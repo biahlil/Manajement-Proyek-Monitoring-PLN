@@ -6,7 +6,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
-
 class AddAlatUseCaseTest {
     private lateinit var fakeRepo: FakeAlatRepository
     private lateinit var useCase: AddAlatUseCase

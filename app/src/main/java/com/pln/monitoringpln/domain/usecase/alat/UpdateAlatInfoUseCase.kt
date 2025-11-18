@@ -12,9 +12,8 @@ class UpdateAlatInfoUseCase(private val repository: AlatRepository) {
         namaAlat: String,
         kodeAlat: String,
         latitude: Double,
-        longitude: Double
+        longitude: Double,
     ): Result<Unit> {
-
         if (id.isBlank()) return Result.failure(IllegalArgumentException("ID tidak valid"))
         if (namaAlat.isBlank()) return Result.failure(IllegalArgumentException("Nama alat tidak boleh kosong."))
         if (kodeAlat.isBlank()) return Result.failure(IllegalArgumentException("Kode alat tidak boleh kosong."))

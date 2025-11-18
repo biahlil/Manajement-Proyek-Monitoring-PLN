@@ -10,5 +10,5 @@ data class Alat(
 
     // Field Baru untuk UC1b
     val status: String = "ACTIVE", // Default "ACTIVE", bisa jadi "PENDING_DELETE"
-    val lastModifiedById: String? = null // ID Teknisi terakhir yang update
+    val lastModifiedById: String? = null, // ID Teknisi terakhir yang update
 )
