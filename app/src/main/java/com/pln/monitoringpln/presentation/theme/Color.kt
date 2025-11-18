@@ -1,4 +1,4 @@
-package com.pln.monitoringpln.presentation
+package com.pln.monitoringpln.presentation.theme
 
 import androidx.compose.ui.graphics.Color
 
