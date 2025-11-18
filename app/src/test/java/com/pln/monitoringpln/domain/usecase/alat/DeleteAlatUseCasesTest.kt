@@ -68,8 +68,16 @@ class DeleteAlatUseCasesTest {
     fun `technician approves delete AND id matches, should DELETE`() = runTest {
         println("\n--- 🔴 TEST: Teknisi Approve (Sukses) ---")
         // Arrange: Status PENDING_DELETE dan ID cocok
-        val alat = Alat(id = "1", kodeAlat = "K", namaAlat = "T", latitude = 0.0, longitude = 0.0, kondisi = "B",
-            status = "PENDING_DELETE", lastModifiedById = "teknisi-asli")
+        val alat = Alat(
+            id = "1",
+            kodeAlat = "K",
+            namaAlat = "T",
+            latitude = 0.0,
+            longitude = 0.0,
+            kondisi = "B",
+            status = "PENDING_DELETE",
+            lastModifiedById = "teknisi-asli",
+        )
         fakeRepo.addDummy(alat)
 
         val result = approveDeleteUseCase(alatId = "1", technicianId = "teknisi-asli")
@@ -82,8 +90,16 @@ class DeleteAlatUseCasesTest {
     @Test
     fun `technician approves delete BUT id mismatch, should FAIL`() = runTest {
         println("\n--- 🔴 TEST: Teknisi Salah (Gagal Otorisasi) ---")
-        val alat = Alat(id = "1", kodeAlat = "K", namaAlat = "T", latitude = 0.0, longitude = 0.0, kondisi = "B",
-            status = "PENDING_DELETE", lastModifiedById = "teknisi-asli")
+        val alat = Alat(
+            id = "1",
+            kodeAlat = "K",
+            namaAlat = "T",
+            latitude = 0.0,
+            longitude = 0.0,
+            kondisi = "B",
+            status = "PENDING_DELETE",
+            lastModifiedById = "teknisi-asli",
+        )
         fakeRepo.addDummy(alat)
 
         val result = approveDeleteUseCase(alatId = "1", technicianId = "teknisi-palsu")
@@ -98,8 +114,16 @@ class DeleteAlatUseCasesTest {
     fun `technician approves delete BUT status is NOT pending, should FAIL`() = runTest {
         println("\n--- 🔴 TEST: Teknisi Approve padahal Status Masih ACTIVE ---")
         // Arrange: ID cocok TAPI Status masih "ACTIVE" (Belum di-request Admin)
-        val alat = Alat(id = "1", kodeAlat = "K", namaAlat = "T", latitude = 0.0, longitude = 0.0, kondisi = "B",
-            status = "ACTIVE", lastModifiedById = "teknisi-asli")
+        val alat = Alat(
+            id = "1",
+            kodeAlat = "K",
+            namaAlat = "T",
+            latitude = 0.0,
+            longitude = 0.0,
+            kondisi = "B",
+            status = "ACTIVE",
+            lastModifiedById = "teknisi-asli",
+        )
         fakeRepo.addDummy(alat)
 
         val result = approveDeleteUseCase(alatId = "1", technicianId = "teknisi-asli")

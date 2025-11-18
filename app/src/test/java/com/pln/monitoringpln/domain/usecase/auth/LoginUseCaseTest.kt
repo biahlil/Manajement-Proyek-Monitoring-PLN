@@ -23,7 +23,7 @@ class LoginUseCaseTest {
             id = "user-123",
             email = "test@example.com",
             namaLengkap = "Test User",
-            role = "Teknisi"
+            role = "Teknisi",
         )
 
         override suspend fun login(email: String, password: String): Result<User> {
@@ -44,6 +44,7 @@ class LoginUseCaseTest {
         fakeRepository = FakeUserRepository()
         useCase = LoginUseCase(fakeRepository)
     }
+
     // 3. Tes pertama kita (Happy Path)
     @Test
     fun `login successful, should call repository`() = runTest {
@@ -57,7 +58,7 @@ class LoginUseCaseTest {
             id = "user-123",
             email = "test@example.com",
             namaLengkap = "Test User",
-            role = "Teknisi"
+            role = "Teknisi",
         )
 
         // Act
@@ -161,4 +162,3 @@ class LoginUseCaseTest {
         println("--- ✅ LULUS (Gagal seperti yang diharapkan) ---")
     }
 }
-
