@@ -2,7 +2,6 @@ package com.pln.monitoringpln.domain.usecase.auth
 
 import com.pln.monitoringpln.domain.model.User
 import com.pln.monitoringpln.domain.repository.UserRepository
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.*
 import org.junit.Before

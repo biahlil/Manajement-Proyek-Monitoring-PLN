@@ -1,9 +1,8 @@
 package com.pln.monitoringpln.domain.usecase.alat
 
-import com.pln.monitoringpln.domain.model.Alat
-import com.pln.monitoringpln.domain.repository.AlatRepository
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
