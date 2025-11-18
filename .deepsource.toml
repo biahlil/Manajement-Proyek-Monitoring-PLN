@@ -1,0 +1,22 @@
+version = 1
+
+test_patterns = [
+  "**/src/test/**",
+  "**/src/androidTest/**"
+]
+
+exclude_patterns = [
+  "build/**",
+  ".gradle/**",
+  "gradle/wrapper/**"
+]
+
+[[analyzers]]
+name = "kotlin"
+
+  [analyzers.meta]
+  runtime_version = "11"
+  language_version = "2.1"
+
+[[transformers]]
+name = "ktlint"
