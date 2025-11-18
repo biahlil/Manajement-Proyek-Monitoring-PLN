@@ -44,7 +44,7 @@ class FakeAlatRepository : AlatRepository {
             namaAlat = nama,
             kodeAlat = kode,
             latitude = lat,
-            longitude = lng
+            longitude = lng,
             // kondisi tidak disentuh!
         )
         println("     ✅ Update Berhasil. Kondisi setelah update: '${database[id]?.kondisi}'")

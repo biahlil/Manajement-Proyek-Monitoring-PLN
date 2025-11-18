@@ -5,7 +5,7 @@ import com.pln.monitoringpln.domain.repository.UserRepository
 
 private val EMAIL_REGEX = "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+".toRegex()
 class LoginUseCase(
-    private val userRepository: UserRepository // Bergantung pada Interface
+    private val userRepository: UserRepository, // Bergantung pada Interface
 ) {
     // Kita gunakan 'invoke' agar kelas ini bisa dipanggil seperti fungsi
     suspend operator fun invoke(email: String, password: String): Result<User> {

@@ -5,16 +5,15 @@ import com.pln.monitoringpln.domain.repository.AlatRepository
 import java.lang.IllegalArgumentException
 
 class AddAlatUseCase(
-    private val repository: AlatRepository
+    private val repository: AlatRepository,
 ) {
     // Parameter sesuai input UI Admin (tanpa kondisi)
     suspend operator fun invoke(
         namaAlat: String,
         kodeAlat: String,
         latitude: Double,
-        longitude: Double
+        longitude: Double,
     ): Result<Unit> {
-
         // 1. Validasi Dasar
         if (namaAlat.isBlank()) {
             return Result.failure(IllegalArgumentException("Nama alat tidak boleh kosong."))
@@ -35,7 +34,7 @@ class AddAlatUseCase(
             namaAlat = namaAlat,
             latitude = latitude,
             longitude = longitude,
-            kondisi = "Normal" // <-- Hardcoded Default sesuai User Story
+            kondisi = "Normal", // <-- Hardcoded Default sesuai User Story
         )
 
         return repository.insertAlat(newAlat)
