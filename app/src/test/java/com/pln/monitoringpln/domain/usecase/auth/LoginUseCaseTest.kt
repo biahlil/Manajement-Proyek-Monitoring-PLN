@@ -1,5 +1,6 @@
 package com.pln.monitoringpln.domain.usecase.auth
 
+import com.pln.monitoringpln.domain.usecase.auth.LoginUseCase
 import com.pln.monitoringpln.domain.usecase.user.FakeUserRepository // Import Fake Shared
 import com.pln.monitoringpln.utils.TestObjects // Import Data Dummy
 import kotlinx.coroutines.test.runTest
