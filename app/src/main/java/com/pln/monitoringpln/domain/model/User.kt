@@ -5,5 +5,4 @@ data class User(
     val email: String,
     val namaLengkap: String,
     val role: String, // "Admin" atau "Teknisi"
-    val isActive: Boolean = true
 )
