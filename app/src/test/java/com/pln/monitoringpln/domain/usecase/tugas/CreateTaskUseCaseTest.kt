@@ -61,7 +61,7 @@ class CreateTaskUseCaseTest {
             deskripsi = "Cek Rutin Bulanan",
             idAlat = TestObjects.ALAT_VALID.id,
             idTeknisi = TestObjects.TEKNISI_VALID.id,
-            tglJatuhTempo = besok
+            tglJatuhTempo = besok,
         )
 
         println(logAssert.format("Cek sukses dan status default"))
@@ -82,7 +82,7 @@ class CreateTaskUseCaseTest {
             deskripsi = "Cek",
             idAlat = "id-alat-gaib",
             idTeknisi = TestObjects.TEKNISI_VALID.id,
-            tglJatuhTempo = Date(System.currentTimeMillis() + 10000)
+            tglJatuhTempo = Date(System.currentTimeMillis() + 10000),
         )
 
         println(logAssert.format("Harus gagal karena alat tidak ditemukan"))
@@ -101,7 +101,7 @@ class CreateTaskUseCaseTest {
             deskripsi = "Cek",
             idAlat = TestObjects.ALAT_VALID.id,
             idTeknisi = "id-tech-gaib",
-            tglJatuhTempo = Date(System.currentTimeMillis() + 10000)
+            tglJatuhTempo = Date(System.currentTimeMillis() + 10000),
         )
 
         println(logAssert.format("Harus gagal karena teknisi tidak ditemukan"))
@@ -120,7 +120,7 @@ class CreateTaskUseCaseTest {
             deskripsi = "Cek",
             idAlat = TestObjects.ALAT_VALID.id,
             idTeknisi = TestObjects.ADMIN_USER.id,
-            tglJatuhTempo = Date(System.currentTimeMillis())
+            tglJatuhTempo = Date(System.currentTimeMillis()),
         )
 
         println(logAssert.format("Harus gagal karena user bukan teknisi"))
@@ -138,7 +138,7 @@ class CreateTaskUseCaseTest {
             deskripsi = "",
             idAlat = TestObjects.ALAT_VALID.id,
             idTeknisi = TestObjects.TEKNISI_VALID.id,
-            tglJatuhTempo = Date()
+            tglJatuhTempo = Date(),
         )
 
         assertTrue(result.isFailure)
@@ -157,7 +157,7 @@ class CreateTaskUseCaseTest {
             deskripsi = "Desc",
             idAlat = TestObjects.ALAT_VALID.id,
             idTeknisi = TestObjects.TEKNISI_VALID.id,
-            tglJatuhTempo = kemarin
+            tglJatuhTempo = kemarin,
         )
 
         assertTrue(result.isFailure)

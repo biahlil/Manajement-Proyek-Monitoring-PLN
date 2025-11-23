@@ -11,7 +11,7 @@ object TestObjects {
         email = "budi@pln.co.id",
         namaLengkap = "Budi Teknisi",
         role = "Teknisi",
-        isActive = true
+        isActive = true,
     )
 
     val USER_INACTIVE = User(
@@ -19,7 +19,7 @@ object TestObjects {
         email = "mantan@pln.co.id",
         namaLengkap = "Mantan Teknisi",
         role = "Teknisi",
-        isActive = false
+        isActive = false,
     )
 
     val ADMIN_USER = User(
@@ -27,7 +27,7 @@ object TestObjects {
         email = "boss@pln.co.id",
         namaLengkap = "Pak Bos",
         role = "Admin",
-        isActive = true
+        isActive = true,
     )
 
     // --- ALAT (Untuk UC1/UC3 nanti) ---
@@ -38,6 +38,6 @@ object TestObjects {
         latitude = -6.2,
         longitude = 106.8,
         kondisi = "Baik",
-        status = "ACTIVE"
+        status = "ACTIVE",
     )
 }

@@ -9,5 +9,5 @@ data class Tugas(
     val idTeknisi: String,
     val tglDibuat: Date = Date(),
     val tglJatuhTempo: Date,
-    val status: String = "To Do" // Default status
+    val status: String = "To Do", // Default status
 )
