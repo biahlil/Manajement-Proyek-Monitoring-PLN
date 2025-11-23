@@ -87,4 +87,149 @@ class GetMyTasksUseCaseTest {
         assertEquals("ID Teknisi tidak boleh kosong.", result.exceptionOrNull()?.message)
         println(logResult)
     }
+
+    // ==========================================
+    // 3. SEARCH & FILTERING CASES (UC8)
+    // ==========================================
+
+    @Test
+    fun `search tasks with Partial Keyword, should return matching tasks`() = runTest {
+        println(logHeader.format("Search: Partial Keyword 'Kabel'"))
+
+        // Act: Cari "Kabel" (Harusnya match "Cek Kabel A")
+        val result = useCase(TestObjects.TEKNISI_VALID.id, "Kabel")
+
+        assertTrue(result.isSuccess)
+        val list = result.getOrNull()!!
+
+        assertEquals(1, list.size)
+        assertEquals("Cek Kabel A", list.first().deskripsi)
+        println(logResult)
+    }
+
+    @Test
+    fun `search tasks Case Insensitive, should return matching tasks`() = runTest {
+        println(logHeader.format("Search: Case Insensitive 'trafo'"))
+
+        // Act: Cari "trafo" (kecil) -> Harusnya match "Perbaikan Trafo B"
+        val result = useCase(TestObjects.TEKNISI_VALID.id, "trafo")
+
+        assertTrue(result.isSuccess)
+        val list = result.getOrNull()!!
+
+        assertEquals(1, list.size)
+        assertEquals("Perbaikan Trafo B", list.first().deskripsi)
+        println(logResult)
+    }
+
+    @Test
+    fun `search tasks Not Found keyword, should return empty list`() = runTest {
+        println(logHeader.format("Search: Keyword Not Found"))
+
+        val result = useCase(TestObjects.TEKNISI_VALID.id, "Nasi Goreng")
+
+        assertTrue(result.isSuccess)
+        assertTrue(result.getOrNull()!!.isEmpty())
+        println(logResult)
+    }
+
+    @Test
+    fun `search tasks with Empty Query, should return ALL tasks`() = runTest {
+        println(logHeader.format("Search: Empty Query"))
+
+        val result = useCase(TestObjects.TEKNISI_VALID.id, "")
+
+        assertTrue(result.isSuccess)
+        val list = result.getOrNull()!!
+
+        // Harusnya return semua tugas teknisi (2 tugas)
+        assertEquals(2, list.size)
+        println(logResult)
+    }
+
+    @Test
+    fun `search tasks with Special Char, should handle gracefully`() = runTest {
+        println(logHeader.format("Search: Special Characters"))
+
+        // Setup: Tambah tugas dengan nama aneh
+        val weirdTask = TestObjects.TUGAS_TODO.copy(id = "w1", deskripsi = "Cek #@!$")
+        fakeRepo.addDummyTasks(listOf(weirdTask))
+
+        // Act
+        val result = useCase(TestObjects.TEKNISI_VALID.id, "#@!$")
+
+        assertTrue(result.isSuccess)
+        assertEquals(1, result.getOrNull()!!.size)
+        println(logResult)
+    }
+
+    // ==========================================
+    // 3. UNIVERSAL SEARCH CASES (UC8 Enhanced)
+    // ==========================================
+
+    @Test
+    fun `search by Status 'Progress', should find In Progress tasks`() = runTest {
+        println(logHeader.format("Search Universal: By Status"))
+
+        // Act: Cari "Progress"
+        val result = useCase(TestObjects.TEKNISI_VALID.id, "Progress")
+
+        assertTrue(result.isSuccess)
+        val list = result.getOrNull()!!
+
+        assertEquals(1, list.size)
+        assertEquals("In Progress", list.first().status)
+        println(logResult)
+    }
+
+    @Test
+    fun `search by Alat ID 'TRF-A', should find tasks related to that Alat`() = runTest {
+        println(logHeader.format("Search Universal: By Alat Code/ID"))
+
+        // ID Alat di TestObjects adalah "alat-1", tapi mari kita anggap user cari "alat-1"
+        // (Di implementasi nyata, ini akan JOIN ke nama alat, tapi di FakeRepo kita cari ID-nya)
+        val result = useCase(TestObjects.TEKNISI_VALID.id, "alat-1")
+
+        assertTrue(result.isSuccess)
+        val list = result.getOrNull()!!
+
+        // Alat-1 dipakai oleh TUGAS_TODO dan TUGAS_IN_PROGRESS milik teknisi ini
+        assertEquals(2, list.size)
+        println(logResult)
+    }
+
+    @Test
+    fun `search by Date (Month Name), should find tasks in that date`() = runTest {
+        println(logHeader.format("Search Universal: By Date String"))
+
+        // TestObjects menggunakan Date() (Hari ini).
+        // Mari cari format bulan saat ini, misal "Nov" atau "Oct" tergantung waktu run.
+        // Agar tes ini selalu lulus, kita ambil format bulan dari data dummy.
+        val todayMonth = java.text.SimpleDateFormat("MMM", java.util.Locale.getDefault())
+            .format(TestObjects.TUGAS_TODO.tglJatuhTempo)
+
+        println("   [Info] Searching for month: $todayMonth")
+        val result = useCase(TestObjects.TEKNISI_VALID.id, todayMonth)
+
+        assertTrue(result.isSuccess)
+        val list = result.getOrNull()!!
+
+        // Semua tugas di TestObjects dibuat/jatuh tempo bulan ini/besok
+        assertTrue(list.isNotEmpty())
+        println(logResult)
+    }
+
+    @Test
+    fun `search by Description 'Kabel', should find matching tasks`() = runTest {
+        println(logHeader.format("Search Universal: By Description"))
+
+        val result = useCase(TestObjects.TEKNISI_VALID.id, "Kabel")
+
+        assertTrue(result.isSuccess)
+        val list = result.getOrNull()!!
+
+        assertEquals(1, list.size)
+        assertEquals("Cek Kabel A", list.first().deskripsi)
+        println(logResult)
+    }
 }

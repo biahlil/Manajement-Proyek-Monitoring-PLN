@@ -5,11 +5,13 @@ import com.pln.monitoringpln.domain.repository.TugasRepository
 
 class GetMyTasksUseCase(private val repository: TugasRepository) {
 
-    suspend operator fun invoke(idTeknisi: String): Result<List<Tugas>> {
+    // Parameter searchQuery opsional (default null)
+    suspend operator fun invoke(idTeknisi: String, searchQuery: String? = null): Result<List<Tugas>> {
         if (idTeknisi.isBlank()) {
-            return Result.failure(Exception("ID Teknisi tidak boleh kosong."))
+            return Result.failure(IllegalArgumentException("ID Teknisi tidak boleh kosong."))
         }
 
-        return repository.getTasksByTeknisi(idTeknisi)
+        // Kita serahkan query ke repository untuk diproses (filtering di Data Layer)
+        return repository.getTasksByTeknisi(idTeknisi, searchQuery)
     }
 }
