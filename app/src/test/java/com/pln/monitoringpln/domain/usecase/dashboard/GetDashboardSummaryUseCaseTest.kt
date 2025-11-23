@@ -32,7 +32,7 @@ class GetDashboardSummaryUseCaseTest {
             totalTugas = 10,
             tugasToDo = 2,
             tugasInProgress = 3,
-            tugasDone = 5 // 50%
+            tugasDone = 5, // 50%
         )
         fakeRepo.summaryToReturn = dummy
 
@@ -92,7 +92,7 @@ class GetDashboardSummaryUseCaseTest {
 
         val dummy = DashboardSummary(
             totalTugas = 1_000_000,
-            tugasDone = 500_000
+            tugasDone = 500_000,
         )
         fakeRepo.summaryToReturn = dummy
 

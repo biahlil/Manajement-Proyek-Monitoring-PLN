@@ -9,6 +9,7 @@ class FakeTugasRepository : TugasRepository {
 
     // Formatter tanggal untuk pencarian string tanggal
     private val dateFormatter = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
+
     // Simpan data di Memory List agar state terjaga selama tes berjalan
     val database = mutableListOf<Tugas>()
 

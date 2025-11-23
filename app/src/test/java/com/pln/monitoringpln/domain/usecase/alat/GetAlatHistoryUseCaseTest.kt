@@ -33,10 +33,12 @@ class GetAlatHistoryUseCaseTest {
         fakeAlatRepo.addDummy(TestObjects.ALAT_VALID)
 
         // 2. Insert Tugas (2 tugas milik alat-1, 0 milik alat lain)
-        fakeTugasRepo.addDummyTasks(listOf(
-            TestObjects.TUGAS_TODO,         // alat-1
-            TestObjects.TUGAS_IN_PROGRESS   // alat-1
-        ))
+        fakeTugasRepo.addDummyTasks(
+            listOf(
+                TestObjects.TUGAS_TODO, // alat-1
+                TestObjects.TUGAS_IN_PROGRESS, // alat-1
+            ),
+        )
     }
 
     // ==========================================

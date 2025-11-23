@@ -5,13 +5,13 @@ import com.pln.monitoringpln.domain.repository.TugasRepository
 
 class CompleteTaskUseCase(
     private val tugasRepository: TugasRepository,
-    private val alatRepository: AlatRepository
+    private val alatRepository: AlatRepository,
 ) {
 
     suspend operator fun invoke(
         taskId: String,
         photoBytes: ByteArray,
-        newCondition: String
+        newCondition: String,
     ): Result<Unit> {
         // 1. Validasi Input
         if (taskId.isBlank()) return Result.failure(IllegalArgumentException("ID Tugas tidak valid."))

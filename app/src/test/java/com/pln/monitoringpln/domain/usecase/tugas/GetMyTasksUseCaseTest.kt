@@ -20,11 +20,13 @@ class GetMyTasksUseCaseTest {
     fun setUp() {
         fakeRepo.clear()
         // Seeding data: Ada tugas untuk TEKNISI_VALID dan teknisi lain
-        fakeRepo.addDummyTasks(listOf(
-            TestObjects.TUGAS_TODO,         // Milik TEKNISI_VALID
-            TestObjects.TUGAS_IN_PROGRESS,  // Milik TEKNISI_VALID
-            TestObjects.TUGAS_OTHER_TECH    // Milik 'tech-2'
-        ))
+        fakeRepo.addDummyTasks(
+            listOf(
+                TestObjects.TUGAS_TODO, // Milik TEKNISI_VALID
+                TestObjects.TUGAS_IN_PROGRESS, // Milik TEKNISI_VALID
+                TestObjects.TUGAS_OTHER_TECH, // Milik 'tech-2'
+            ),
+        )
     }
 
     // --- HAPPY PATH ---

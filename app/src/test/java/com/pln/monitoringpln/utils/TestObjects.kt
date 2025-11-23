@@ -13,7 +13,7 @@ object TestObjects {
         email = "budi@pln.co.id",
         namaLengkap = "Budi Teknisi",
         role = "Teknisi",
-        isActive = true
+        isActive = true,
     )
 
     val USER_INACTIVE = User(
@@ -21,7 +21,7 @@ object TestObjects {
         email = "mantan@pln.co.id",
         namaLengkap = "Mantan Teknisi",
         role = "Teknisi",
-        isActive = false
+        isActive = false,
     )
 
     val ADMIN_USER = User(
@@ -29,7 +29,7 @@ object TestObjects {
         email = "boss@pln.co.id",
         namaLengkap = "Pak Bos",
         role = "Admin",
-        isActive = true
+        isActive = true,
     )
 
     // --- ALAT (Untuk UC1/UC3 nanti) ---
@@ -40,7 +40,7 @@ object TestObjects {
         latitude = -6.2,
         longitude = 106.8,
         kondisi = "Baik",
-        status = "ACTIVE"
+        status = "ACTIVE",
     )
 
     // --- TUGAS [BARU] ---
@@ -51,7 +51,7 @@ object TestObjects {
         idAlat = ALAT_VALID.id,
         idTeknisi = TEKNISI_VALID.id, // tech-1
         tglJatuhTempo = Date(System.currentTimeMillis() + 86400000), // Besok
-        status = "To Do"
+        status = "To Do",
     )
 
     val TUGAS_IN_PROGRESS = Tugas(
@@ -60,7 +60,7 @@ object TestObjects {
         idAlat = ALAT_VALID.id,
         idTeknisi = TEKNISI_VALID.id, // tech-1
         tglJatuhTempo = Date(System.currentTimeMillis() + 86400000),
-        status = "In Progress"
+        status = "In Progress",
     )
 
     val TUGAS_OTHER_TECH = Tugas(
@@ -69,6 +69,6 @@ object TestObjects {
         idAlat = ALAT_VALID.id,
         idTeknisi = "tech-2", // Teknisi Beda
         tglJatuhTempo = Date(System.currentTimeMillis() + 86400000),
-        status = "To Do"
+        status = "To Do",
     )
 }

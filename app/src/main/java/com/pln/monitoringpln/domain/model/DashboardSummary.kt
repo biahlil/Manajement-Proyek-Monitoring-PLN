@@ -6,7 +6,7 @@ data class DashboardSummary(
     val totalTugas: Int = 0,
     val tugasToDo: Int = 0,
     val tugasInProgress: Int = 0,
-    val tugasDone: Int = 0
+    val tugasDone: Int = 0,
 ) {
     // Helper logic di Domain Model (opsional, untuk memudahkan UI)
     fun getCompletionRate(): Double {

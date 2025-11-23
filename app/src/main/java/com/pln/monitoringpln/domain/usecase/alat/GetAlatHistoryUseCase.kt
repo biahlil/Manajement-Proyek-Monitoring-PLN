@@ -6,7 +6,7 @@ import com.pln.monitoringpln.domain.repository.TugasRepository
 
 class GetAlatHistoryUseCase(
     private val alatRepository: AlatRepository,
-    private val tugasRepository: TugasRepository
+    private val tugasRepository: TugasRepository,
 ) {
 
     suspend operator fun invoke(idAlat: String): Result<AlatHistory> {
