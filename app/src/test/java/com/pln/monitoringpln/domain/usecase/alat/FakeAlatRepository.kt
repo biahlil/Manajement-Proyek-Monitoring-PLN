@@ -74,6 +74,14 @@ class FakeAlatRepository : AlatRepository {
         return Result.success(Unit)
     }
 
+    override suspend fun updateAlatCondition(id: String, kondisi: String): Result<Unit> {
+        println("  ➡️ [FakeRepo] Update kondisi Alat $id menjadi '$kondisi'")
+        val existing = database[id] ?: return Result.failure(Exception("Alat tidak ditemukan"))
+
+        database[id] = existing.copy(kondisi = kondisi)
+        return Result.success(Unit)
+    }
+
     fun addDummy(alat: Alat) {
         println("  🔧 [Setup] Menambahkan dummy data: ${alat.namaAlat} (ID: ${alat.id})")
         database[alat.id] = alat

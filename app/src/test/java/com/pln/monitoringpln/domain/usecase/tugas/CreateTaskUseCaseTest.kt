@@ -1,7 +1,5 @@
 package com.pln.monitoringpln.domain.usecase.tugas
 
-import com.pln.monitoringpln.domain.model.Tugas
-import com.pln.monitoringpln.domain.repository.TugasRepository
 import com.pln.monitoringpln.domain.usecase.alat.FakeAlatRepository
 import com.pln.monitoringpln.domain.usecase.user.FakeUserRepository
 import com.pln.monitoringpln.utils.TestObjects
@@ -23,16 +21,6 @@ class CreateTaskUseCaseTest {
     private val logAct = "  [Act] %s..."
     private val logAssert = "  [Assert] %s"
     private val logSuccess = "--- ✅ LULUS ---"
-
-    // --- Fake Tugas Repo (Internal Class) ---
-    class FakeTugasRepository : TugasRepository {
-        var lastSavedTugas: Tugas? = null
-        override suspend fun createTask(tugas: Tugas): Result<Unit> {
-            println("  ➡️ [FakeTugasRepo] createTask() disimpan: ${tugas.deskripsi}")
-            lastSavedTugas = tugas
-            return Result.success(Unit)
-        }
-    }
 
     @Before
     fun setUp() {
@@ -66,7 +54,7 @@ class CreateTaskUseCaseTest {
 
         println(logAssert.format("Cek sukses dan status default"))
         assertTrue(result.isSuccess)
-        assertEquals("To Do", fakeTugasRepo.lastSavedTugas?.status)
+        assertEquals("To Do", fakeTugasRepo.database[0].status)
 
         println(logSuccess)
     }

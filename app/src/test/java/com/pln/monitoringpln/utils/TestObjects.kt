@@ -1,7 +1,9 @@
 package com.pln.monitoringpln.utils
 
 import com.pln.monitoringpln.domain.model.Alat
+import com.pln.monitoringpln.domain.model.Tugas
 import com.pln.monitoringpln.domain.model.User
+import java.util.Date
 
 object TestObjects {
 
@@ -39,5 +41,34 @@ object TestObjects {
         longitude = 106.8,
         kondisi = "Baik",
         status = "ACTIVE"
+    )
+
+    // --- TUGAS [BARU] ---
+    // Menggunakan data dari user & alat yang valid di atas
+    val TUGAS_TODO = Tugas(
+        id = "task-1",
+        deskripsi = "Cek Kabel A",
+        idAlat = ALAT_VALID.id,
+        idTeknisi = TEKNISI_VALID.id, // tech-1
+        tglJatuhTempo = Date(System.currentTimeMillis() + 86400000), // Besok
+        status = "To Do"
+    )
+
+    val TUGAS_IN_PROGRESS = Tugas(
+        id = "task-2",
+        deskripsi = "Perbaikan Trafo B",
+        idAlat = ALAT_VALID.id,
+        idTeknisi = TEKNISI_VALID.id, // tech-1
+        tglJatuhTempo = Date(System.currentTimeMillis() + 86400000),
+        status = "In Progress"
+    )
+
+    val TUGAS_OTHER_TECH = Tugas(
+        id = "task-3",
+        deskripsi = "Inspeksi Rutin",
+        idAlat = ALAT_VALID.id,
+        idTeknisi = "tech-2", // Teknisi Beda
+        tglJatuhTempo = Date(System.currentTimeMillis() + 86400000),
+        status = "To Do"
     )
 }
