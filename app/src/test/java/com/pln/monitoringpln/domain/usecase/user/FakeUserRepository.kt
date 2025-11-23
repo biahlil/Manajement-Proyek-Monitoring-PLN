@@ -29,7 +29,7 @@ class FakeUserRepository : UserRepository {
             email = email,
             namaLengkap = namaLengkap,
             role = "Teknisi",
-            isActive = true
+            isActive = true,
         )
         users[newUser.id] = newUser
         println("     ✅ Sukses: User baru dibuat (ID: ${newUser.id})")

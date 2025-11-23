@@ -10,7 +10,6 @@ class AddTeknisiUseCase(private val repository: UserRepository) {
     private val emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$".toRegex()
 
     suspend operator fun invoke(namaLengkap: String, email: String, password: String): Result<User> {
-
         if (namaLengkap.isBlank()) {
             return Result.failure(IllegalArgumentException("Nama tidak boleh kosong."))
         }

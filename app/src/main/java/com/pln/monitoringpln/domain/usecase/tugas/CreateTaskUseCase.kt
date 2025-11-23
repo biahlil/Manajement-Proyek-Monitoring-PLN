@@ -10,16 +10,15 @@ import java.util.Date
 class CreateTaskUseCase(
     private val tugasRepository: TugasRepository,
     private val alatRepository: AlatRepository, // Inject Repo Alat
-    private val userRepository: UserRepository  // Inject Repo User
+    private val userRepository: UserRepository, // Inject Repo User
 ) {
 
     suspend operator fun invoke(
         deskripsi: String,
         idAlat: String,
         idTeknisi: String,
-        tglJatuhTempo: Date
+        tglJatuhTempo: Date,
     ): Result<Unit> {
-
         // 1. Validasi Input Dasar
         if (deskripsi.isBlank()) return Result.failure(IllegalArgumentException("Deskripsi tidak boleh kosong."))
         if (idAlat.isBlank()) return Result.failure(IllegalArgumentException("ID Alat tidak boleh kosong."))
@@ -62,7 +61,7 @@ class CreateTaskUseCase(
             idAlat = idAlat,
             idTeknisi = idTeknisi,
             tglJatuhTempo = tglJatuhTempo,
-            status = "To Do"
+            status = "To Do",
         )
 
         return tugasRepository.createTask(tugas)
