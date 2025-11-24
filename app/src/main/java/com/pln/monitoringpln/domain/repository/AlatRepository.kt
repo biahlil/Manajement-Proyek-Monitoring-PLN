@@ -21,4 +21,7 @@ interface AlatRepository {
     // UC1b
     suspend fun requestDeleteAlat(id: String): Result<Unit>
     suspend fun deleteAlat(id: String): Result<Unit>
+
+    // UC6: Update Alat Condition (Teknisi Only)
+    suspend fun updateAlatCondition(id: String, kondisi: String): Result<Unit>
 }
