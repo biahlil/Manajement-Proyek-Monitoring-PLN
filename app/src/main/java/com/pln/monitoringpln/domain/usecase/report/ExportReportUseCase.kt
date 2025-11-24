@@ -9,7 +9,7 @@ class ExportReportUseCase(private val repository: ReportRepository) {
     suspend operator fun invoke(
         startDate: Date,
         endDate: Date,
-        format: ExportFormat
+        format: ExportFormat,
     ): Result<String> {
         // Validasi: Start Date tidak boleh lebih besar dari End Date
         if (startDate.after(endDate)) {

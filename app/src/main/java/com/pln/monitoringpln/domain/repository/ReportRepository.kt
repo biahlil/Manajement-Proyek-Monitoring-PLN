@@ -7,6 +7,6 @@ interface ReportRepository {
     suspend fun exportTaskReport(
         startDate: Date,
         endDate: Date,
-        format: ExportFormat
+        format: ExportFormat,
     ): Result<String>
 }
