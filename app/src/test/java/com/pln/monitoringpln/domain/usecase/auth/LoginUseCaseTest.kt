@@ -1,7 +1,6 @@
 package com.pln.monitoringpln.domain.usecase.auth
 
-import com.pln.monitoringpln.domain.usecase.user.FakeUserRepository
-import com.pln.monitoringpln.utils.TestObjects
+import com.pln.monitoringpln.data.repository.FakeAuthRepository
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.*
 import org.junit.Before
@@ -9,7 +8,7 @@ import org.junit.Test
 
 class LoginUseCaseTest {
 
-    private lateinit var fakeRepository: FakeUserRepository
+    private lateinit var authRepository: FakeAuthRepository
     private lateinit var useCase: LoginUseCase
 
     private val logTestStart = "\n--- 🔴 TEST START: %s ---"
@@ -19,50 +18,43 @@ class LoginUseCaseTest {
 
     @Before
     fun setUp() {
-        fakeRepository = FakeUserRepository()
-        useCase = LoginUseCase(fakeRepository)
-
-        // Setup data awal
-        fakeRepository.addDummyUser(TestObjects.TEKNISI_VALID)
-        fakeRepository.addDummyUser(TestObjects.USER_INACTIVE)
+        authRepository = FakeAuthRepository()
+        useCase = LoginUseCase(authRepository)
     }
 
     @Test
-    fun `login successful, should return Active User`() = runTest {
+    fun `login successful, should return Success`() = runTest {
         println(logTestStart.format("Login Successful"))
-        println(logAct.format("Login user '${TestObjects.TEKNISI_VALID.email}'"))
+        println(logAct.format("Login user 'valid@pln.co.id'"))
 
-        val result = useCase(TestObjects.TEKNISI_VALID.email, "password123")
+        // Given
+        // FakeRepo defaults to success
 
-        println(logAssert.format("Sukses dan return data user"))
+        // When
+        val result = useCase("valid@pln.co.id", "password123")
+
+        // Then
+        println(logAssert.format("Sukses"))
         assertTrue(result.isSuccess)
-        assertEquals(TestObjects.TEKNISI_VALID, result.getOrNull())
         println(logSuccess)
     }
 
     @Test
-    fun `login inactive user, should return Failure`() = runTest {
-        println(logTestStart.format("Login Inactive User"))
-        println(logAct.format("Login user non-aktif"))
+    fun `login failure from repository, should return Failure`() = runTest {
+        println(logTestStart.format("Login Failure (Repo)"))
+        println(logAct.format("Login with wrong password"))
 
-        val result = useCase(TestObjects.USER_INACTIVE.email, "password123")
+        // Given
+        authRepository.shouldFailLogin = true
+        authRepository.failureMessage = "Invalid login credentials"
 
-        println(logAssert.format("Gagal karena akun dinonaktifkan"))
+        // When
+        val result = useCase("valid@pln.co.id", "wrong")
+
+        // Then
+        println(logAssert.format("Gagal sesuai repo"))
         assertTrue(result.isFailure)
-        assertEquals("Akun Anda telah dinonaktifkan. Hubungi Admin.", result.exceptionOrNull()?.message)
-        println(logSuccess)
-    }
-
-    @Test
-    fun `login with wrong password, should fail`() = runTest {
-        println(logTestStart.format("Wrong Password"))
-        println(logAct.format("Login password salah"))
-
-        val result = useCase(TestObjects.TEKNISI_VALID.email, "salah123")
-
-        println(logAssert.format("Gagal kredensial"))
-        assertTrue(result.isFailure)
-        assertEquals("Kredensial salah", result.exceptionOrNull()?.message)
+        assertEquals("Invalid login credentials", result.exceptionOrNull()?.message)
         println(logSuccess)
     }
 
