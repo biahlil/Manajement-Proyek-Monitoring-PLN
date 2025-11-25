@@ -20,7 +20,7 @@ class FakeAlatRepository : AlatRepository {
     override suspend fun getAlatDetail(id: String): Result<Alat> {
         println("  ➡️ [FakeRepo] getAlatDetail() dipanggil. ID: $id")
         val found = database[id]
-        return if (found != null) {
+        return if (found != null && !found.isArchived) {
             println("     ✅ Data ditemukan: ${found.namaAlat}")
             Result.success(found)
         } else {
@@ -51,26 +51,14 @@ class FakeAlatRepository : AlatRepository {
         return Result.success(Unit)
     }
 
-    // --- UC1b: REQUEST DELETE (Baru) ---
-    override suspend fun requestDeleteAlat(id: String): Result<Unit> {
-        println("  ➡️ [FakeRepo] requestDeleteAlat() dipanggil. ID: $id")
+    // --- UC1b: SOFT DELETE (ARCHIVE) ---
+    override suspend fun archiveAlat(id: String): Result<Unit> {
+        println("  ➡️ [FakeRepo] archiveAlat() dipanggil. ID: $id")
         val existing = database[id] ?: return Result.failure(Exception("Alat tidak ditemukan"))
 
-        // Ubah status jadi PENDING_DELETE
-        database[id] = existing.copy(status = "PENDING_DELETE")
-        println("     ✅ Status diubah menjadi PENDING_DELETE")
-        return Result.success(Unit)
-    }
-
-    // --- UC1b: DELETE PERMANENT (Baru) ---
-    override suspend fun deleteAlat(id: String): Result<Unit> {
-        println("  ➡️ [FakeRepo] deleteAlat() dipanggil (Hapus Permanen). ID: $id")
-        if (!database.containsKey(id)) {
-            println("     ❌ Gagal: ID tidak ditemukan")
-            return Result.failure(Exception("Alat tidak ditemukan"))
-        }
-        database.remove(id)
-        println("     ✅ Data dihapus permanen dari memory.")
+        // Ubah status jadi ARCHIVED / isArchived = true
+        database[id] = existing.copy(isArchived = true, status = "ARCHIVED")
+        println("     ✅ Status diubah menjadi ARCHIVED")
         return Result.success(Unit)
     }
 
