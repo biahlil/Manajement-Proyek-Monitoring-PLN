@@ -13,7 +13,7 @@ class FakeReportRepository : ReportRepository {
     override suspend fun exportTaskReport(
         startDate: Date,
         endDate: Date,
-        format: ExportFormat
+        format: ExportFormat,
     ): Result<String> {
         println("  ➡️ [FakeRepo] Request Export ($format) dari $startDate s/d $endDate")
 
