@@ -8,6 +8,10 @@ import io.github.jan.supabase.gotrue.SessionStatus
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
+import com.pln.monitoringpln.data.model.ProfileDto
+import io.github.jan.supabase.postgrest.postgrest
+import io.github.jan.supabase.functions.*
+
 class AuthRepositoryImpl(
     private val supabaseClient: SupabaseClient
 ) : AuthRepository {
@@ -36,5 +40,45 @@ class AuthRepositoryImpl(
 
     override suspend fun getCurrentUserEmail(): String? {
         return supabaseClient.auth.currentUserOrNull()?.email
+    }
+
+    override suspend fun getUserRole(): Result<String> {
+        return try {
+            val userId = supabaseClient.auth.currentUserOrNull()?.id
+                ?: return Result.failure(Exception("User not logged in"))
+
+            val profile = supabaseClient.postgrest["profiles"]
+                .select {
+                    filter {
+                        eq("id", userId)
+                    }
+                }.decodeSingle<ProfileDto>()
+
+            Result.success(profile.role)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+    @kotlinx.serialization.Serializable
+    data class CreateUserParams(
+        val email: String,
+        val password: String,
+        val fullName: String,
+        val role: String
+    )
+
+    override suspend fun createUser(email: String, password: String, fullName: String, role: String): Result<Unit> {
+        return try {
+            val params = CreateUserParams(
+                email = email,
+                password = password,
+                fullName = fullName,
+                role = role
+            )
+            supabaseClient.functions.invoke("create-user", params)
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 }

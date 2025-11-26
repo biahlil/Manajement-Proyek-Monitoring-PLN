@@ -9,6 +9,9 @@ interface AlatRepository {
     // UC1a: Get Detail (Admin & Teknisi)
     suspend fun getAlatDetail(id: String): Result<Alat>
 
+    // Get by Kode (Helper/QR Scan)
+    suspend fun getAlatByKode(kode: String): Result<Alat>
+
     // UC1a: Update Info (Admin Only - Tanpa Kondisi)
     suspend fun updateAlatInfo(
         id: String,

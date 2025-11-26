@@ -41,4 +41,24 @@ class FakeAuthRepository : AuthRepository {
     override suspend fun getCurrentUserEmail(): String? {
         return currentUserEmail
     }
+
+    // Role testing helpers
+    var fakeRole = "TEKNISI"
+    var shouldFailRole = false
+
+    override suspend fun getUserRole(): Result<String> {
+        if (shouldFailRole) {
+            return Result.failure(Exception("Failed to get role"))
+        }
+        return Result.success(fakeRole)
+    }
+
+    var shouldFailCreateUser = false
+    
+    override suspend fun createUser(email: String, password: String, fullName: String, role: String): Result<Unit> {
+        if (shouldFailCreateUser) {
+            return Result.failure(Exception("Failed to create user"))
+        }
+        return Result.success(Unit)
+    }
 }

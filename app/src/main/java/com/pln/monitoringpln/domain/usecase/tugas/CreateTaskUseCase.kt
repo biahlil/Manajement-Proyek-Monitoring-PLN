@@ -64,6 +64,15 @@ class CreateTaskUseCase(
             status = "To Do",
         )
 
-        return tugasRepository.createTask(tugas)
+        val createdTask = tugasRepository.createTask(tugas)
+
+        // Cek apakah berhasil dibuat (tidak null)
+        return if (createdTask != null) {
+            // Jika ada datanya, return Sukses (Unit)
+            Result.success(Unit)
+        } else {
+            // Jika null, return Gagal
+            Result.failure(Exception("Gagal membuat tugas. Terjadi kesalahan database."))
+        }
     }
 }

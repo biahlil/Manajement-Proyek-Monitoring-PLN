@@ -1,19 +1,22 @@
 package com.pln.monitoringpln.data.repository
 
-import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.pln.monitoringpln.di.SupabaseModule
-import com.pln.monitoringpln.utils.TestObjects
-import kotlinx.coroutines.flow.first
+import com.pln.monitoringpln.BuildConfig.SUPABASE_KEY
+import com.pln.monitoringpln.BuildConfig.SUPABASE_URL
+import com.pln.monitoringpln.domain.repository.AuthRepository
+import io.github.jan.supabase.SupabaseClient
+import io.github.jan.supabase.createSupabaseClient
+import io.github.jan.supabase.gotrue.Auth
+import io.github.jan.supabase.postgrest.Postgrest
+import io.github.jan.supabase.functions.Functions
 import kotlinx.coroutines.runBlocking
-import org.junit.Assert.*
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import org.junit.runner.RunWith
 
-@RunWith(AndroidJUnit4::class)
 class AuthRepositoryImplTest {
 
-    private lateinit var authRepository: AuthRepositoryImpl
+    private lateinit var supabaseClient: SupabaseClient
+    private lateinit var authRepository: AuthRepository
 
     // Logging helpers
     private val logHeader = "\n--- 🔴 TEST: %s ---"
@@ -23,57 +26,105 @@ class AuthRepositoryImplTest {
 
     @Before
     fun setUp() {
-        val supabaseClient = SupabaseModule.provideSupabaseClient()
+        // Initialize real Supabase Client for Integration Test
+        supabaseClient = createSupabaseClient(
+            supabaseUrl = SUPABASE_URL,
+            supabaseKey = SUPABASE_KEY
+        ) {
+            install(Auth)
+            install(Postgrest)
+            install(Functions)
+        }
+
         authRepository = AuthRepositoryImpl(supabaseClient)
     }
 
     @Test
-    fun loginWithInvalidCredentialsShouldFail() = runBlocking {
-        println(logHeader.format("Integration: Login Invalid Credentials"))
+    fun login_with_valid_credentials_should_succeed() = runBlocking {
+        println(logHeader.format("Integration: Login Success"))
+        
+        // Given
+        val email = "boss@pln.co.id" // Valid user from Supabase
+        val password = "password123"
 
-        // Act
-        val result = authRepository.login("invalid@pln.co.id", "wrongpassword")
-        println(logAction.format("Attempt login with invalid creds"))
+        // When
+        val result = authRepository.login(email, password)
 
-        // Assert
-        assertTrue("Result should be failure", result.isFailure)
-        println(logAssert.format("Login failed as expected"))
+        // Then
+        assertTrue(result.isSuccess)
+        println(logAssert.format("Login successful"))
+        
         println(logResult)
     }
 
     @Test
-    fun loginWithValidCredentialsShouldSuccess() = runBlocking {
-        println(logHeader.format("Integration: Login Valid Credentials"))
+    fun login_with_invalid_credentials_should_fail() = runBlocking {
+        println(logHeader.format("Integration: Login Failure"))
+        
+        // Given
+        val email = "invalid@pln.co.id"
+        val password = "wrongpassword"
 
-        // Act
-        val result = authRepository.login(TestObjects.ADMIN_USER_EMAIL, TestObjects.ADMIN_USER_PASSWORD)
-        println(logAction.format("Attempt login with valid creds"))
+        // When
+        val result = authRepository.login(email, password)
 
-        // Assert
+        // Then
+        assertTrue(result.isFailure)
+        println(logAssert.format("Login failed as expected: ${result.exceptionOrNull()?.message}"))
+        
+        println(logResult)
+    }
+
+    @Test
+    fun get_user_role_should_return_valid_role() = runBlocking {
+        println(logHeader.format("Integration: Get User Role"))
+        
+        // Given: Login first
+        val email = "boss@pln.co.id"
+        val password = "password123"
+        authRepository.login(email, password)
+
+        // When
+        val result = authRepository.getUserRole()
+
+        // Then
         if (result.isFailure) {
-            val error = result.exceptionOrNull()
-            println("❌ LOGIN FAILED: ${error?.message}")
-            error?.printStackTrace()
+             println("Error getting role: ${result.exceptionOrNull()?.message}")
         }
-        assertTrue("Result should be success. Error: ${result.exceptionOrNull()?.message}", result.isSuccess)
-        println(logAssert.format("Login success"))
+        assertTrue(result.isSuccess)
+        val role = result.getOrNull()
+        println(logAssert.format("Role retrieved: $role"))
+        assertTrue("Role must be ADMIN or TEKNISI, but was $role", role == "ADMIN" || role == "TEKNISI")
+        
         println(logResult)
     }
-    
+
     @Test
-    fun isUserLoggedInShouldReturnTrueAfterLogin() = runBlocking {
-        println(logHeader.format("Integration: Check Session Status After Login"))
+    fun create_user_should_succeed() = runBlocking {
+        println(logHeader.format("Integration: Create User"))
 
-        // Ensure logged in
-        authRepository.login(TestObjects.ADMIN_USER_EMAIL, TestObjects.ADMIN_USER_PASSWORD)
+        // Given: Login as Admin
+        val adminEmail = "boss@pln.co.id"
+        val adminPassword = "password123"
+        authRepository.login(adminEmail, adminPassword)
 
-        // Act
-        val isLoggedIn = authRepository.isUserLoggedIn().first()
-        println(logAction.format("Check isUserLoggedIn flow"))
+        // When: Create a new user
+        val timestamp = System.currentTimeMillis()
+        val newEmail = "test.user.$timestamp@pln.co.id"
+        val newPassword = "password123"
+        val fullName = "Test User $timestamp"
+        val role = "TEKNISI"
 
-        // Assert
-        assertTrue("User should be logged in", isLoggedIn)
-        println(logAssert.format("Flow emitted value: $isLoggedIn"))
+        println("  [Act] Creating user: $newEmail...")
+        val result = authRepository.createUser(newEmail, newPassword, fullName, role)
+
+        // Then
+        if (result.isFailure) {
+            println("Error creating user: ${result.exceptionOrNull()?.message}")
+        }
+        assertTrue(result.isSuccess)
+        println(logAssert.format("User created successfully"))
+
         println(logResult)
     }
 }

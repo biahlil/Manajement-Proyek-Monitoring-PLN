@@ -63,6 +63,5 @@ google-services.json
 
 # Laporan dari Heap dan Memory Profiler
 *.hprof
-
-# Cursor Rules
 .cursorrules
+.agent/ 
