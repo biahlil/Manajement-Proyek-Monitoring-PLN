@@ -3,7 +3,7 @@ package com.pln.monitoringpln.domain.repository
 import com.pln.monitoringpln.domain.model.Tugas
 
 interface TugasRepository {
-    suspend fun createTask(tugas: Tugas): Result<Unit>
+    suspend fun createTask(tugas: Tugas): Tugas?
     suspend fun getTasksByTeknisi(idTeknisi: String, searchQuery: String? = null): Result<List<Tugas>>
     suspend fun updateTaskStatus(taskId: String, newStatus: String): Result<Unit>
     suspend fun getTaskDetail(taskId: String): Result<Tugas>

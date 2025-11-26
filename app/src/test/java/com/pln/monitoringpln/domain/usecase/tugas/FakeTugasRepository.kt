@@ -13,7 +13,7 @@ class FakeTugasRepository : TugasRepository {
     // Simpan data di Memory List agar state terjaga selama tes berjalan
     val database = mutableListOf<Tugas>()
 
-    override suspend fun createTask(tugas: Tugas): Result<Unit> {
+    override suspend fun createTask(tugas: Tugas): Tugas? {
         // Simulasi auto-generate ID jika kosong
         val newTugas = if (tugas.id.isEmpty()) {
             tugas.copy(id = "task-${System.currentTimeMillis()}-${database.size}")
@@ -22,7 +22,7 @@ class FakeTugasRepository : TugasRepository {
         }
         database.add(newTugas)
         println("  ➡️ [FakeRepo] Insert tugas sukses: ${newTugas.deskripsi} (ID: ${newTugas.id})")
-        return Result.success(Unit)
+        return newTugas
     }
 
     override suspend fun getTasksByTeknisi(idTeknisi: String, searchQuery: String?): Result<List<Tugas>> {
