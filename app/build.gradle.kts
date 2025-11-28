@@ -102,4 +102,7 @@ dependencies {
 
     // PDF
     implementation(libs.itext7.core)
+
+    // WorkManager
+    implementation("androidx.work:work-runtime-ktx:2.9.0")
 }

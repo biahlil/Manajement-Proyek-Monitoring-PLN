@@ -26,4 +26,10 @@ interface AlatRepository {
 
     // UC6: Update Alat Condition (Teknisi Only)
     suspend fun updateAlatCondition(id: String, kondisi: String): Result<Unit>
+
+    // Offline-First: Observe All Active Alat
+    fun getAllAlat(): kotlinx.coroutines.flow.Flow<List<Alat>>
+
+    // Sync Data
+    suspend fun sync(): Result<Unit>
 }

@@ -14,5 +14,6 @@ data class AlatEntity(
     val kondisi: String,
     val status: String,
     val lastModifiedById: String?,
-    val isArchived: Boolean = false // Soft Delete
+    val isArchived: Boolean = false, // Soft Delete
+    val isSynced: Boolean = true // Offline Sync
 )

@@ -13,7 +13,7 @@ class FakeTugasRepository : TugasRepository {
     // Simpan data di Memory List agar state terjaga selama tes berjalan
     val database = mutableListOf<Tugas>()
 
-    override suspend fun createTask(tugas: Tugas): Tugas? {
+    override suspend fun createTask(tugas: Tugas): Result<Tugas?> {
         // Simulasi auto-generate ID jika kosong
         val newTugas = if (tugas.id.isEmpty()) {
             tugas.copy(id = "task-${System.currentTimeMillis()}-${database.size}")
@@ -22,7 +22,7 @@ class FakeTugasRepository : TugasRepository {
         }
         database.add(newTugas)
         println("  ➡️ [FakeRepo] Insert tugas sukses: ${newTugas.deskripsi} (ID: ${newTugas.id})")
-        return newTugas
+        return Result.success(newTugas)
     }
 
     override suspend fun getTasksByTeknisi(idTeknisi: String, searchQuery: String?): Result<List<Tugas>> {
@@ -95,6 +95,21 @@ class FakeTugasRepository : TugasRepository {
         println("  ➡️ [FakeRepo] Uploading ${photoBytes.size} bytes untuk Task $taskId...")
         // Simulasi sukses return URL dummy
         return Result.success("https://supabase-storage/bukti/$taskId.jpg")
+    }
+
+    override suspend fun completeTugas(id: String, buktiFotoPath: String, kondisiAkhir: String): Result<Unit> {
+        println("  ➡️ [FakeRepo] Completing task $id with proof $buktiFotoPath and condition $kondisiAkhir")
+        val index = database.indexOfFirst { it.id == id }
+        if (index != -1) {
+            database[index] = database[index].copy(status = "Done")
+            return Result.success(Unit)
+        }
+        return Result.failure(Exception("Task not found"))
+    }
+
+    override suspend fun sync(): Result<Unit> {
+        println("  ➡️ [FakeRepo] Sync triggered")
+        return Result.success(Unit)
     }
 
     // Helper untuk setup data awal di tes

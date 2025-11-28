@@ -22,30 +22,35 @@ class AlatRepositoryImplTest {
     private val logAssert = "  [Assert] %s"
     private val logResult = "--- ✅ LULUS ---\n"
 
+    private lateinit var database: com.pln.monitoringpln.data.local.AppDatabase
+
     @Before
-    fun setUp() = runBlocking {
+    fun setUp() {
         // Initialize real Supabase Client for Integration Test
         supabaseClient = createSupabaseClient(
             supabaseUrl = com.pln.monitoringpln.BuildConfig.SUPABASE_URL,
             supabaseKey = com.pln.monitoringpln.BuildConfig.SUPABASE_KEY
         ) {
-            install(io.github.jan.supabase.gotrue.Auth)
             install(Postgrest)
         }
 
-        // Login first to bypass RLS
-        val authRepo = AuthRepositoryImpl(supabaseClient)
-        try {
-            val result = authRepo.login("boss@pln.co.id", "password123")
-            println("Setup Login Result: ${result.isSuccess}")
-            if (result.isFailure) {
-                println("Setup Login Error: ${result.exceptionOrNull()?.message}")
-            }
-        } catch (e: Exception) {
-            println("Setup Login Exception: ${e.message}")
-        }
+        // Initialize In-Memory Room Database
+        val context = androidx.test.core.app.ApplicationProvider.getApplicationContext<android.content.Context>()
+        database = androidx.room.Room.inMemoryDatabaseBuilder(
+            context,
+            com.pln.monitoringpln.data.local.AppDatabase::class.java
+        ).allowMainThreadQueries().build()
 
-        alatRepository = AlatRepositoryImpl(supabaseClient)
+        // Initialize DataSources
+        val localDataSource = com.pln.monitoringpln.data.local.datasource.AlatLocalDataSource(database.alatDao())
+        val remoteDataSource = com.pln.monitoringpln.data.remote.AlatRemoteDataSource(supabaseClient)
+
+        alatRepository = AlatRepositoryImpl(localDataSource, remoteDataSource)
+    }
+
+    @org.junit.After
+    fun tearDown() {
+        database.close()
     }
 
     @Test
@@ -54,17 +59,13 @@ class AlatRepositoryImplTest {
         
         // Given
         val uniqueCode = "TEST-${System.currentTimeMillis()}"
-        val uniqueId = java.util.UUID.randomUUID().toString()
-        val alat = TestObjects.ALAT_VALID.copy(id = uniqueId, kodeAlat = uniqueCode)
-        println(logAction.format("Insert alat: ${alat.kodeAlat} with ID: $uniqueId"))
+        val alat = TestObjects.ALAT_VALID.copy(kodeAlat = uniqueCode)
+        println(logAction.format("Insert alat: ${alat.kodeAlat}"))
 
         // When
         val insertResult = alatRepository.insertAlat(alat)
 
         // Then
-        if (insertResult.isFailure) {
-            println("Insert Error: ${insertResult.exceptionOrNull()?.message}")
-        }
         assertTrue(insertResult.isSuccess)
         println(logAssert.format("Insert successful"))
         
@@ -77,8 +78,7 @@ class AlatRepositoryImplTest {
         
         // Given: Insert first to get ID
         val uniqueCode = "ARCHIVE-TEST-${System.currentTimeMillis()}"
-        val uniqueId = java.util.UUID.randomUUID().toString()
-        val alat = TestObjects.ALAT_VALID.copy(id = uniqueId, kodeAlat = uniqueCode)
+        val alat = TestObjects.ALAT_VALID.copy(kodeAlat = uniqueCode)
         alatRepository.insertAlat(alat)
         
         // Fetch ID using the new repository method
@@ -92,9 +92,6 @@ class AlatRepositoryImplTest {
         val result = alatRepository.archiveAlat(id)
 
         // Then
-        if (result.isFailure) {
-            println("Archive Error: ${result.exceptionOrNull()?.message}")
-        }
         assertTrue(result.isSuccess)
         
         // Verify
@@ -111,8 +108,7 @@ class AlatRepositoryImplTest {
         
         // Given: Insert first
         val uniqueCode = "UPDATE-INFO-${System.currentTimeMillis()}"
-        val uniqueId = java.util.UUID.randomUUID().toString()
-        val alat = TestObjects.ALAT_VALID.copy(id = uniqueId, kodeAlat = uniqueCode)
+        val alat = TestObjects.ALAT_VALID.copy(kodeAlat = uniqueCode)
         alatRepository.insertAlat(alat)
         
         // Get ID
@@ -145,8 +141,7 @@ class AlatRepositoryImplTest {
         
         // Given: Insert first
         val uniqueCode = "UPDATE-COND-${System.currentTimeMillis()}"
-        val uniqueId = java.util.UUID.randomUUID().toString()
-        val alat = TestObjects.ALAT_VALID.copy(id = uniqueId, kodeAlat = uniqueCode, kondisi = "Baik")
+        val alat = TestObjects.ALAT_VALID.copy(kodeAlat = uniqueCode, kondisi = "Baik")
         alatRepository.insertAlat(alat)
         
         // Get ID

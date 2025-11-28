@@ -6,12 +6,9 @@ import com.itextpdf.kernel.pdf.PdfWriter
 import com.itextpdf.layout.Document
 import com.itextpdf.layout.element.Paragraph
 import com.itextpdf.layout.element.Table
-import com.pln.monitoringpln.data.model.TugasDto
-import com.pln.monitoringpln.data.model.toDomain
+import com.pln.monitoringpln.data.mapper.toDomain
 import com.pln.monitoringpln.domain.model.ExportFormat
 import com.pln.monitoringpln.domain.repository.ReportRepository
-import io.github.jan.supabase.SupabaseClient
-import io.github.jan.supabase.postgrest.postgrest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -21,7 +18,7 @@ import java.util.Date
 import java.util.Locale
 
 class ReportRepositoryImpl(
-    private val supabaseClient: SupabaseClient,
+    private val tugasDao: com.pln.monitoringpln.data.local.dao.TugasDao,
     private val context: Context
 ) : ReportRepository {
 
@@ -31,14 +28,9 @@ class ReportRepositoryImpl(
         format: ExportFormat
     ): Result<String> {
         return try {
-            // 1. Fetch Data
-            val tasks = supabaseClient.postgrest["tugas"]
-                .select {
-                    filter {
-                        gte("due_date", startDate)
-                        lte("due_date", endDate)
-                    }
-                }.decodeList<TugasDto>().map { it.toDomain() }
+            // 1. Fetch Data from Local DB (Offline-First)
+            val tasks = tugasDao.getTasksByDateRange(startDate.time, endDate.time)
+                .map { it.toDomain() }
 
             if (tasks.isEmpty()) {
                 return Result.failure(Exception("Tidak ada data tugas pada rentang tanggal tersebut."))

@@ -17,33 +17,7 @@ data class AlatDto(
     @SerialName("is_archived") val isArchived: Boolean = false
 )
 
-fun AlatDto.toDomain(): Alat {
-    return Alat(
-        id = id,
-        kodeAlat = kodeAlat,
-        namaAlat = namaAlat,
-        latitude = latitude,
-        longitude = longitude,
-        kondisi = kondisi,
-        status = status,
-        lastModifiedById = lastModifiedById,
-        isArchived = isArchived
-    )
-}
 
-fun Alat.toDto(): AlatDto {
-    return AlatDto(
-        id = id,
-        kodeAlat = kodeAlat,
-        namaAlat = namaAlat,
-        latitude = latitude,
-        longitude = longitude,
-        kondisi = kondisi,
-        status = status,
-        lastModifiedById = lastModifiedById,
-        isArchived = isArchived
-    )
-}
 
 @Serializable
 data class AlatInsertDto(

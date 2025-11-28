@@ -20,23 +20,60 @@ class AuthRepositoryImplTest {
 
     // Logging helpers
     private val logHeader = "\n--- 🔴 TEST: %s ---"
-    private val logAction = "  [Act] %s..."
     private val logAssert = "  [Assert] %s"
     private val logResult = "--- ✅ LULUS ---\n"
 
     @Before
     fun setUp() {
         // Initialize real Supabase Client for Integration Test
+        val context = androidx.test.core.app.ApplicationProvider.getApplicationContext<android.content.Context>()
         supabaseClient = createSupabaseClient(
             supabaseUrl = SUPABASE_URL,
             supabaseKey = SUPABASE_KEY
         ) {
-            install(Auth)
+            install(Auth) {
+                sessionManager = com.pln.monitoringpln.data.local.AndroidSessionManager(context)
+            }
             install(Postgrest)
             install(Functions)
         }
 
         authRepository = AuthRepositoryImpl(supabaseClient)
+    }
+
+    @Test
+    fun session_should_persist_after_login() = runBlocking {
+        println(logHeader.format("Integration: Session Persistence"))
+        
+        // Given
+        val email = "boss@pln.co.id"
+        val password = "password123"
+
+        // When: Login
+        val result = authRepository.login(email, password)
+        assertTrue(result.isSuccess)
+        
+        // Then: Check Persistence
+        val context = androidx.test.core.app.ApplicationProvider.getApplicationContext<android.content.Context>()
+        val sessionManager = com.pln.monitoringpln.data.local.AndroidSessionManager(context)
+        val savedSession = sessionManager.loadSession()
+        
+        if (savedSession != null) {
+            println(logAssert.format("Session persisted: ${savedSession.accessToken.take(10)}..."))
+        } else {
+            println(logAssert.format("Session NOT persisted"))
+        }
+        assertTrue("Session should be persisted after login", savedSession != null)
+
+        // Act: Logout
+        authRepository.logout()
+        
+        // Then: Check Deletion
+        val deletedSession = sessionManager.loadSession()
+        assertTrue("Session should be deleted after logout", deletedSession == null)
+        println(logAssert.format("Session deleted successfully"))
+        
+        println(logResult)
     }
 
     @Test
