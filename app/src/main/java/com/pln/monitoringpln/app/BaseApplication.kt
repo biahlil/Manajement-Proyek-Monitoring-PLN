@@ -17,5 +17,24 @@ class BaseApplication : Application() {
             androidContext(this@BaseApplication)
             modules(appModule, dataModule, domainModule)
         }
+        setupWorkManager()
+    }
+
+    private fun setupWorkManager() {
+        val constraints = androidx.work.Constraints.Builder()
+            .setRequiredNetworkType(androidx.work.NetworkType.CONNECTED)
+            .build()
+
+        val syncRequest = androidx.work.PeriodicWorkRequestBuilder<com.pln.monitoringpln.data.worker.SyncWorker>(
+            5, java.util.concurrent.TimeUnit.MINUTES
+        )
+            .setConstraints(constraints)
+            .build()
+
+        androidx.work.WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+            "SyncWorker",
+            androidx.work.ExistingPeriodicWorkPolicy.KEEP,
+            syncRequest
+        )
     }
 }

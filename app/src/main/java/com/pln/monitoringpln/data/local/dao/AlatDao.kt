@@ -13,7 +13,8 @@ interface AlatDao {
     suspend fun insertAlat(alat: AlatEntity)
 
     // UC1a: Get Detail (Only Active)
-    @Query("SELECT * FROM alat WHERE id = :id AND isArchived = 0")
+    // UC1a: Get Detail (Include Archived)
+    @Query("SELECT * FROM alat WHERE id = :id")
     suspend fun getAlatDetail(id: String): AlatEntity?
 
     // UC1b: Soft Delete (Archive)
@@ -23,4 +24,25 @@ interface AlatDao {
     // Helper for testing/admin: Get All Active
     @Query("SELECT * FROM alat WHERE isArchived = 0")
     suspend fun getAllActiveAlat(): List<AlatEntity>
+
+    @Query("SELECT * FROM alat")
+    fun getAllAlat(): kotlinx.coroutines.flow.Flow<List<AlatEntity>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAll(alatList: List<AlatEntity>)
+
+    @androidx.room.Update
+    suspend fun updateAlat(alat: AlatEntity)
+
+    @Query("SELECT * FROM alat WHERE kodeAlat = :kode")
+    suspend fun getAlatByKode(kode: String): AlatEntity?
+
+    @Query("SELECT * FROM alat WHERE isSynced = 0")
+    suspend fun getUnsyncedAlat(): List<AlatEntity>
+
+    @Query("UPDATE alat SET isSynced = :isSynced WHERE id = :id")
+    suspend fun updateSyncStatus(id: String, isSynced: Boolean)
+
+    @Query("SELECT COUNT(*) FROM alat WHERE isArchived = 0")
+    suspend fun countAll(): Int
 }

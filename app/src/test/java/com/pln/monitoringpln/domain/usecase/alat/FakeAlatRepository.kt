@@ -80,6 +80,15 @@ class FakeAlatRepository : AlatRepository {
         return Result.success(Unit)
     }
 
+    override fun getAllAlat(): kotlinx.coroutines.flow.Flow<List<Alat>> {
+        return kotlinx.coroutines.flow.flowOf(database.values.toList())
+    }
+
+    override suspend fun sync(): Result<Unit> {
+        println("  ➡️ [FakeRepo] Sync triggered")
+        return Result.success(Unit)
+    }
+
     fun addDummy(alat: Alat) {
         println("  🔧 [Setup] Menambahkan dummy data: ${alat.namaAlat} (ID: ${alat.id})")
         database[alat.id] = alat

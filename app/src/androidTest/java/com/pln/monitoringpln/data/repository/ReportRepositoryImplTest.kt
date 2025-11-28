@@ -5,9 +5,6 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.pln.monitoringpln.domain.model.ExportFormat
 import com.pln.monitoringpln.domain.repository.ReportRepository
-import io.github.jan.supabase.SupabaseClient
-import io.github.jan.supabase.createSupabaseClient
-import io.github.jan.supabase.postgrest.Postgrest
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -19,7 +16,7 @@ import java.util.Date
 @RunWith(AndroidJUnit4::class)
 class ReportRepositoryImplTest {
 
-    private lateinit var supabaseClient: SupabaseClient
+    private lateinit var database: com.pln.monitoringpln.data.local.AppDatabase
     private lateinit var reportRepository: ReportRepository
     private lateinit var context: Context
 
@@ -32,16 +29,12 @@ class ReportRepositoryImplTest {
     @Before
     fun setUp() {
         context = ApplicationProvider.getApplicationContext()
+        database = androidx.room.Room.inMemoryDatabaseBuilder(
+            context,
+            com.pln.monitoringpln.data.local.AppDatabase::class.java
+        ).build()
 
-        // Initialize real Supabase Client
-        supabaseClient = createSupabaseClient(
-            supabaseUrl = com.pln.monitoringpln.BuildConfig.SUPABASE_URL,
-            supabaseKey = com.pln.monitoringpln.BuildConfig.SUPABASE_KEY
-        ) {
-            install(Postgrest)
-        }
-
-        reportRepository = ReportRepositoryImpl(supabaseClient, context)
+        reportRepository = ReportRepositoryImpl(database.tugasDao(), context)
     }
 
     @Test
@@ -51,6 +44,14 @@ class ReportRepositoryImplTest {
         // Given
         val startDate = Date(System.currentTimeMillis() - 86400000 * 7) // 7 days ago
         val endDate = Date(System.currentTimeMillis() + 86400000 * 7) // 7 days ahead
+        
+        // Insert dummy data
+        val task1 = com.pln.monitoringpln.data.local.entity.TugasEntity(
+            id = "task-1", deskripsi = "Task for Report", idAlat = "alat-1", idTeknisi = "tech-1",
+            tglDibuat = Date(), tglJatuhTempo = Date(), status = "Done", isSynced = true
+        )
+        database.tugasDao().insertTugas(task1)
+
         println(logAction.format("Export PDF from $startDate to $endDate"))
 
         // When
@@ -83,6 +84,14 @@ class ReportRepositoryImplTest {
         // Given
         val startDate = Date(System.currentTimeMillis() - 86400000 * 7) // 7 days ago
         val endDate = Date(System.currentTimeMillis() + 86400000 * 7) // 7 days ahead
+        
+        // Insert dummy data
+        val task1 = com.pln.monitoringpln.data.local.entity.TugasEntity(
+            id = "task-1", deskripsi = "Task for Report CSV", idAlat = "alat-1", idTeknisi = "tech-1",
+            tglDibuat = Date(), tglJatuhTempo = Date(), status = "Done", isSynced = true
+        )
+        database.tugasDao().insertTugas(task1)
+
         println(logAction.format("Export CSV from $startDate to $endDate"))
 
         // When
