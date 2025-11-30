@@ -17,6 +17,7 @@ class BaseApplication : Application() {
             androidContext(this@BaseApplication)
             modules(appModule, dataModule, domainModule)
         }
+
         setupWorkManager()
     }
 
