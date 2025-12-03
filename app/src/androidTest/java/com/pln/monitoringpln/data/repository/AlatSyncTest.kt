@@ -63,9 +63,26 @@ class AlatSyncTest {
         alatRepository = AlatRepositoryImpl(localDataSource, remoteDataSource)
     }
 
+    private val createdRemoteIds = mutableListOf<String>()
+
     @After
     fun tearDown() {
         database.close()
+        
+        if (createdRemoteIds.isNotEmpty()) {
+            runBlocking {
+                try {
+                    createdRemoteIds.forEach { id ->
+                        supabaseClient.postgrest["alat"].delete {
+                            filter { eq("id", id) }
+                        }
+                        println("Cleaned up remote alat: $id")
+                    }
+                } catch (e: Exception) {
+                    println("Failed to cleanup remote data: ${e.message}")
+                }
+            }
+        }
     }
 
     @Test
@@ -106,20 +123,11 @@ class AlatSyncTest {
                 filter { eq("kode_alat", uniqueCode) }
             }.decodeSingleOrNull<com.pln.monitoringpln.data.model.AlatDto>()
         
+        // Track for cleanup
+        createdRemoteIds.add(uniqueId)
+        
         assertNotNull(remoteResult)
         println(logAssert.format("Remote data found: ${remoteResult?.kodeAlat}"))
-        
-        // Cleanup: Delete from Remote
-        try {
-            supabaseClient.postgrest["alat"].delete {
-                filter {
-                    eq("id", uniqueId)
-                }
-            }
-            println(logAction.format("Cleaned up remote test data: $uniqueId"))
-        } catch (e: Exception) {
-            println("Failed to cleanup remote data: ${e.message}")
-        }
         
         println(logResult)
     }

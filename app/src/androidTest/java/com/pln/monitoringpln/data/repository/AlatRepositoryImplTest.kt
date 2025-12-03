@@ -5,6 +5,7 @@ import com.pln.monitoringpln.utils.TestObjects
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.postgrest.Postgrest
+import io.github.jan.supabase.postgrest.postgrest
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -48,9 +49,27 @@ class AlatRepositoryImplTest {
         alatRepository = AlatRepositoryImpl(localDataSource, remoteDataSource)
     }
 
+    private val createdAlatIds = mutableListOf<String>()
+
     @org.junit.After
     fun tearDown() {
         database.close()
+        
+        // Cleanup Remote Data
+        if (createdAlatIds.isNotEmpty()) {
+            runBlocking {
+                try {
+                    createdAlatIds.forEach { id ->
+                        supabaseClient.postgrest["alat"].delete {
+                            filter { eq("id", id) }
+                        }
+                        println("Cleaned up alat: $id")
+                    }
+                } catch (e: Exception) {
+                    println("Failed to cleanup alat: ${e.message}")
+                }
+            }
+        }
     }
 
     @Test
@@ -67,6 +86,11 @@ class AlatRepositoryImplTest {
 
         // Then
         assertTrue(insertResult.isSuccess)
+        
+        // Track ID for cleanup
+        val fetched = alatRepository.getAlatByKode(uniqueCode).getOrNull()
+        fetched?.id?.let { createdAlatIds.add(it) }
+        
         println(logAssert.format("Insert successful"))
         
         println(logResult)
@@ -85,6 +109,7 @@ class AlatRepositoryImplTest {
         val fetchedAlatResult = alatRepository.getAlatByKode(uniqueCode)
         assertTrue(fetchedAlatResult.isSuccess)
         val id = fetchedAlatResult.getOrNull()?.id ?: throw IllegalStateException("Alat not found")
+        createdAlatIds.add(id)
             
         println(logAction.format("Archive alat: $id"))
 
@@ -113,6 +138,7 @@ class AlatRepositoryImplTest {
         
         // Get ID
         val id = alatRepository.getAlatByKode(uniqueCode).getOrNull()?.id ?: throw IllegalStateException("Alat not found")
+        createdAlatIds.add(id)
 
         // When
         val updatedAlat = alat.copy(id = id, namaAlat = "Updated Name", latitude = 1.0, longitude = 1.0, locationName = "New Location")
@@ -148,6 +174,7 @@ class AlatRepositoryImplTest {
         
         // Get ID
         val id = alatRepository.getAlatByKode(uniqueCode).getOrNull()?.id ?: throw IllegalStateException("Alat not found")
+        createdAlatIds.add(id)
 
         // When
         val result = alatRepository.updateAlatCondition(id, "Rusak")

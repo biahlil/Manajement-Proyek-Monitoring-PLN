@@ -30,6 +30,11 @@ class DashboardRepositoryImplTest {
         dashboardRepository = DashboardRepositoryImpl(database.alatDao(), database.tugasDao())
     }
 
+    @org.junit.After
+    fun tearDown() {
+        database.close()
+    }
+
     @Test
     fun get_dashboard_summary_should_return_valid_data() = runBlocking {
         println(logHeader.format("Integration: Get Dashboard Summary (Local)"))

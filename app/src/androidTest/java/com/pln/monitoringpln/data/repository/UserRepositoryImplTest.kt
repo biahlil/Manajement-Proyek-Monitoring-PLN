@@ -8,6 +8,7 @@ import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.gotrue.Auth
 import io.github.jan.supabase.postgrest.Postgrest
 import io.github.jan.supabase.storage.Storage
+import io.github.jan.supabase.storage.storage
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -49,9 +50,33 @@ class UserRepositoryImplTest {
         userRepository = UserRepositoryImpl(database.userDao(), supabaseClient)
     }
 
+    private val uploadedAvatars = mutableListOf<String>()
+
     @org.junit.After
     fun tearDown() {
         database.close()
+        
+        if (uploadedAvatars.isNotEmpty()) {
+            runBlocking {
+                try {
+                    // Assuming avatars bucket and path convention
+                    // UserRepositoryImpl usually uploads to "avatars/{userId}.jpg" or similar
+                    // We need to know the path. The result gives the URL.
+                    // But we can also try to delete by the userId if that's the filename.
+                    // Let's rely on the URL or the known path structure.
+                    val bucket = supabaseClient.storage.from("avatars")
+                    uploadedAvatars.forEach { path ->
+                         // path might be full URL or relative.
+                         // If it's URL, extract path.
+                         val fileName = path.substringAfterLast("/")
+                         bucket.delete(fileName)
+                         println("Cleaned up avatar: $fileName")
+                    }
+                } catch (e: Exception) {
+                    println("Failed to cleanup avatars: ${e.message}")
+                }
+            }
+        }
     }
 
     @Test
@@ -106,6 +131,7 @@ class UserRepositoryImplTest {
         if (result.isSuccess) {
             val url = result.getOrNull()
             assertTrue("URL should not be null", !url.isNullOrBlank())
+            url?.let { uploadedAvatars.add(it) }
             println(logAssert.format("Avatar uploaded, URL: $url"))
         } else {
              println(logAssert.format("Upload failed (likely RLS): ${result.exceptionOrNull()?.message}"))

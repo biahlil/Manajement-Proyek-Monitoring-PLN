@@ -26,6 +26,8 @@ class ReportRepositoryImplTest {
     private val logAssert = "  [Assert] %s"
     private val logResult = "--- ✅ LULUS ---\n"
 
+    private val createdFiles = mutableListOf<String>()
+
     @Before
     fun setUp() {
         context = ApplicationProvider.getApplicationContext()
@@ -35,6 +37,24 @@ class ReportRepositoryImplTest {
         ).build()
 
         reportRepository = ReportRepositoryImpl(database.tugasDao(), database.userDao(), database.alatDao(), context)
+    }
+
+    @org.junit.After
+    fun tearDown() {
+        database.close()
+        
+        // Cleanup created files
+        createdFiles.forEach { path ->
+            try {
+                val file = File(path)
+                if (file.exists()) {
+                    file.delete()
+                    println("Cleaned up file: $path")
+                }
+            } catch (e: Exception) {
+                println("Failed to cleanup file $path: ${e.message}")
+            }
+        }
     }
 
     @Test
@@ -66,6 +86,7 @@ class ReportRepositoryImplTest {
         }
         
         val path = result.getOrNull()
+        path?.let { createdFiles.add(it) }
         println(logAssert.format("File created at: $path"))
         
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
@@ -119,6 +140,7 @@ class ReportRepositoryImplTest {
         
         if (result.isSuccess) {
             val path = result.getOrNull()
+            path?.let { createdFiles.add(it) }
             println(logAssert.format("File created at: $path"))
             
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {

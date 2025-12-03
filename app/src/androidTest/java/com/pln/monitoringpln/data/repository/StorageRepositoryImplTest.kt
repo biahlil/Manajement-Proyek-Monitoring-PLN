@@ -5,6 +5,7 @@ import com.pln.monitoringpln.domain.repository.StorageRepository
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.storage.Storage
+import io.github.jan.supabase.storage.storage
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -53,6 +54,25 @@ class StorageRepositoryImplTest {
         }
     }
 
+    private val uploadedFiles = mutableListOf<String>()
+
+    @org.junit.After
+    fun tearDown() {
+        if (uploadedFiles.isNotEmpty()) {
+            runBlocking {
+                try {
+                    val bucket = supabaseClient.storage.from("avatars") // Assuming avatars bucket
+                    uploadedFiles.forEach { fileName ->
+                        bucket.delete(fileName)
+                        println("Cleaned up file: $fileName")
+                    }
+                } catch (e: Exception) {
+                    println("Failed to cleanup files: ${e.message}")
+                }
+            }
+        }
+    }
+
     @Test
     fun upload_technician_photo_should_succeed() = runBlocking {
         println(logHeader.format("Integration: Upload Photo"))
@@ -60,6 +80,7 @@ class StorageRepositoryImplTest {
         // Given
         val fileName = "test-upload-${System.currentTimeMillis()}.jpg"
         val byteArray = "Test Content".toByteArray()
+        uploadedFiles.add(fileName)
         println(logAction.format("Upload file: $fileName"))
 
         // When
