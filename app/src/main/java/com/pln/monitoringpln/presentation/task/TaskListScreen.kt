@@ -7,6 +7,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.LocationOn
@@ -26,32 +27,37 @@ import com.pln.monitoringpln.domain.model.Tugas
 fun TaskListScreen(
     state: TaskListState,
     onSearchQueryChange: (String) -> Unit,
-    onDeleteTask: (Tugas) -> Unit,
-    onConfirmDelete: () -> Unit,
-    onDismissDelete: () -> Unit,
     onAddTask: () -> Unit,
-    onEditTask: (Tugas) -> Unit
+    onTaskClick: (String) -> Unit,
+    onBack: () -> Unit
 ) {
     val snackbarHostState = androidx.compose.runtime.remember { SnackbarHostState() }
 
-    // Show Snackbar for Delete Confirmation
-    if (state.showDeleteConfirmation) {
-        LaunchedEffect(state.showDeleteConfirmation) {
-            val result = snackbarHostState.showSnackbar(
-                message = "Hapus tugas ${state.taskToDelete?.deskripsi}?",
-                actionLabel = "Hapus",
-                duration = SnackbarDuration.Short
-            )
-            if (result == SnackbarResult.ActionPerformed) {
-                onConfirmDelete()
-            } else {
-                onDismissDelete()
-            }
-        }
-    }
-
     Scaffold(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+        topBar = {
+            TopAppBar(
+                title = { 
+                    Text(
+                        "Daftar Tugas", 
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
+                    ) 
+                },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            Icons.Default.ArrowBack, 
+                            contentDescription = "Back",
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                )
+            )
+        },
         floatingActionButton = {
             if (state.isAdmin) {
                 FloatingActionButton(
@@ -68,7 +74,7 @@ fun TaskListScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .background(Color(0xFFF5F5F5))
+                .background(MaterialTheme.colorScheme.background)
         ) {
             // Search Bar
             OutlinedTextField(
@@ -80,8 +86,9 @@ fun TaskListScreen(
                 placeholder = { Text("Cari tugas, lokasi, atau teknisi...") },
                 leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search") },
                 shape = RoundedCornerShape(12.dp),
-                colors = TextFieldDefaults.outlinedTextFieldColors(
-                    containerColor = Color.White,
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedContainerColor = Color.White,
+                    unfocusedContainerColor = Color.White,
                     unfocusedBorderColor = Color.Transparent,
                     focusedBorderColor = MaterialTheme.colorScheme.primary
                 )
@@ -117,9 +124,9 @@ fun TaskListScreen(
                 items(state.filteredTasks) { task ->
                     TaskItem(
                         task = task,
-                        isAdmin = state.isAdmin,
-                        onEdit = { onEditTask(task) },
-                        onDelete = { onDeleteTask(task) }
+                        technicianNames = state.technicianNames,
+                        equipmentNames = state.equipmentNames,
+                        onClick = { onTaskClick(task.id) }
                     )
                 }
             }
@@ -130,11 +137,12 @@ fun TaskListScreen(
 @Composable
 fun TaskItem(
     task: Tugas,
-    isAdmin: Boolean,
-    onEdit: () -> Unit,
-    onDelete: () -> Unit
+    technicianNames: Map<String, String>,
+    equipmentNames: Map<String, String>,
+    onClick: () -> Unit
 ) {
     Card(
+        onClick = onClick,
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         shape = RoundedCornerShape(12.dp)
@@ -151,33 +159,35 @@ fun TaskItem(
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = task.deskripsi,
+                        text = task.judul,
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )
                     Spacer(modifier = Modifier.height(4.dp))
+                    val technicianName = technicianNames[task.idTeknisi] ?: task.idTeknisi
                     Text(
-                        text = task.namaTeknisi,
+                        text = "Teknisi: $technicianName",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.primary
                     )
                 }
                 
                 // Status Badge
+                val status = task.status.replace("_", " ")
                 Surface(
-                    color = when (task.status) {
-                        "Done" -> Color(0xFFE6F4EA)
-                        "In Progress" -> Color(0xFFFEF7E0)
+                    color = when {
+                        status.equals("Done", ignoreCase = true) -> Color(0xFFE6F4EA)
+                        status.equals("In Progress", ignoreCase = true) -> Color(0xFFFEF7E0)
                         else -> MaterialTheme.colorScheme.surfaceVariant
                     },
                     shape = RoundedCornerShape(4.dp)
                 ) {
                     Text(
-                        text = task.status,
+                        text = status.lowercase().replaceFirstChar { if (it.isLowerCase()) it.titlecase(java.util.Locale.ROOT) else it.toString() }.split(" ").joinToString(" ") { it.replaceFirstChar { char -> if (char.isLowerCase()) char.titlecase(java.util.Locale.ROOT) else char.toString() } },
                         style = MaterialTheme.typography.labelSmall,
-                        color = when (task.status) {
-                            "Done" -> Color(0xFF137333)
-                            "In Progress" -> Color(0xFFB06000)
+                        color = when {
+                            status.equals("Done", ignoreCase = true) -> Color(0xFF137333)
+                            status.equals("In Progress", ignoreCase = true) -> Color(0xFFB06000)
                             else -> MaterialTheme.colorScheme.onSurfaceVariant
                         },
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
@@ -195,39 +205,30 @@ fun TaskItem(
                     modifier = Modifier.size(16.dp)
                 )
                 Spacer(modifier = Modifier.width(4.dp))
+                val equipmentName = equipmentNames[task.idAlat] ?: task.idAlat
                 Text(
-                    text = task.lokasi,
+                    text = "Alat: $equipmentName",
                     style = MaterialTheme.typography.bodySmall,
                     color = Color.Gray
                 )
                 Spacer(modifier = Modifier.weight(1f))
+                
+                // Format Date
+                val dateFormat = java.text.SimpleDateFormat("dd/MM/yyyy HH:mm", java.util.Locale.getDefault())
+                val dateString = try {
+                    dateFormat.format(task.tglJatuhTempo)
+                } catch (e: Exception) {
+                    task.tglJatuhTempo.toString()
+                }
+                
                 Text(
-                    text = task.tanggal, // Using tanggal as time/date placeholder
+                    text = dateString,
                     style = MaterialTheme.typography.bodySmall,
                     color = Color.Gray
                 )
             }
 
-            // Admin Actions
-            if (isAdmin) {
-                Spacer(modifier = Modifier.height(12.dp))
-                Divider()
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End
-                ) {
-                    TextButton(onClick = onEdit) {
-                        Icon(Icons.Default.Edit, contentDescription = "Edit", modifier = Modifier.size(18.dp))
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text("Edit")
-                    }
-                    TextButton(onClick = onDelete) {
-                        Icon(Icons.Default.Delete, contentDescription = "Delete", tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(18.dp))
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text("Hapus", color = MaterialTheme.colorScheme.error)
-                    }
-                }
-            }
+
         }
     }
 }

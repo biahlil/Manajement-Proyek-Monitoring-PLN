@@ -7,24 +7,30 @@ import com.pln.monitoringpln.domain.model.Tugas
 fun TugasEntity.toDomain(): Tugas {
     return Tugas(
         id = id,
-        deskripsi = deskripsi,
-        idAlat = idAlat,
-        idTeknisi = idTeknisi,
-        tglDibuat = tglDibuat,
-        tglJatuhTempo = tglJatuhTempo,
-        status = status
-    )
-}
-
-fun Tugas.toEntity(isSynced: Boolean = false): TugasEntity {
-    return TugasEntity(
-        id = id,
+        judul = judul,
         deskripsi = deskripsi,
         idAlat = idAlat,
         idTeknisi = idTeknisi,
         tglDibuat = tglDibuat,
         tglJatuhTempo = tglJatuhTempo,
         status = status,
+        buktiFoto = buktiFoto,
+        kondisiAkhir = kondisiAkhir
+    )
+}
+
+fun Tugas.toEntity(isSynced: Boolean = false): TugasEntity {
+    return TugasEntity(
+        id = id,
+        judul = judul,
+        deskripsi = deskripsi,
+        idAlat = idAlat,
+        idTeknisi = idTeknisi,
+        tglDibuat = tglDibuat,
+        tglJatuhTempo = tglJatuhTempo,
+        status = status,
+        buktiFoto = buktiFoto,
+        kondisiAkhir = kondisiAkhir,
         isSynced = isSynced
     )
 }
@@ -32,7 +38,8 @@ fun Tugas.toEntity(isSynced: Boolean = false): TugasEntity {
 fun TugasDto.toEntity(isSynced: Boolean = true): TugasEntity {
     return TugasEntity(
         id = id,
-        deskripsi = title, // Mapping title to deskripsi
+        judul = title,
+        deskripsi = description ?: "",
         idAlat = alatId,
         idTeknisi = teknisiId,
         tglDibuat = createdAt,
@@ -45,7 +52,7 @@ fun TugasDto.toEntity(isSynced: Boolean = true): TugasEntity {
 fun Tugas.toInsertDto(): com.pln.monitoringpln.data.model.TugasInsertDto {
     return com.pln.monitoringpln.data.model.TugasInsertDto(
         id = id,
-        title = deskripsi,
+        title = judul,
         description = deskripsi,
         status = status,
         dueDate = tglJatuhTempo,

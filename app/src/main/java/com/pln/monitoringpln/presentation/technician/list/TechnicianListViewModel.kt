@@ -10,18 +10,16 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class TechnicianListViewModel : ViewModel() {
+class TechnicianListViewModel(
+    private val getTechniciansUseCase: com.pln.monitoringpln.domain.usecase.technician.GetTechniciansUseCase,
+    private val observeTasksUseCase: com.pln.monitoringpln.domain.usecase.tugas.ObserveTasksUseCase,
+    private val userRepository: com.pln.monitoringpln.domain.repository.UserRepository,
+    private val getAllAlatUseCase: com.pln.monitoringpln.domain.usecase.alat.GetAllAlatUseCase,
+    private val deleteUserUseCase: com.pln.monitoringpln.domain.usecase.user.DeleteUserUseCase
+) : ViewModel() {
 
     private val _state = MutableStateFlow(TechnicianListState())
     val state: StateFlow<TechnicianListState> = _state.asStateFlow()
-
-    // Mock Data
-    private val allTechnicians = listOf(
-        User(id = "1", name = "Rusman Hadi", role = "teknisi", email = "rusman@pln.co.id"),
-        User(id = "2", name = "Ahmad Zaky", role = "teknisi", email = "zaky@pln.co.id"),
-        User(id = "3", name = "Budi Santoso", role = "teknisi", email = "budi@pln.co.id"),
-        User(id = "4", name = "Siti Aminah", role = "teknisi", email = "siti@pln.co.id")
-    )
 
     init {
         loadTechnicians()
@@ -30,15 +28,64 @@ class TechnicianListViewModel : ViewModel() {
     fun loadTechnicians() {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
-            delay(500) // Simulate network
-
-            _state.update { 
-                it.copy(
-                    isLoading = false,
-                    technicians = allTechnicians,
-                    filteredTechnicians = allTechnicians
-                ) 
+            
+            // 1. Fetch Technicians
+            launch {
+                getTechniciansUseCase().collect { technicians ->
+                    _state.update { 
+                        it.copy(
+                            isLoading = false,
+                            technicians = technicians,
+                            filteredTechnicians = technicians 
+                        ) 
+                    }
+                }
             }
+
+            // 2. Fetch Equipment & Tasks to map equipment to technician
+            launch {
+                kotlinx.coroutines.flow.combine(
+                    getAllAlatUseCase(),
+                    observeTasksUseCase()
+                ) { alatList, tasks ->
+                    val equipmentMap = alatList.associate { it.id to it.namaAlat }
+                    
+                    // Task Counts
+                    val counts = tasks
+                        .filter { it.status != "Done" }
+                        .groupBy { it.idTeknisi }
+                        .mapValues { it.value.size }
+                    
+                    // Random Equipment per Technician
+                    val techEquipment = tasks
+                        .groupBy { it.idTeknisi }
+                        .mapValues { (_, techTasks) ->
+                            if (techTasks.isNotEmpty()) {
+                                val randomTask = techTasks.random()
+                                equipmentMap[randomTask.idAlat] ?: "Alat Tidak Dikenal (${randomTask.idAlat})"
+                            } else {
+                                "Belum ada alat"
+                            }
+                        }
+                    
+                    Triple(counts, techEquipment, equipmentMap)
+                }.collect { (counts, techEquipment, _) ->
+                    _state.update { 
+                        it.copy(
+                            technicianTaskCounts = counts,
+                            technicianEquipment = techEquipment
+                        ) 
+                    }
+                }
+            }
+        }
+    }
+
+    fun refreshTechnicians() {
+        viewModelScope.launch {
+            _state.update { it.copy(isLoading = true) }
+            userRepository.refreshTeknisi()
+            _state.update { it.copy(isLoading = false) }
         }
     }
 
@@ -48,7 +95,7 @@ class TechnicianListViewModel : ViewModel() {
                 state.technicians
             } else {
                 state.technicians.filter {
-                    it.name.contains(query, ignoreCase = true) ||
+                    it.namaLengkap.contains(query, ignoreCase = true) ||
                     it.email.contains(query, ignoreCase = true)
                 }
             }
@@ -64,20 +111,26 @@ class TechnicianListViewModel : ViewModel() {
         val technician = _state.value.technicianToDelete ?: return
         viewModelScope.launch {
             _state.update { it.copy(isDeleting = true) }
-            delay(1000) // Simulate delete API call
             
-            // Remove from list
-            val updatedList = _state.value.technicians.filter { it.id != technician.id }
-            val updatedFiltered = _state.value.filteredTechnicians.filter { it.id != technician.id }
+            val result = deleteUserUseCase(technician.id)
             
-            _state.update { 
-                it.copy(
-                    isDeleting = false, 
-                    showDeleteDialog = false, 
-                    technicianToDelete = null,
-                    technicians = updatedList,
-                    filteredTechnicians = updatedFiltered
-                ) 
+            if (result.isSuccess) {
+                _state.update { 
+                    it.copy(
+                        isDeleting = false, 
+                        showDeleteDialog = false, 
+                        technicianToDelete = null
+                    ) 
+                }
+                // Refresh list to ensure UI is in sync
+                loadTechnicians()
+            } else {
+                _state.update { 
+                    it.copy(
+                        isDeleting = false,
+                        // Optionally show error
+                    ) 
+                }
             }
         }
     }

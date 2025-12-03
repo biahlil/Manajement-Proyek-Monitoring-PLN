@@ -9,6 +9,8 @@ interface AlatRepository {
     // UC1a: Get Detail (Admin & Teknisi)
     suspend fun getAlatDetail(id: String): Result<Alat>
 
+    fun observeAlat(id: String): kotlinx.coroutines.flow.Flow<Alat?>
+
     // Get by Kode (Helper/QR Scan)
     suspend fun getAlatByKode(kode: String): Result<Alat>
 

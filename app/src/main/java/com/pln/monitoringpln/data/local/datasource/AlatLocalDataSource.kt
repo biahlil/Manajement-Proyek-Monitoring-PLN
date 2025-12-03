@@ -14,6 +14,8 @@ class AlatLocalDataSource(private val alatDao: AlatDao) {
 
     suspend fun getAlatDetail(id: String): AlatEntity? = alatDao.getAlatDetail(id)
 
+    fun observeAlatDetail(id: String): Flow<AlatEntity?> = alatDao.observeAlatDetail(id)
+
     suspend fun getAlatByKode(kode: String): AlatEntity? = alatDao.getAlatByKode(kode)
 
     suspend fun updateAlat(alat: AlatEntity) = alatDao.updateAlat(alat)

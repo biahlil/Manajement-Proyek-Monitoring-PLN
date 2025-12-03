@@ -12,14 +12,18 @@ class AndroidSessionManager(context: Context) : SessionManager {
 
     override suspend fun saveSession(session: UserSession) {
         val json = Json.encodeToString(session)
+        android.util.Log.d("SessionManager", "Saving session: $json")
         prefs.edit().putString("session", json).apply()
     }
 
     override suspend fun loadSession(): UserSession? {
-        val json = prefs.getString("session", null) ?: return null
+        val json = prefs.getString("session", null)
+        android.util.Log.d("SessionManager", "Loading session: $json")
+        if (json == null) return null
         return try {
             Json.decodeFromString(json)
         } catch (e: Exception) {
+            android.util.Log.e("SessionManager", "Error decoding session", e)
             null
         }
     }

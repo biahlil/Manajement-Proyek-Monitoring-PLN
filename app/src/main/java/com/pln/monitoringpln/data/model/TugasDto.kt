@@ -14,31 +14,38 @@ data class TugasDto(
     @SerialName("due_date") @Serializable(with = DateSerializer::class) val dueDate: Date,
     @SerialName("alat_id") val alatId: String,
     @SerialName("teknisi_id") val teknisiId: String,
-    @SerialName("created_at") @Serializable(with = DateSerializer::class) val createdAt: Date
+    @SerialName("created_at") @Serializable(with = DateSerializer::class) val createdAt: Date,
+    @SerialName("bukti_foto") val buktiFoto: String? = null,
+    @SerialName("kondisi_akhir") val kondisiAkhir: String? = null
 )
 
 fun TugasDto.toDomain(): Tugas {
     return Tugas(
         id = id,
-        deskripsi = title, // Mapping title back to deskripsi
+        judul = title,
+        deskripsi = description ?: "",
         idAlat = alatId,
         idTeknisi = teknisiId,
         tglDibuat = createdAt,
         tglJatuhTempo = dueDate,
-        status = status
+        status = status,
+        buktiFoto = buktiFoto,
+        kondisiAkhir = kondisiAkhir
     )
 }
 
 fun Tugas.toDto(): TugasDto {
     return TugasDto(
         id = id,
-        title = deskripsi,
-        description = deskripsi, // Use deskripsi for description too
+        title = judul,
+        description = deskripsi,
         status = status,
         dueDate = tglJatuhTempo,
         alatId = idAlat,
         teknisiId = idTeknisi,
-        createdAt = tglDibuat
+        createdAt = tglDibuat,
+        buktiFoto = buktiFoto,
+        kondisiAkhir = kondisiAkhir
     )
 }
 
@@ -50,18 +57,22 @@ data class TugasInsertDto(
     @SerialName("status") val status: String,
     @SerialName("due_date") @Serializable(with = DateSerializer::class) val dueDate: Date,
     @SerialName("alat_id") val alatId: String,
-    @SerialName("teknisi_id") val teknisiId: String
+    @SerialName("teknisi_id") val teknisiId: String,
+    @SerialName("bukti_foto") val buktiFoto: String? = null,
+    @SerialName("kondisi_akhir") val kondisiAkhir: String? = null
 )
 
 fun Tugas.toInsertDto(): TugasInsertDto {
     return TugasInsertDto(
         id = id,
-        title = deskripsi,
+        title = judul,
         description = deskripsi,
         status = status,
         dueDate = tglJatuhTempo,
         alatId = idAlat,
-        teknisiId = idTeknisi
+        teknisiId = idTeknisi,
+        buktiFoto = buktiFoto,
+        kondisiAkhir = kondisiAkhir
     )
 }
 

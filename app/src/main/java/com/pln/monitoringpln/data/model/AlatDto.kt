@@ -13,8 +13,10 @@ data class AlatDto(
     @SerialName("longitude") val longitude: Double,
     @SerialName("kondisi") val kondisi: String,
     @SerialName("status") val status: String,
+    @SerialName("tipe") val tipe: String? = null,
     @SerialName("last_modified_by_id") val lastModifiedById: String? = null,
-    @SerialName("is_archived") val isArchived: Boolean = false
+    @SerialName("is_archived") val isArchived: Boolean = false,
+    @SerialName("location_name") val locationName: String? = null
 )
 
 
@@ -28,7 +30,9 @@ data class AlatInsertDto(
     @SerialName("longitude") val longitude: Double,
     @SerialName("kondisi") val kondisi: String,
     @SerialName("status") val status: String,
-    @SerialName("is_archived") val isArchived: Boolean = false
+    @SerialName("tipe") val tipe: String,
+    @SerialName("is_archived") val isArchived: Boolean = false,
+    @SerialName("location_name") val locationName: String? = null
 )
 
 fun Alat.toInsertDto(): AlatInsertDto {
@@ -40,7 +44,9 @@ fun Alat.toInsertDto(): AlatInsertDto {
         longitude = longitude,
         kondisi = kondisi,
         status = status,
-        isArchived = isArchived
+        tipe = tipe,
+        isArchived = isArchived,
+        locationName = locationName
     )
 }
 
@@ -48,8 +54,10 @@ fun Alat.toInsertDto(): AlatInsertDto {
 data class AlatUpdateInfoDto(
     @SerialName("nama_alat") val namaAlat: String,
     @SerialName("kode_alat") val kodeAlat: String,
+    @SerialName("tipe") val tipe: String,
     @SerialName("latitude") val latitude: Double,
-    @SerialName("longitude") val longitude: Double
+    @SerialName("longitude") val longitude: Double,
+    @SerialName("location_name") val locationName: String? = null
 )
 
 @Serializable

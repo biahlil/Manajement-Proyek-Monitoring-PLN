@@ -3,11 +3,13 @@ package com.pln.monitoringpln.presentation.profile
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import coil.compose.AsyncImage
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -68,6 +70,7 @@ fun ProfileScreen(
                 Text("Keluar", color = Color.White, fontWeight = FontWeight.Bold)
             }
         }
+    }
 }
 
 
@@ -87,19 +90,28 @@ fun ProfileAvatar(state: ProfileState) {
         ) {
             // Avatar Image Placeholder
             Box(
-                modifier = Modifier
-                    .size(100.dp)
-                    .clip(CircleShape)
-                    .background(Color.LightGray),
-                contentAlignment = Alignment.Center
-            ) {
+            modifier = Modifier
+                .size(100.dp)
+                .clip(CircleShape)
+                .background(Color.White),
+            contentAlignment = Alignment.Center
+        ) {
+            if (state.photoUrl != null) {
+                coil.compose.AsyncImage(
+                    model = state.photoUrl,
+                    contentDescription = "Profile Picture",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                )
+            } else {
                 Icon(
-                    painter = painterResource(id = R.drawable.ic_launcher_foreground), // Use default icon for now
-                    contentDescription = "Avatar",
+                    imageVector = Icons.Default.Person,
+                    contentDescription = null,
                     modifier = Modifier.size(60.dp),
                     tint = Color.Gray
                 )
             }
+        }
             
             Spacer(modifier = Modifier.height(16.dp))
             
@@ -112,11 +124,6 @@ fun ProfileAvatar(state: ProfileState) {
                 text = state.role,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.primary
-            )
-            Text(
-                text = "ID: ${state.id}",
-                style = MaterialTheme.typography.bodySmall,
-                color = Color.Gray
             )
         }
     }
@@ -137,13 +144,6 @@ fun ProfileDetailsCard(state: ProfileState) {
             ProfileDetailItem(label = "Username", value = state.username)
             Divider(modifier = Modifier.padding(vertical = 8.dp))
             ProfileDetailItem(label = "Email", value = state.email)
-            Divider(modifier = Modifier.padding(vertical = 8.dp))
-            ProfileDetailItem(label = "No HP", value = state.phone)
-            
-            if (state.area.isNotEmpty() && state.area != "-") {
-                Divider(modifier = Modifier.padding(vertical = 8.dp))
-                ProfileDetailItem(label = "Area Tugas", value = state.area)
-            }
         }
     }
 }

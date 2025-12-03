@@ -9,5 +9,6 @@ data class ProfileState(
     val email: String = "",
     val phone: String = "",
     val area: String = "", // "Area Tugas" for Technician
-    val isLoggedOut: Boolean = false
+    val isLoggedOut: Boolean = false,
+    val photoUrl: String? = null
 )

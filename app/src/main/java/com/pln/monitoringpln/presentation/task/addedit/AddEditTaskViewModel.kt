@@ -2,45 +2,97 @@ package com.pln.monitoringpln.presentation.task.addedit
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.delay
+import com.pln.monitoringpln.domain.model.Alat
+import com.pln.monitoringpln.domain.model.User
+import com.pln.monitoringpln.domain.repository.AlatRepository
+import com.pln.monitoringpln.domain.repository.UserRepository
+import com.pln.monitoringpln.domain.usecase.tugas.CreateTaskUseCase
+import com.pln.monitoringpln.domain.usecase.tugas.GetTaskDetailUseCase
+import com.pln.monitoringpln.domain.usecase.tugas.UpdateTaskUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import java.time.ZoneId
+import java.util.Date
 
-import com.pln.monitoringpln.domain.model.Alat
-import com.pln.monitoringpln.domain.model.User
-import java.time.LocalDate
-
-class AddEditTaskViewModel : ViewModel() {
+class AddEditTaskViewModel(
+    private val createTaskUseCase: CreateTaskUseCase,
+    private val updateTaskUseCase: UpdateTaskUseCase,
+    private val getTaskDetailUseCase: GetTaskDetailUseCase,
+    private val alatRepository: AlatRepository,
+    private val userRepository: UserRepository
+) : ViewModel() {
 
     private val _state = MutableStateFlow(AddEditTaskState())
     val state: StateFlow<AddEditTaskState> = _state.asStateFlow()
 
-    private val allEquipments = listOf(
-        Alat(id = "1", kodeAlat = "TRF-001", namaAlat = "Trafo A", latitude = -3.3194, longitude = 114.5908, kondisi = "Normal"),
-        Alat(id = "2", kodeAlat = "TRF-002", namaAlat = "Trafo B", latitude = -3.3200, longitude = 114.5910, kondisi = "Normal"),
-        Alat(id = "3", kodeAlat = "CBL-001", namaAlat = "Kabel Bawah Tanah", latitude = -3.3210, longitude = 114.5920, kondisi = "Rusak"),
-        Alat(id = "4", kodeAlat = "PNL-001", namaAlat = "Panel Distribusi", latitude = -3.3220, longitude = 114.5930, kondisi = "Perlu Perhatian"),
-        Alat(id = "5", kodeAlat = "TRF-003", namaAlat = "Trafo C", latitude = -3.3230, longitude = 114.5940, kondisi = "Normal")
-    )
-
-    private val allTechnicians = listOf(
-        User(id = "1", email = "rusman@pln.co.id", namaLengkap = "Rusman Hadi", role = "Teknisi"),
-        User(id = "2", email = "budi@pln.co.id", namaLengkap = "Budi Santoso", role = "Teknisi"),
-        User(id = "3", email = "ahmad@pln.co.id", namaLengkap = "Ahmad Yani", role = "Teknisi"),
-        User(id = "4", email = "siti@pln.co.id", namaLengkap = "Siti Aminah", role = "Teknisi")
-    )
+    private var allEquipmentsCache: List<Alat> = emptyList()
 
     init {
-        // Load initial data
-        _state.update { 
-            it.copy(
-                availableEquipments = allEquipments,
-                availableTechnicians = allTechnicians
-            ) 
+        loadData()
+    }
+
+    fun loadTask(taskId: String?) {
+        val actualTaskId = if (taskId == "null" || taskId.isNullOrBlank()) null else taskId
+        _state.update { it.copy(taskId = actualTaskId, error = null) } // Clear error on load
+        if (actualTaskId != null) {
+            loadTaskDetail(actualTaskId)
+        } else {
+            // Reset state for new task if needed, or keep defaults
+        }
+    }
+
+    private fun loadData() {
+        viewModelScope.launch {
+            // Load Equipments
+            alatRepository.getAllAlat().collect { list ->
+                // Filter out equipment with empty IDs
+                val validList = list.filter { it.id.isNotBlank() }
+                allEquipmentsCache = validList
+                _state.update { it.copy(availableEquipments = validList) }
+            }
+        }
+        viewModelScope.launch {
+            // Load Technicians
+            val techniciansResult = userRepository.getAllTeknisi()
+            if (techniciansResult.isSuccess) {
+                val allUsers = techniciansResult.getOrNull() ?: emptyList()
+                // Filter only users with role "Teknisi" (Case Insensitive check)
+                val technicians = allUsers.filter { it.role.equals("Teknisi", ignoreCase = true) }
+                _state.update { it.copy(availableTechnicians = technicians) }
+            }
+        }
+    }
+
+    private fun loadTaskDetail(id: String) {
+        viewModelScope.launch {
+            _state.update { it.copy(isLoading = true) }
+            val result = getTaskDetailUseCase(id)
+            if (result.isSuccess) {
+                val detail = result.getOrNull()!!
+                val task = detail.task
+                val deadline = task.tglJatuhTempo.toInstant()
+                    .atZone(ZoneId.systemDefault())
+                    .toLocalDate()
+
+                _state.update { 
+                    it.copy(
+                        isLoading = false,
+                        title = task.judul,
+                        description = task.deskripsi,
+                        deadline = deadline,
+                        selectedEquipment = detail.equipment,
+                        selectedTechnician = detail.technician,
+                        equipmentSearchQuery = detail.equipment?.let { eq -> "${eq.namaAlat} - ${eq.kodeAlat}" } ?: "",
+                        status = task.status
+                    ) 
+                }
+            } else {
+                _state.update { it.copy(isLoading = false, error = "Gagal memuat detail tugas") }
+            }
         }
     }
 
@@ -57,9 +109,9 @@ class AddEditTaskViewModel : ViewModel() {
             it.copy(
                 equipmentSearchQuery = query,
                 availableEquipments = if (query.isBlank()) {
-                    allEquipments
+                    allEquipmentsCache
                 } else {
-                    allEquipments.filter { eq -> 
+                    allEquipmentsCache.filter { eq -> 
                         eq.namaAlat.contains(query, ignoreCase = true) || 
                         eq.kodeAlat.contains(query, ignoreCase = true) 
                     }
@@ -89,8 +141,9 @@ class AddEditTaskViewModel : ViewModel() {
         viewModelScope.launch {
             _state.update { it.copy(isSaving = true, error = null) }
             
-            // Validation
             val currentState = _state.value
+            
+            // Validation handled in UseCase, but basic UI check here
             if (currentState.title.isBlank() || 
                 currentState.selectedEquipment == null || 
                 currentState.deadline == null || 
@@ -100,10 +153,42 @@ class AddEditTaskViewModel : ViewModel() {
                 return@launch
             }
 
-            // Mock Save Delay
-            delay(1500)
+            val deadlineDate = Date.from(currentState.deadline!!.atStartOfDay(ZoneId.systemDefault()).toInstant())
 
-            _state.update { it.copy(isSaving = false, isTaskSaved = true) }
+            if (currentState.taskId != null) {
+                // Update
+                val result = updateTaskUseCase(
+                    taskId = currentState.taskId,
+                    judul = currentState.title,
+                    deskripsi = currentState.description,
+                    idAlat = currentState.selectedEquipment!!.id,
+                    idTeknisi = currentState.selectedTechnician!!.id,
+                    tglJatuhTempo = deadlineDate,
+                    status = currentState.status
+                )
+                
+                if (result.isSuccess) {
+                    _state.update { it.copy(isSaving = false, isTaskSaved = true, savedTaskId = currentState.taskId) }
+                } else {
+                    _state.update { it.copy(isSaving = false, error = result.exceptionOrNull()?.message ?: "Gagal menyimpan tugas") }
+                }
+            } else {
+                // Create
+                val result = createTaskUseCase(
+                    judul = currentState.title,
+                    deskripsi = currentState.description,
+                    idAlat = currentState.selectedEquipment!!.id,
+                    idTeknisi = currentState.selectedTechnician!!.id,
+                    tglJatuhTempo = deadlineDate
+                )
+                
+                if (result.isSuccess) {
+                    val newTaskId = result.getOrNull()
+                    _state.update { it.copy(isSaving = false, isTaskSaved = true, savedTaskId = newTaskId) }
+                } else {
+                    _state.update { it.copy(isSaving = false, error = result.exceptionOrNull()?.message ?: "Gagal menyimpan tugas") }
+                }
+            }
         }
     }
 }

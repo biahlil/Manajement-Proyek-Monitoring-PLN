@@ -9,7 +9,11 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class AddTechnicianViewModel : ViewModel() {
+class AddTechnicianViewModel(
+    private val createUserUseCase: com.pln.monitoringpln.domain.usecase.auth.CreateUserUseCase,
+    private val uploadPhotoUseCase: com.pln.monitoringpln.domain.usecase.storage.UploadPhotoUseCase,
+    private val context: android.content.Context // Need context for ContentResolver
+) : ViewModel() {
 
     private val _state = MutableStateFlow(AddTechnicianState())
     val state: StateFlow<AddTechnicianState> = _state.asStateFlow()
@@ -18,39 +22,72 @@ class AddTechnicianViewModel : ViewModel() {
         _state.update { it.copy(namaLengkap = value) }
     }
 
-    fun onIdChange(value: String) {
-        _state.update { it.copy(idTeknisi = value) }
-    }
-
     fun onEmailChange(value: String) {
         _state.update { it.copy(email = value) }
     }
 
-    fun onNoTeleponChange(value: String) {
-        _state.update { it.copy(noTelepon = value) }
+    fun onPasswordChange(value: String) {
+        _state.update { it.copy(password = value) }
     }
 
-    fun onAreaTugasChange(value: String) {
-        _state.update { it.copy(areaTugas = value) }
+    fun onPhotoSelected(uri: android.net.Uri?) {
+        _state.update { it.copy(photoUri = uri) }
     }
 
     fun onSaveTechnician() {
         viewModelScope.launch {
+            _state.update { it.copy(isSaving = true, error = null) }
             val currentState = _state.value
-            
-            // Basic Validation
-            if (currentState.namaLengkap.isBlank() || 
-                currentState.idTeknisi.isBlank() || 
-                currentState.email.isBlank() ||
-                currentState.noTelepon.isBlank()) {
-                _state.update { it.copy(error = "Semua field wajib diisi") }
+
+            // Validation
+            if (currentState.namaLengkap.isBlank() || currentState.email.isBlank() || currentState.password.isBlank()) {
+                _state.update { it.copy(isSaving = false, error = "Semua field harus diisi") }
                 return@launch
             }
 
-            _state.update { it.copy(isSaving = true, error = null) }
-            delay(1000) // Simulate save API call
+            var photoUrl: String? = null
             
-            _state.update { it.copy(isSaving = false, isSaved = true) }
+            // Upload Photo if exists
+            if (currentState.photoUri != null) {
+                try {
+                    val inputStream = context.contentResolver.openInputStream(currentState.photoUri)
+                    val byteArray = inputStream?.readBytes()
+                    inputStream?.close()
+
+                    if (byteArray != null) {
+                        val fileName = "technician_${System.currentTimeMillis()}.jpg"
+                        val uploadResult = uploadPhotoUseCase(byteArray, fileName)
+                        
+                        uploadResult.fold(
+                            onSuccess = { url -> photoUrl = url },
+                            onFailure = { error ->
+                                _state.update { it.copy(isSaving = false, error = "Gagal upload foto: ${error.message}") }
+                                return@launch
+                            }
+                        )
+                    }
+                } catch (e: Exception) {
+                    _state.update { it.copy(isSaving = false, error = "Gagal memproses foto: ${e.message}") }
+                    return@launch
+                }
+            }
+
+            val result = createUserUseCase(
+                email = currentState.email,
+                password = currentState.password,
+                fullName = currentState.namaLengkap,
+                role = "TEKNISI",
+                photoUrl = photoUrl
+            )
+
+            result.fold(
+                onSuccess = {
+                    _state.update { it.copy(isSaving = false, isSaved = true) }
+                },
+                onFailure = { error ->
+                    _state.update { it.copy(isSaving = false, error = error.message ?: "Gagal menyimpan teknisi") }
+                }
+            )
         }
     }
 }

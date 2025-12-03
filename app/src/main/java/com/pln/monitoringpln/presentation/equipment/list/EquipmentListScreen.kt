@@ -36,15 +36,24 @@ fun EquipmentListScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Daftar Peralatan", fontWeight = FontWeight.Bold) },
+                title = { 
+                    Text(
+                        "Daftar Peralatan", 
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
+                    ) 
+                },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(
+                            Icons.Default.ArrowBack, 
+                            contentDescription = "Back",
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    containerColor = MaterialTheme.colorScheme.surface,
                 )
             )
         },
@@ -53,7 +62,8 @@ fun EquipmentListScreen(
                 FloatingActionButton(
                     onClick = onAddEquipment,
                     containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = Color.White
+                    contentColor = Color.White,
+                    shape = RoundedCornerShape(16.dp)
                 ) {
                     Icon(Icons.Default.Add, contentDescription = "Add Equipment")
                 }
@@ -64,28 +74,8 @@ fun EquipmentListScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(16.dp)
+                .padding(horizontal = 16.dp)
         ) {
-            // Header Stats
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-                shape = RoundedCornerShape(8.dp)
-            ) {
-                Row(
-                    modifier = Modifier.padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Total Peralatan : ${state.equipmentList.size}",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
             // Search Bar
             OutlinedTextField(
                 value = state.searchQuery,
@@ -94,8 +84,28 @@ fun EquipmentListScreen(
                 placeholder = { Text("Cari nama atau kode alat...") },
                 leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
                 shape = RoundedCornerShape(12.dp),
-                singleLine = true
+                singleLine = true,
+                colors = OutlinedTextFieldDefaults.colors(
+                    unfocusedContainerColor = Color.White,
+                    focusedContainerColor = Color.White
+                )
             )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Total Chip
+            Surface(
+                color = MaterialTheme.colorScheme.primaryContainer,
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Text(
+                    text = "Total Peralatan: ${state.equipmentList.size}",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                )
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -106,7 +116,7 @@ fun EquipmentListScreen(
                 }
             } else {
                 LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
                     contentPadding = PaddingValues(bottom = 80.dp) // Space for FAB
                 ) {
                     items(state.filteredEquipmentList) { equipment ->
@@ -134,9 +144,10 @@ fun EquipmentCard(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             // Header: Name and Badge
@@ -158,40 +169,25 @@ fun EquipmentCard(
                     )
                 }
                 
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Surface(
-                        shape = RoundedCornerShape(16.dp),
-                        color = when (equipment.kondisi) {
-                            "Normal" -> Color(0xFFE8F5E9)
-                            "Rusak" -> Color(0xFFFFEBEE)
-                            else -> Color(0xFFFFF3E0)
-                        },
-                        contentColor = when (equipment.kondisi) {
-                            "Normal" -> Color(0xFF1B5E20)
-                            "Rusak" -> Color(0xFFB71C1C)
-                            else -> Color(0xFFE65100)
-                        }
-                    ) {
-                        Text(
-                            text = equipment.kondisi,
-                            style = MaterialTheme.typography.labelSmall,
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                        )
+                Surface(
+                    shape = RoundedCornerShape(8.dp),
+                    color = when (equipment.kondisi) {
+                        "Normal" -> Color(0xFFE8F5E9)
+                        "Rusak" -> Color(0xFFFFEBEE)
+                        else -> Color(0xFFFFF3E0)
+                    },
+                    contentColor = when (equipment.kondisi) {
+                        "Normal" -> Color(0xFF1B5E20)
+                        "Rusak" -> Color(0xFFB71C1C)
+                        else -> Color(0xFFE65100)
                     }
-                    
-                    if (isAdmin) {
-                        Spacer(modifier = Modifier.width(8.dp))
-                        IconButton(
-                            onClick = onDeleteClick,
-                            modifier = Modifier.size(24.dp)
-                        ) {
-                            Icon(
-                                Icons.Default.Delete,
-                                contentDescription = "Delete",
-                                tint = MaterialTheme.colorScheme.error
-                            )
-                        }
-                    }
+                ) {
+                    Text(
+                        text = equipment.kondisi,
+                        style = MaterialTheme.typography.labelSmall,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        fontWeight = FontWeight.Bold
+                    )
                 }
             }
 
@@ -207,33 +203,29 @@ fun EquipmentCard(
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
-                    text = "Lokasi belum tersedia", // Mock location name
+                    text = equipment.locationName ?: "Lokasi belum tersedia",
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color.Gray
                 )
             }
 
             Spacer(modifier = Modifier.height(12.dp))
-            Divider()
+            Divider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Metrics (Mocked)
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                MetricItem(label = "Tegangan", value = "20 Kv")
-                MetricItem(label = "Suhu", value = "45°C")
-                MetricItem(label = "Cek Terakhir", value = "20 Min Lalu")
+            // Last Checked
+            Column {
+                Text(
+                    text = "Cek Terakhir",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = Color.Gray
+                )
+                Text(
+                    text = "20 Min Lalu", // Mock data
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Bold
+                )
             }
         }
-    }
-}
-
-@Composable
-fun MetricItem(label: String, value: String) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(text = label, style = MaterialTheme.typography.labelSmall, color = Color.Gray)
-        Text(text = value, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
     }
 }

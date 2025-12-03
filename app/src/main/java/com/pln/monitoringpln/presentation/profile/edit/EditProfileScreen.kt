@@ -2,6 +2,7 @@ package com.pln.monitoringpln.presentation.profile.edit
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import coil.compose.AsyncImage
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
@@ -25,9 +26,18 @@ fun EditProfileScreen(
     onNameChange: (String) -> Unit,
     onEmailChange: (String) -> Unit,
     onPhoneChange: (String) -> Unit,
+    onPasswordChange: (String) -> Unit,
+    onConfirmPasswordChange: (String) -> Unit,
+    onAvatarSelected: (ByteArray) -> Unit,
     onSave: () -> Unit,
     onBack: () -> Unit
 ) {
+    androidx.compose.runtime.LaunchedEffect(state.isSaved) {
+        if (state.isSaved) {
+            onBack()
+        }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -43,6 +53,16 @@ fun EditProfileScreen(
                     navigationIconContentColor = Color.White
                 )
             )
+        },
+        snackbarHost = {
+            if (state.error != null) {
+                Snackbar(
+                    containerColor = MaterialTheme.colorScheme.error,
+                    contentColor = Color.White
+                ) {
+                    Text(state.error)
+                }
+            }
         }
     ) { paddingValues ->
         Column(
@@ -54,6 +74,21 @@ fun EditProfileScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // Photo Upload Section
+            val context = androidx.compose.ui.platform.LocalContext.current
+            val pickMedia = androidx.activity.compose.rememberLauncherForActivityResult(
+                androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia()
+            ) { uri ->
+                if (uri != null) {
+                    val contentResolver = context.contentResolver
+                    val inputStream = contentResolver.openInputStream(uri)
+                    val byteArray = inputStream?.readBytes()
+                    inputStream?.close()
+                    if (byteArray != null) {
+                        onAvatarSelected(byteArray)
+                    }
+                }
+            }
+
             Box(
                 contentAlignment = Alignment.BottomEnd
             ) {
@@ -64,15 +99,26 @@ fun EditProfileScreen(
                         .background(Color.LightGray),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(
-                        Icons.Default.Person,
-                        contentDescription = null,
-                        modifier = Modifier.size(60.dp),
-                        tint = Color.Gray
-                    )
+                    if (state.photoUrl != null) {
+                        coil.compose.AsyncImage(
+                            model = state.photoUrl,
+                            contentDescription = "Avatar",
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                        )
+                    } else {
+                        Icon(
+                            Icons.Default.Person,
+                            contentDescription = null,
+                            modifier = Modifier.size(60.dp),
+                            tint = Color.Gray
+                        )
+                    }
                 }
                 SmallFloatingActionButton(
-                    onClick = { /* TODO: Pick Image */ },
+                    onClick = { 
+                        pickMedia.launch(androidx.activity.result.PickVisualMediaRequest(androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia.ImageOnly))
+                    },
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = Color.White,
                     modifier = Modifier.size(32.dp)
@@ -89,7 +135,13 @@ fun EditProfileScreen(
                 onValueChange = onNameChange,
                 label = { Text("Nama Lengkap") },
                 modifier = Modifier.fillMaxWidth(),
-                singleLine = true
+                singleLine = true,
+                isError = state.nameError != null,
+                supportingText = {
+                    if (state.nameError != null) {
+                        Text(state.nameError, color = MaterialTheme.colorScheme.error)
+                    }
+                }
             )
             
             Spacer(modifier = Modifier.height(16.dp))
@@ -110,17 +162,49 @@ fun EditProfileScreen(
                 onValueChange = onEmailChange,
                 label = { Text("Email") },
                 modifier = Modifier.fillMaxWidth(),
-                singleLine = true
+                singleLine = true,
+                isError = state.emailError != null,
+                supportingText = {
+                    if (state.emailError != null) {
+                        Text(state.emailError, color = MaterialTheme.colorScheme.error)
+                    }
+                }
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(24.dp))
+            
+            Text(
+                text = "Ubah Password (Opsional)",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.align(Alignment.Start)
+            )
+            
+            Spacer(modifier = Modifier.height(8.dp))
 
             OutlinedTextField(
-                value = state.phone,
-                onValueChange = onPhoneChange,
-                label = { Text("No Telepon") },
+                value = state.password,
+                onValueChange = onPasswordChange,
+                label = { Text("Password Baru") },
                 modifier = Modifier.fillMaxWidth(),
-                singleLine = true
+                singleLine = true,
+                isError = state.passwordError != null
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            OutlinedTextField(
+                value = state.confirmPassword,
+                onValueChange = onConfirmPasswordChange,
+                label = { Text("Konfirmasi Password") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                isError = state.passwordError != null,
+                supportingText = {
+                    if (state.passwordError != null) {
+                        Text(state.passwordError, color = MaterialTheme.colorScheme.error)
+                    }
+                }
             )
 
             Spacer(modifier = Modifier.height(32.dp))

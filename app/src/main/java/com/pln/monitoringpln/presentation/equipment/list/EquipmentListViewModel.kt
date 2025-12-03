@@ -4,76 +4,83 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pln.monitoringpln.domain.model.Alat
 import com.pln.monitoringpln.domain.repository.AuthRepository
-import kotlinx.coroutines.delay
+import com.pln.monitoringpln.domain.repository.AlatRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+import androidx.lifecycle.SavedStateHandle
+
 class EquipmentListViewModel(
-    private val authRepository: AuthRepository
+    private val savedStateHandle: SavedStateHandle,
+    private val authRepository: AuthRepository,
+    private val alatRepository: AlatRepository
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(EquipmentListState())
+    private val _state = MutableStateFlow(EquipmentListState(isLoading = true))
     val state: StateFlow<EquipmentListState> = _state.asStateFlow()
 
-    // Mock Data
-    private val allEquipments = listOf(
-        Alat(id = "1", kodeAlat = "TRF-001", namaAlat = "Trafo Kayu Tangi 1", latitude = -3.3194, longitude = 114.5908, kondisi = "Normal"),
-        Alat(id = "2", kodeAlat = "TRF-002", namaAlat = "Trafo Kayu Tangi 2", latitude = -3.3200, longitude = 114.5910, kondisi = "Normal"),
-        Alat(id = "3", kodeAlat = "CBL-001", namaAlat = "Kabel Bawah Tanah", latitude = -3.3210, longitude = 114.5920, kondisi = "Rusak"),
-        Alat(id = "4", kodeAlat = "PNL-001", namaAlat = "Panel Distribusi", latitude = -3.3220, longitude = 114.5930, kondisi = "Perlu Perhatian"),
-        Alat(id = "5", kodeAlat = "TRF-003", namaAlat = "Trafo C", latitude = -3.3230, longitude = 114.5940, kondisi = "Normal")
-    )
-
-    // Mock Technician Assignment (Equipment IDs assigned to Technician ID "1")
-    private val technicianAssignment = listOf("1", "2", "5")
-
+    private var allEquipmentsCache: List<Alat> = emptyList()
+    private var currentFilterType: String = savedStateHandle.get<String>("filterType") ?: "all_equipment"
+    
     init {
-        loadEquipment()
+        viewModelScope.launch {
+            alatRepository.getAllAlat().collect { list ->
+                allEquipmentsCache = list
+                applyFilters()
+            }
+        }
     }
 
-    fun loadEquipment() {
-        viewModelScope.launch {
-            _state.update { it.copy(isLoading = true) }
-            
-            val roleResult = authRepository.getUserRole()
-            val isAdmin = roleResult.getOrNull() == "admin"
-            
-            delay(500) // Mock delay
+    fun setFilter(filterType: String) {
+        if (currentFilterType != filterType) {
+            currentFilterType = filterType
+            applyFilters()
+        }
+    }
 
-            val equipment = if (isAdmin) {
-                allEquipments
+    fun onSearchQueryChange(query: String) {
+        _state.update { it.copy(searchQuery = query) }
+        applyFilters()
+    }
+
+    private fun applyFilters() {
+        viewModelScope.launch {
+            val query = _state.value.searchQuery
+            val roleResult = authRepository.getUserRole()
+            val isAdmin = roleResult.getOrNull()?.equals("admin", ignoreCase = true) == true
+
+            // 1. Filter by Category
+            val categoryFiltered = when (currentFilterType) {
+                "normal_equipment" -> allEquipmentsCache.filter { it.kondisi == "Normal" }
+                "warning_equipment" -> allEquipmentsCache.filter { it.kondisi == "Perlu Perhatian" }
+                "broken_equipment" -> allEquipmentsCache.filter { it.kondisi == "Rusak" }
+                else -> allEquipmentsCache
+            }
+
+            // 2. Filter by Search
+            val finalFiltered = if (query.isBlank()) {
+                categoryFiltered
             } else {
-                // Filter for Technician (Mock ID "1")
-                allEquipments.filter { it.id in technicianAssignment }
+                categoryFiltered.filter {
+                    it.namaAlat.contains(query, ignoreCase = true) ||
+                    it.kodeAlat.contains(query, ignoreCase = true)
+                }
             }
 
             _state.update { 
                 it.copy(
                     isLoading = false,
-                    equipmentList = equipment,
-                    filteredEquipmentList = equipment,
+                    equipmentList = categoryFiltered,
+                    filteredEquipmentList = finalFiltered,
                     isAdmin = isAdmin
                 ) 
             }
         }
     }
-
-    fun onSearchQueryChange(query: String) {
-        _state.update { state ->
-            val filtered = if (query.isBlank()) {
-                state.equipmentList
-            } else {
-                state.equipmentList.filter {
-                    it.namaAlat.contains(query, ignoreCase = true) ||
-                    it.kodeAlat.contains(query, ignoreCase = true)
-                }
-            }
-            state.copy(searchQuery = query, filteredEquipmentList = filtered)
-        }
-    }
+    
     fun onDeleteEquipment(equipment: Alat) {
         _state.update { it.copy(showDeleteDialog = true, equipmentToDelete = equipment) }
     }
@@ -82,21 +89,20 @@ class EquipmentListViewModel(
         val equipment = _state.value.equipmentToDelete ?: return
         viewModelScope.launch {
             _state.update { it.copy(isDeleting = true) }
-            delay(1000) // Mock delete delay
             
-            // Remove from list
-            val updatedList = _state.value.equipmentList.filter { it.id != equipment.id }
-            val updatedFiltered = _state.value.filteredEquipmentList.filter { it.id != equipment.id }
-            
-            _state.update { 
-                it.copy(
-                    isDeleting = false,
-                    showDeleteDialog = false,
-                    equipmentToDelete = null,
-                    equipmentList = updatedList,
-                    filteredEquipmentList = updatedFiltered
-                ) 
-            }
+            alatRepository.archiveAlat(equipment.id)
+                .onSuccess {
+                    _state.update { 
+                        it.copy(
+                            isDeleting = false,
+                            showDeleteDialog = false,
+                            equipmentToDelete = null
+                        ) 
+                    }
+                }
+                .onFailure {
+                    _state.update { it.copy(isDeleting = false) } // Handle error
+                }
         }
     }
 

@@ -13,8 +13,14 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.layout.ContentScale
+import coil.compose.AsyncImage
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -31,20 +37,34 @@ fun TechnicianListScreen(
     onAddTechnician: () -> Unit,
     onDeleteTechnician: (User) -> Unit,
     onConfirmDelete: () -> Unit,
-    onDismissDelete: () -> Unit
+    onDismissDelete: () -> Unit,
+    onRefresh: () -> Unit
 ) {
+    LaunchedEffect(Unit) {
+        onRefresh()
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Daftar Teknisi", fontWeight = FontWeight.Bold) },
+                title = { 
+                    Text(
+                        "Daftar Teknisi", 
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
+                    ) 
+                },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(
+                            Icons.Default.ArrowBack, 
+                            contentDescription = "Back",
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    containerColor = MaterialTheme.colorScheme.surface
                 )
             )
         },
@@ -62,40 +82,47 @@ fun TechnicianListScreen(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(16.dp)
+                    .background(MaterialTheme.colorScheme.background)
             ) {
-                // Header Stats
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-                    shape = RoundedCornerShape(8.dp)
-                ) {
-                    Row(
-                        modifier = Modifier.padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "Kelola Teknisi : ${state.technicians.size} Total",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
                 // Search Bar
                 OutlinedTextField(
                     value = state.searchQuery,
                     onValueChange = onSearchQueryChange,
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
                     placeholder = { Text("Cari nama atau ID teknisi...") },
-                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search") },
                     shape = RoundedCornerShape(12.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedContainerColor = Color.White,
+                        unfocusedContainerColor = Color.White,
+                        unfocusedBorderColor = Color.Transparent,
+                        focusedBorderColor = MaterialTheme.colorScheme.primary
+                    ),
                     singleLine = true
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                // Total Technicians Label
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    horizontalArrangement = Arrangement.Start
+                ) {
+                    Surface(
+                        shape = RoundedCornerShape(16.dp),
+                        color = MaterialTheme.colorScheme.primaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    ) {
+                        Text(
+                            text = "Total Teknisi: ${state.technicians.size}",
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                        )
+                    }
+                }
 
                 // List
                 if (state.isLoading) {
@@ -104,24 +131,29 @@ fun TechnicianListScreen(
                     }
                 } else {
                     LazyColumn(
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                        contentPadding = PaddingValues(bottom = 80.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.padding(horizontal = 16.dp)
                     ) {
                         items(state.filteredTechnicians) { technician ->
                             TechnicianCard(
                                 technician = technician,
+                                taskCount = state.technicianTaskCounts[technician.id] ?: 0,
+                                equipmentName = state.technicianEquipment[technician.id] ?: "Belum ada alat",
                                 onDeleteClick = { onDeleteTechnician(technician) }
                             )
                         }
                     }
                 }
             }
+
             
             // Delete Dialog
             if (state.showDeleteDialog) {
                 AlertDialog(
                     onDismissRequest = onDismissDelete,
                     title = { Text("Hapus Teknisi") },
-                    text = { Text("Apakah Anda yakin ingin menghapus ${state.technicianToDelete?.name}?") },
+                    text = { Text("Apakah Anda yakin ingin menghapus ${state.technicianToDelete?.namaLengkap}?") },
                     confirmButton = {
                         Button(
                             onClick = onConfirmDelete,
@@ -151,6 +183,8 @@ fun TechnicianListScreen(
 @Composable
 fun TechnicianCard(
     technician: User,
+    taskCount: Int,
+    equipmentName: String,
     onDeleteClick: () -> Unit
 ) {
     Card(
@@ -160,33 +194,56 @@ fun TechnicianCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            // Header: Name and ID
+            // Header: Name and Badge
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Top
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Column(modifier = Modifier.weight(1f)) {
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
+                    // Photo
+                    if (technician.photoUrl != null) {
+                        AsyncImage(
+                            model = technician.photoUrl,
+                            contentDescription = technician.namaLengkap,
+                            modifier = Modifier
+                                .size(40.dp)
+                                .clip(CircleShape),
+                            contentScale = ContentScale.Crop
+                        )
+                    } else {
+                        Box(
+                            modifier = Modifier
+                                .size(40.dp)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.primaryContainer),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = technician.namaLengkap.take(1).uppercase(),
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                        }
+                    }
+                    
+                    Spacer(modifier = Modifier.width(12.dp))
+
                     Text(
-                        text = technician.name,
+                        text = technician.namaLengkap,
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = "TKN-${technician.id.padStart(3, '0')}-PLN", // Mock ID format
-                        style = MaterialTheme.typography.bodySmall,
-                        color = Color.Gray
                     )
                 }
                 
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Surface(
                         shape = RoundedCornerShape(16.dp),
-                        color = Color(0xFFE8F5E9), // Light Green
-                        contentColor = Color(0xFF1B5E20)
+                        color = MaterialTheme.colorScheme.primaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                     ) {
                         Text(
-                            text = "Siaga", // Mock Status
+                            text = "Total Tugas: $taskCount",
                             style = MaterialTheme.typography.labelSmall,
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                         )
@@ -206,47 +263,24 @@ fun TechnicianCard(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Location
+            // Equipment
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
-                    Icons.Default.LocationOn,
+                    Icons.Default.Settings,
                     contentDescription = null,
                     tint = Color.Gray,
                     modifier = Modifier.size(16.dp)
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
-                    text = "Gardu Kayu Tangi 1, Gardu Kayu Tangi 2", // Mock Location
+                    text = equipmentName,
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color.Gray
                 )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Actions
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Button(
-                    onClick = { /* TODO: Call */ },
-                    modifier = Modifier.weight(1f),
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
-                ) {
-                    Icon(Icons.Default.Call, contentDescription = null, modifier = Modifier.size(16.dp))
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Telepon")
-                }
-                OutlinedButton(
-                    onClick = { /* TODO: Message */ },
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Icon(Icons.Default.Email, contentDescription = null, modifier = Modifier.size(16.dp))
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Pesan")
-                }
-            }
+            Spacer(modifier = Modifier.height(12.dp))
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
         }
     }
 }

@@ -41,7 +41,7 @@ fun AppHeader(
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Image(
-                painter = painterResource(id = R.mipmap.ic_launcher),
+                painter = painterResource(id = R.drawable.ic_launcher_foreground),
                 contentDescription = "Logo",
                 modifier = Modifier.size(48.dp)
             )
@@ -61,12 +61,5 @@ fun AppHeader(
             }
         }
         
-        IconButton(onClick = onNotificationClick) {
-            Icon(
-                imageVector = Icons.Default.Notifications,
-                contentDescription = "Notifications",
-                tint = MaterialTheme.colorScheme.onPrimaryContainer
-            )
-        }
     }
 }

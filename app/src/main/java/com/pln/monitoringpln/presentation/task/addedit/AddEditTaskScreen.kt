@@ -8,7 +8,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.*
@@ -71,7 +71,7 @@ fun AddEditTaskScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Tambah Tugas", fontWeight = FontWeight.Bold) },
+                title = { Text(if (state.taskId != null) "Edit Tugas" else "Tambah Tugas", fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back")
@@ -200,7 +200,7 @@ fun AddEditTaskScreen(
                 readOnly = true,
                 trailingIcon = {
                     IconButton(onClick = { showDatePicker = true }) {
-                        Icon(Icons.Default.CalendarToday, contentDescription = "Select Date")
+                        Icon(Icons.Default.DateRange, contentDescription = "Select Date")
                     }
                 },
                 modifier = Modifier
@@ -208,7 +208,7 @@ fun AddEditTaskScreen(
                     .clickable { showDatePicker = true },
                 shape = RoundedCornerShape(8.dp),
                 enabled = false, // Disable typing, force click
-                colors = TextFieldDefaults.outlinedTextFieldColors(
+                colors = OutlinedTextFieldDefaults.colors(
                     disabledTextColor = MaterialTheme.colorScheme.onSurface,
                     disabledBorderColor = MaterialTheme.colorScheme.outline,
                     disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant

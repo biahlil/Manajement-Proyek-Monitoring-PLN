@@ -12,8 +12,10 @@ data class AlatEntity(
     val latitude: Double,
     val longitude: Double,
     val kondisi: String,
+    val tipe: String = "Umum",
     val status: String,
     val lastModifiedById: String?,
     val isArchived: Boolean = false, // Soft Delete
-    val isSynced: Boolean = true // Offline Sync
+    val isSynced: Boolean = true, // Offline Sync
+    val locationName: String? = null
 )

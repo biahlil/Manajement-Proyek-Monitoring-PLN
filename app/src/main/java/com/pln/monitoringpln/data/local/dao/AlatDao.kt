@@ -17,15 +17,18 @@ interface AlatDao {
     @Query("SELECT * FROM alat WHERE id = :id")
     suspend fun getAlatDetail(id: String): AlatEntity?
 
+    @Query("SELECT * FROM alat WHERE id = :id")
+    fun observeAlatDetail(id: String): kotlinx.coroutines.flow.Flow<AlatEntity?>
+
     // UC1b: Soft Delete (Archive)
-    @Query("UPDATE alat SET isArchived = 1, status = 'ARCHIVED' WHERE id = :id")
+    @Query("UPDATE alat SET isArchived = 1, status = 'ARCHIVED', isSynced = 0 WHERE id = :id")
     suspend fun archiveAlat(id: String)
 
     // Helper for testing/admin: Get All Active
     @Query("SELECT * FROM alat WHERE isArchived = 0")
     suspend fun getAllActiveAlat(): List<AlatEntity>
 
-    @Query("SELECT * FROM alat")
+    @Query("SELECT * FROM alat WHERE isArchived = 0")
     fun getAllAlat(): kotlinx.coroutines.flow.Flow<List<AlatEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -45,4 +48,10 @@ interface AlatDao {
 
     @Query("SELECT COUNT(*) FROM alat WHERE isArchived = 0")
     suspend fun countAll(): Int
+
+    @Query("SELECT COUNT(*) FROM alat WHERE isArchived = 0")
+    fun observeCountAll(): kotlinx.coroutines.flow.Flow<Int>
+
+    @Query("SELECT COUNT(*) FROM alat WHERE kondisi = :kondisi AND isArchived = 0")
+    fun observeCountByCondition(kondisi: String): kotlinx.coroutines.flow.Flow<Int>
 }

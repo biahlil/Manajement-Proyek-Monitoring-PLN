@@ -3,6 +3,7 @@ package com.pln.monitoringpln.presentation.equipment.detail
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -19,6 +20,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.pln.monitoringpln.domain.model.Alat
+import java.text.SimpleDateFormat
+import java.util.Locale
+import com.pln.monitoringpln.domain.model.Tugas
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -28,7 +32,9 @@ fun EquipmentDetailScreen(
     onEdit: () -> Unit,
     onDelete: () -> Unit,
     onConfirmDelete: () -> Unit,
-    onDismissDelete: () -> Unit
+    onDismissDelete: () -> Unit,
+    onAddTask: () -> Unit,
+    onTaskClick: (String) -> Unit
 ) {
     val context = LocalContext.current
 
@@ -41,29 +47,58 @@ fun EquipmentDetailScreen(
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back")
                     }
                 },
-                actions = {
-                    if (state.isAdmin) {
-                        IconButton(onClick = onEdit) {
-                            Icon(Icons.Default.Edit, contentDescription = "Edit")
-                        }
-                        IconButton(onClick = onDelete) {
-                            Icon(Icons.Default.Delete, contentDescription = "Delete", tint = MaterialTheme.colorScheme.error)
-                        }
-                    }
-                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
                 )
             )
+        },
+
+        bottomBar = {
+            if (state.isAdmin) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    OutlinedButton(
+                        onClick = onDelete,
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(50.dp),
+                        shape = RoundedCornerShape(8.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                    ) {
+                        Icon(Icons.Default.Delete, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Hapus", fontWeight = FontWeight.Bold)
+                    }
+
+                    Button(
+                        onClick = onEdit,
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(50.dp),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Edit", fontWeight = FontWeight.Bold)
+                    }
+                }
+            }
         }
     ) { paddingValues ->
         if (state.isLoading) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
             }
-        } else if (state.equipment != null) {
-            val equipment = state.equipment
+        } else if (state.alatHistory != null) {
+            val equipment = state.alatHistory.alat
+            val history = state.alatHistory.riwayatTugas
+            val lastMaintenance = history.firstOrNull { it.status == "Done" }
+
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
@@ -73,7 +108,7 @@ fun EquipmentDetailScreen(
             ) {
                 // Header
                 item {
-                    DetailHeader(equipment)
+                    DetailHeader(equipment, lastMaintenance)
                 }
 
                 // Warning (Conditional)
@@ -88,17 +123,27 @@ fun EquipmentDetailScreen(
                     SpecificationsCard(
                         equipment = equipment,
                         onMapClick = {
-                            val gmmIntentUri = Uri.parse("geo:${equipment.latitude},${equipment.longitude}?q=${equipment.latitude},${equipment.longitude}(${equipment.namaAlat})")
-                            val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
-                            mapIntent.setPackage("com.google.android.apps.maps")
-                            if (mapIntent.resolveActivity(context.packageManager) != null) {
+                            val uri = Uri.parse("geo:${equipment.latitude},${equipment.longitude}?q=${equipment.latitude},${equipment.longitude}(${equipment.namaAlat})")
+                            val mapIntent = Intent(Intent.ACTION_VIEW, uri)
+                            
+                            try {
                                 context.startActivity(mapIntent)
+                            } catch (e: android.content.ActivityNotFoundException) {
+                                // Fallback to browser if no map app is installed
+                                val browserUri = Uri.parse("https://www.google.com/maps/search/?api=1&query=${equipment.latitude},${equipment.longitude}")
+                                val browserIntent = Intent(Intent.ACTION_VIEW, browserUri)
+                                try {
+                                    context.startActivity(browserIntent)
+                                } catch (e2: Exception) {
+                                    // Fallback if even browser fails (very unlikely)
+                                    android.widget.Toast.makeText(context, "Tidak ada aplikasi untuk membuka peta", android.widget.Toast.LENGTH_SHORT).show()
+                                }
                             }
                         }
                     )
                 }
 
-                // History (Mock)
+                // History
                 item {
                     Text(
                         text = "Riwayat Inspeksi",
@@ -107,8 +152,23 @@ fun EquipmentDetailScreen(
                         modifier = Modifier.padding(vertical = 8.dp)
                     )
                 }
-                items(3) {
-                    HistoryItemMock()
+                
+                if (history.isEmpty()) {
+                    item {
+                        Text(
+                            text = "Belum ada riwayat inspeksi",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Color.Gray,
+                            modifier = Modifier.padding(vertical = 8.dp)
+                        )
+                    }
+                } else {
+                    items(history.size) { index ->
+                        HistoryItem(
+                            tugas = history[index],
+                            onClick = { onTaskClick(history[index].id) }
+                        )
+                    }
                 }
             }
         } else if (state.error != null) {
@@ -122,7 +182,7 @@ fun EquipmentDetailScreen(
             AlertDialog(
                 onDismissRequest = onDismissDelete,
                 title = { Text("Hapus Alat") },
-                text = { Text("Apakah Anda yakin ingin menghapus ${state.equipment?.namaAlat}?") },
+                text = { Text("Apakah Anda yakin ingin menghapus ${state.alatHistory?.alat?.namaAlat}?") },
                 confirmButton = {
                     TextButton(
                         onClick = onConfirmDelete,
@@ -146,10 +206,13 @@ fun EquipmentDetailScreen(
 }
 
 @Composable
-fun DetailHeader(equipment: Alat) {
+fun DetailHeader(equipment: Alat, lastMaintenance: Tugas?) {
+    val dateFormat = SimpleDateFormat("dd MMM yyyy", Locale("id", "ID"))
+    val lastMaintenanceDate = lastMaintenance?.tglJatuhTempo?.let { dateFormat.format(it) } ?: "Belum ada"
+
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFEDE7F6)) // Light Purple
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
@@ -157,18 +220,28 @@ fun DetailHeader(equipment: Alat) {
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.Top
             ) {
-                Column {
+                Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = equipment.namaAlat,
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF311B92) // Dark Purple
                     )
+                    Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = equipment.kodeAlat,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = Color(0xFF5E35B1) // Medium Purple
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = equipment.tipe,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color(0xFF757575)
                     )
                 }
+                
+                // Status Badge
                 Surface(
                     shape = RoundedCornerShape(16.dp),
                     color = when (equipment.kondisi) {
@@ -185,15 +258,16 @@ fun DetailHeader(equipment: Alat) {
                     Text(
                         text = equipment.kondisi,
                         style = MaterialTheme.typography.labelMedium,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                     )
                 }
             }
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(24.dp))
             Text(
-                text = "Pemeliharaan Terakhir: 2 hari lalu", // Mock
+                text = "Pemeliharaan Terakhir: $lastMaintenanceDate",
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = Color(0xFF757575)
             )
         }
     }
@@ -203,7 +277,7 @@ fun DetailHeader(equipment: Alat) {
 fun WarningCard(equipment: Alat) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFFFEBEE)) // Light Red
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
@@ -212,7 +286,7 @@ fun WarningCard(equipment: Alat) {
             Icon(
                 Icons.Default.Warning,
                 contentDescription = "Warning",
-                tint = MaterialTheme.colorScheme.error,
+                tint = Color(0xFFB71C1C), // Red
                 modifier = Modifier.size(32.dp)
             )
             Spacer(modifier = Modifier.width(16.dp))
@@ -221,12 +295,12 @@ fun WarningCard(equipment: Alat) {
                     text = "Perhatian Diperlukan",
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onErrorContainer
+                    color = Color(0xFFB71C1C)
                 )
                 Text(
                     text = "Kondisi alat ${equipment.kondisi}. Segera lakukan pengecekan.",
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onErrorContainer
+                    color = Color(0xFFB71C1C)
                 )
             }
         }
@@ -235,44 +309,40 @@ fun WarningCard(equipment: Alat) {
 
 @Composable
 fun SpecificationsCard(equipment: Alat, onMapClick: () -> Unit) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                text = "Spesifikasi & Lokasi",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = "Lokasi",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+        
+        // Map View
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(200.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .border(
+                    width = 1.dp,
+                    color = MaterialTheme.colorScheme.outlineVariant,
+                    shape = RoundedCornerShape(12.dp)
+                )
+        ) {
+            // Map Component
+            com.pln.monitoringpln.presentation.components.MapPicker(
+                modifier = Modifier.fillMaxSize(),
+                initialLocation = org.osmdroid.util.GeoPoint(equipment.latitude, equipment.longitude),
+                onLocationSelected = { _, _ -> } // No-op for read-only view
             )
-            Spacer(modifier = Modifier.height(16.dp))
             
-            // Map Placeholder
+            // Transparent Overlay for Click
             Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(150.dp)
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(Color.LightGray)
-                    .clickable(onClick = onMapClick),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Icon(Icons.Default.LocationOn, contentDescription = null, tint = Color.DarkGray)
-                    Text("Lihat di Peta", style = MaterialTheme.typography.labelMedium, color = Color.DarkGray)
-                }
-            }
-            
-            Spacer(modifier = Modifier.height(16.dp))
-            
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                SpecItem(label = "Tegangan", value = "20 Kv")
-                SpecItem(label = "Suhu", value = "45°C")
-                SpecItem(label = "Beban", value = "80%")
-            }
+                    .fillMaxSize()
+                    .background(Color.Transparent)
+                    .clickable(onClick = onMapClick)
+            )
         }
     }
 }
@@ -286,24 +356,35 @@ fun SpecItem(label: String, value: String) {
 }
 
 @Composable
-fun HistoryItemMock() {
-    Card(
+fun HistoryItem(tugas: Tugas, onClick: () -> Unit) {
+    val dateFormat = SimpleDateFormat("dd MMM yyyy", Locale("id", "ID"))
+    val dateStr = dateFormat.format(tugas.tglDibuat)
+
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+            .clickable(onClick = onClick)
+            .padding(vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
-            modifier = Modifier.padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(Icons.Default.CheckCircle, contentDescription = null, tint = Color(0xFF4CAF50))
-            Spacer(modifier = Modifier.width(12.dp))
-            Column {
-                Text(text = "Inspeksi Rutin", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyMedium)
-                Text(text = "5 hari lalu • Oleh Rusman Hadi", style = MaterialTheme.typography.labelSmall, color = Color.Gray)
-            }
+        Icon(
+            if (tugas.status == "Done") Icons.Default.CheckCircle else Icons.Default.Info, 
+            contentDescription = null, 
+            tint = if (tugas.status == "Done") Color(0xFF4CAF50) else Color(0xFFFFC107),
+            modifier = Modifier.size(24.dp)
+        )
+        Spacer(modifier = Modifier.width(16.dp))
+        Column {
+            Text(
+                text = tugas.judul, 
+                fontWeight = FontWeight.Bold, 
+                style = MaterialTheme.typography.bodyMedium
+            )
+            Text(
+                text = "$dateStr • Status: ${tugas.status}", 
+                style = MaterialTheme.typography.labelSmall, 
+                color = Color.Gray
+            )
         }
     }
 }

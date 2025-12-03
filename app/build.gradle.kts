@@ -105,4 +105,7 @@ dependencies {
 
     // WorkManager
     implementation("androidx.work:work-runtime-ktx:2.9.0")
+
+    // Coil
+    implementation(libs.coil.compose)
 }

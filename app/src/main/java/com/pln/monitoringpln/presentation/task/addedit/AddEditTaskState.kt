@@ -9,6 +9,7 @@ data class AddEditTaskState(
     val isSaving: Boolean = false,
     val error: String? = null,
     val isTaskSaved: Boolean = false,
+    val taskId: String? = null,
 
     // Form Fields
     val title: String = "",
@@ -22,5 +23,9 @@ data class AddEditTaskState(
     val availableTechnicians: List<User> = emptyList(),
     
     // Search Query for Equipment
-    val equipmentSearchQuery: String = ""
+    val equipmentSearchQuery: String = "",
+    
+    val savedTaskId: String? = null,
+    // Status (for Edit)
+    val status: String = "To Do"
 )

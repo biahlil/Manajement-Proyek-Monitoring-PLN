@@ -1,113 +1,177 @@
 package com.pln.monitoringpln.presentation.dashboard
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import coil.compose.AsyncImage
+import androidx.compose.ui.layout.ContentScale
 import com.pln.monitoringpln.R
-import com.pln.monitoringpln.domain.model.DashboardSummary
-import com.pln.monitoringpln.presentation.theme.MonitoringPLNTheme
+import com.pln.monitoringpln.domain.model.Tugas
+import com.pln.monitoringpln.presentation.components.BottomNavigationBar
+import com.pln.monitoringpln.presentation.navigation.Screen
+import org.koin.androidx.compose.koinViewModel
+import java.text.SimpleDateFormat
+import java.util.Locale
 
-@Composable
+import com.pln.monitoringpln.presentation.theme.StatusGreenContainer
+import com.pln.monitoringpln.presentation.theme.StatusGreenContent
+import com.pln.monitoringpln.presentation.theme.StatusPurpleContainer
+import com.pln.monitoringpln.presentation.theme.StatusPurpleContent
+import com.pln.monitoringpln.presentation.theme.StatusRedContainer
+import com.pln.monitoringpln.presentation.theme.StatusRedContent
+import com.pln.monitoringpln.presentation.theme.StatusYellowContainer
+import com.pln.monitoringpln.presentation.theme.StatusYellowContent
+
 @Composable
 fun DashboardScreen(
-    state: DashboardState,
-    onEquipmentClick: () -> Unit,
-    onTechnicianClick: () -> Unit,
-    onTaskClick: () -> Unit
+    onNavigate: (String) -> Unit,
+    viewModel: DashboardViewModel = koinViewModel()
 ) {
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background),
-        contentPadding = PaddingValues(bottom = 80.dp) // Space for BottomNav
-    ) {
-        // Welcome Section
-        item {
-            WelcomeSection(
-                isAdmin = state.isAdmin,
-                taskCount = state.technicianTasks.size // Or summary.tugasToDo if preferred
-            )
+    val state by viewModel.state.collectAsState()
+
+    if (state.isLoading) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator()
         }
-
-        // Stats Grid
-        // Stats Grid
-        item {
-            StatsGrid(
-                summary = state.summary, 
-                isAdmin = state.isAdmin, 
-                onEquipmentClick = onEquipmentClick,
-                onTaskClick = onTaskClick
-            )
-        }
-
-        // Admin Specific Sections
-        if (state.isAdmin) {
+    } else {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
             item {
-                SectionTitle(title = "Tugas In Progress")
-            }
-            // Mock items for now, later bind to state.inProgressTasks
-            items(3) {
-                TaskItemMock()
+                Spacer(modifier = Modifier.height(16.dp))
+                WelcomeCard(isAdmin = state.isAdmin)
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                if (state.isAdmin) {
+                    Button(
+                        onClick = { onNavigate(Screen.Report.route) },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onTertiaryContainer
+                        )
+                    ) {
+                        Icon(imageVector = androidx.compose.material.icons.Icons.Filled.DateRange, contentDescription = null)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Unduh Full Laporan")
+                    }
+                }
             }
 
             item {
-                TechnicianStatusSection(
-                    totalTeknisi = state.summary.totalTeknisi,
-                    onClick = onTechnicianClick
+                StatGrid(
+                    state = state,
+                    onCardClick = { type ->
+                        if (type == "my_tasks" || type == "all_tasks") {
+                            onNavigate(Screen.TaskList.route)
+                        } else {
+                            onNavigate(Screen.EquipmentList.createRoute(type))
+                        }
+                    }
                 )
             }
-        } else {
-            // Technician Specific Sections
-            if (state.activeWarnings.isNotEmpty()) {
-                item {
-                    SectionTitle(title = "Peringatan Aktif")
-                }
-                items(state.activeWarnings) { task ->
-                    TaskItemMock(title = task.deskripsi, status = "Warning", isWarning = true)
-                }
-            }
-            
+
             item {
-                SectionTitle(title = "Tugas Hari Ini")
+                Text(
+                    text = if (state.isAdmin) "Tugas In Progress" else "Tugas Hari Ini",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
             }
-            items(state.technicianTasks) { task ->
-                TaskItemMock(title = task.deskripsi, status = "To Do")
+
+            val tasks = if (state.isAdmin) state.inProgressTasks else state.technicianTasks
+            if (tasks.isEmpty()) {
+                item {
+                    Text(
+                        text = "Tidak ada tugas saat ini",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(vertical = 16.dp)
+                    )
+                }
+            } else {
+                items(tasks) { task ->
+                    TaskItem(
+                        task = task,
+                        onClick = { onNavigate(Screen.TaskList.route) }
+                    )
+                }
+            }
+
+            if (state.isAdmin && state.technicians.isNotEmpty()) {
+                item {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Teknisi",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+                    }
+                }
+
+                if (state.isTechniciansLoading && state.technicians.isEmpty()) {
+                    item {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(100.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator()
+                        }
+                    }
+                } else {
+                    items(state.technicians) { technician ->
+                        TechnicianItem(
+                            user = technician, 
+                            onClick = { onNavigate(Screen.TechnicianList.route) }
+                        )
+                    }
+                }
+
+                item {
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
             }
         }
     }
@@ -116,160 +180,146 @@ fun DashboardScreen(
 
 
 @Composable
-fun WelcomeSection(isAdmin: Boolean, taskCount: Int = 0) {
+fun WelcomeCard(isAdmin: Boolean) {
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer
+            containerColor = MaterialTheme.colorScheme.secondaryContainer
         )
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
                 text = if (isAdmin) "DASHBOARD ADMINISTRATOR" else "DASHBOARD TEKNISI",
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.onPrimaryContainer
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSecondaryContainer,
+                fontWeight = FontWeight.Bold
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = if (isAdmin) 
-                    "Selamat Datang Admin, Selamat Bekerja!" 
-                else 
-                    "Selamat Datang Teknisi, Anda punya $taskCount tugas yang belum dikerjakan hari ini!",
+                text = if (isAdmin)
+                    "Selamat Bekerja, Admin!"
+                else
+                    "Halo Teknisi, cek tugasmu hari ini.",
                 style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onPrimaryContainer
+                color = MaterialTheme.colorScheme.onSecondaryContainer
             )
         }
     }
 }
 
 @Composable
-fun StatsGrid(
-    summary: DashboardSummary, 
-    isAdmin: Boolean, 
-    onEquipmentClick: () -> Unit,
-    onTaskClick: () -> Unit
-) {
-    Column(modifier = Modifier.padding(16.dp)) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            StatCard(
-                title = "Total Alat",
-                value = summary.totalAlat.toString(),
-                modifier = Modifier.weight(1f),
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                onClick = onEquipmentClick
-            )
-            
-            if (isAdmin) {
+fun StatGrid(state: DashboardState, onCardClick: (String) -> Unit) {
+    if (state.isAdmin) {
+        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            // Total Tugas Card (Full Width)
+            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                StatCard(
+                    title = "Total Alat",
+                    count = state.summary.totalAlat.toString(),
+                    containerColor = StatusPurpleContainer,
+                    contentColor = StatusPurpleContent,
+                    modifier = Modifier.weight(1f),
+                    onClick = { onCardClick("all_equipment") }
+                )
                 StatCard(
                     title = "Normal",
-                    value = summary.totalAlatNormal.toString(),
+                    count = state.summary.totalAlatNormal.toString(),
+                    containerColor = StatusGreenContainer,
+                    contentColor = StatusGreenContent,
                     modifier = Modifier.weight(1f),
-                    containerColor = Color(0xFFE6F4EA), // Light Green
-                    contentColor = Color(0xFF137333),
-                    onClick = onEquipmentClick
-                )
-            } else {
-                StatCard(
-                    title = "Total Tugas",
-                    value = summary.totalTugas.toString(),
-                    modifier = Modifier.weight(1f),
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                    onClick = onTaskClick
+                    onClick = { onCardClick("normal_equipment") }
                 )
             }
-        }
-        
-        if (isAdmin) {
-            Spacer(modifier = Modifier.height(16.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
+            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                 StatCard(
                     title = "Perlu Perhatian",
-                    value = summary.totalAlatPerluPerhatian.toString(),
+                    count = state.summary.totalAlatPerluPerhatian.toString(),
+                    containerColor = StatusYellowContainer,
+                    contentColor = StatusYellowContent,
                     modifier = Modifier.weight(1f),
-                    containerColor = Color(0xFFFEF7E0), // Light Yellow
-                    contentColor = Color(0xFFB06000),
-                    onClick = onEquipmentClick
+                    onClick = { onCardClick("warning_equipment") }
                 )
                 StatCard(
                     title = "Rusak",
-                    value = summary.totalAlatRusak.toString(),
+                    count = state.summary.totalAlatRusak.toString(),
+                    containerColor = StatusRedContainer,
+                    contentColor = StatusRedContent,
                     modifier = Modifier.weight(1f),
-                    containerColor = Color(0xFFFCE8E6), // Light Red
-                    contentColor = Color(0xFFC5221F),
-                    onClick = onEquipmentClick
+                    onClick = { onCardClick("broken_equipment") }
                 )
             }
+        }
+    } else {
+        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            StatCard(
+                title = "Total Alat",
+                count = state.summary.totalAlat.toString(),
+                containerColor = StatusPurpleContainer,
+                contentColor = StatusPurpleContent,
+                modifier = Modifier.weight(1f),
+                onClick = { onCardClick("my_equipment") }
+            )
+            StatCard(
+                title = "Total Tugas",
+                count = state.summary.totalTugas.toString(),
+                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.weight(1f),
+                onClick = { onCardClick("my_tasks") }
+            )
         }
     }
 }
 
 @Composable
 fun StatCard(
-    title: String, 
-    value: String, 
+    title: String,
+    count: String,
+    containerColor: Color,
+    contentColor: Color,
     modifier: Modifier = Modifier,
-    containerColor: Color = MaterialTheme.colorScheme.surfaceVariant,
-    contentColor: Color = MaterialTheme.colorScheme.onSurfaceVariant,
-    onClick: () -> Unit = {}
+    onClick: () -> Unit
 ) {
     Card(
-        modifier = modifier.clickable(onClick = onClick),
-        colors = CardDefaults.cardColors(
-            containerColor = containerColor
-        )
+        modifier = modifier
+            .height(100.dp)
+            .clickable { onClick() },
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = containerColor)
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.Center
         ) {
             Text(
-                text = value,
+                text = count,
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
                 color = contentColor
             )
             Text(
                 text = title,
-                style = MaterialTheme.typography.labelMedium,
-                color = contentColor,
-                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Medium,
+                color = contentColor
             )
         }
     }
 }
 
 @Composable
-fun SectionTitle(title: String) {
-    Text(
-        text = title,
-        style = MaterialTheme.typography.titleMedium,
-        fontWeight = FontWeight.Bold,
-        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-    )
-}
-
-@Composable
-fun TaskItemMock(
-    title: String = "Perbaikan Gardu A",
-    status: String = "In Progress",
-    isWarning: Boolean = false
-) {
+fun TaskItem(task: Tugas, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 4.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            .clickable { onClick() },
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
@@ -277,100 +327,34 @@ fun TaskItemMock(
         ) {
             Box(
                 modifier = Modifier
-                    .size(40.dp)
+                    .size(48.dp)
                     .clip(CircleShape)
-                    .background(
-                        if (isWarning) MaterialTheme.colorScheme.errorContainer 
-                        else MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
-                    ),
+                    .background(MaterialTheme.colorScheme.primaryContainer),
                 contentAlignment = Alignment.Center
             ) {
-                 Icon(
-                     imageVector = Icons.Default.Notifications, // Placeholder icon
-                     contentDescription = "Task Icon",
-                     tint = if (isWarning) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
-                 )
+                Icon(
+                    imageVector = Icons.Default.Notifications,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer
+                )
             }
             Spacer(modifier = Modifier.width(16.dp))
             Column {
-                Text(text = title, fontWeight = FontWeight.Bold)
                 Text(
-                    text = "Status: $status", 
-                    style = MaterialTheme.typography.bodySmall, 
-                    color = if (isWarning) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.secondary
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun TechnicianStatusSection(totalTeknisi: Int, onClick: () -> Unit) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-            .clickable(onClick = onClick),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Status Teknisi",
+                    text = task.judul,
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
-                Card(
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
-                ) {
-                    Text(
-                        text = "Total: $totalTeknisi",
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
-                }
-            }
-            Spacer(modifier = Modifier.height(16.dp))
-            
-            // Sample List
-            repeat(3) {
-                TechnicianItemMock()
+                Text(
+                    text = "Status: ${task.status.replace("_", " ").lowercase().replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString() }.split(" ").joinToString(" ") { it.replaceFirstChar { char -> if (char.isLowerCase()) char.titlecase(Locale.ROOT) else char.toString() } }}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
     }
 }
 
-@Composable
-fun TechnicianItemMock() {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Box(
-            modifier = Modifier
-                .size(40.dp)
-                .clip(CircleShape)
-                .background(Color.LightGray)
-        )
-        Spacer(modifier = Modifier.width(16.dp))
-        Column {
-            Text(text = "Nama Teknisi", fontWeight = FontWeight.Bold)
-            Text(text = "Status: Sedang Bertugas", style = MaterialTheme.typography.bodySmall)
-        }
-    }
-}
 
-@Preview(showBackground = true)
-@Composable
-fun DashboardScreenPreview() {
-    MonitoringPLNTheme {
-        DashboardScreen(state = DashboardState(isAdmin = true))
-    }
-}
+

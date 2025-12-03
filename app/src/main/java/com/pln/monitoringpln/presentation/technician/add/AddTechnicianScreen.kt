@@ -10,20 +10,37 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import coil.compose.AsyncImage
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddTechnicianScreen(
     state: AddTechnicianState,
     onNamaChange: (String) -> Unit,
-    onIdChange: (String) -> Unit,
     onEmailChange: (String) -> Unit,
-    onNoTeleponChange: (String) -> Unit,
-    onAreaTugasChange: (String) -> Unit,
+    onPasswordChange: (String) -> Unit,
+    onPhotoSelected: (android.net.Uri?) -> Unit,
     onSave: () -> Unit,
     onBack: () -> Unit
 ) {
     val scrollState = rememberScrollState()
+    
+    val photoPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia()
+    ) { uri ->
+        onPhotoSelected(uri)
+    }
 
     Scaffold(
         topBar = {
@@ -49,20 +66,71 @@ fun AddTechnicianScreen(
                 .verticalScroll(scrollState),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            // Photo Picker
+            Box(
+                modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(120.dp)
+                        .clickable {
+                            photoPickerLauncher.launch(
+                                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                            )
+                        }
+                ) {
+                    // Profile Image
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.surfaceVariant),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (state.photoUri != null) {
+                            AsyncImage(
+                                model = state.photoUri,
+                                contentDescription = "Selected Photo",
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = ContentScale.Crop
+                            )
+                        } else {
+                            Icon(
+                                imageVector = Icons.Default.Person,
+                                contentDescription = "Add Photo",
+                                modifier = Modifier.size(64.dp),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+
+                    // Edit Icon Overlay (Floating)
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .offset(x = 0.dp, y = 0.dp) // Adjust if needed
+                            .size(36.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.primary)
+                            .padding(8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Edit,
+                            contentDescription = "Edit",
+                            modifier = Modifier.size(20.dp),
+                            tint = MaterialTheme.colorScheme.onPrimary
+                        )
+                    }
+                }
+            }
+
             // Nama Lengkap
             OutlinedTextField(
                 value = state.namaLengkap,
                 onValueChange = onNamaChange,
                 label = { Text("Nama Lengkap *") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true
-            )
-
-            // ID Teknisi
-            OutlinedTextField(
-                value = state.idTeknisi,
-                onValueChange = onIdChange,
-                label = { Text("ID Teknisi *") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
             )
@@ -76,22 +144,14 @@ fun AddTechnicianScreen(
                 singleLine = true
             )
 
-            // No Telepon
+            // Password
             OutlinedTextField(
-                value = state.noTelepon,
-                onValueChange = onNoTeleponChange,
-                label = { Text("No Telepon *") },
+                value = state.password,
+                onValueChange = onPasswordChange,
+                label = { Text("Password *") },
                 modifier = Modifier.fillMaxWidth(),
-                singleLine = true
-            )
-
-            // Area Tugas
-            OutlinedTextField(
-                value = state.areaTugas,
-                onValueChange = onAreaTugasChange,
-                label = { Text("Area Tugas") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true
+                singleLine = true,
+                visualTransformation = androidx.compose.ui.text.input.PasswordVisualTransformation()
             )
 
             Spacer(modifier = Modifier.height(16.dp))

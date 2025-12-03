@@ -9,38 +9,72 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class SearchViewModel : ViewModel() {
+import com.pln.monitoringpln.domain.repository.AlatRepository
+import com.pln.monitoringpln.domain.repository.TugasRepository
+import com.pln.monitoringpln.domain.repository.UserRepository
+import kotlinx.coroutines.flow.first
+
+class SearchViewModel(
+    private val tugasRepository: TugasRepository,
+    private val alatRepository: AlatRepository,
+    private val userRepository: UserRepository
+) : ViewModel() {
 
     private val _state = MutableStateFlow(SearchState())
     val state: StateFlow<SearchState> = _state.asStateFlow()
-
-    // Mock Data
-    private val allData = listOf(
-        SearchResult("1", "Perbaikan Gardu A", "Gardu Kayu Tangi 1", SearchResultType.TASK),
-        SearchResult("2", "Inspeksi Rutin", "Gardu Kayu Tangi 2", SearchResultType.TASK),
-        SearchResult("3", "Trafo 100kVA", "Normal - Gardu A", SearchResultType.EQUIPMENT),
-        SearchResult("4", "Kabel Distribusi", "Rusak - Gardu B", SearchResultType.EQUIPMENT),
-        SearchResult("5", "Budi Santoso", "TKN-001-PLN", SearchResultType.TECHNICIAN),
-        SearchResult("6", "Ahmad Dani", "TKN-002-PLN", SearchResultType.TECHNICIAN)
-    )
 
     fun onQueryChange(query: String) {
         _state.update { it.copy(query = query, isLoading = true) }
         
         viewModelScope.launch {
-            delay(500) // Simulate network delay
+            delay(300) // Debounce
             
             if (query.isBlank()) {
                 _state.update { it.copy(results = emptyList(), isLoading = false) }
                 return@launch
             }
 
-            val filtered = allData.filter { 
-                it.title.contains(query, ignoreCase = true) || 
-                it.subtitle.contains(query, ignoreCase = true) 
-            }
+            val results = mutableListOf<SearchResult>()
+
+            // 1. Search Tasks
+            // Note: We might need a more generic search in repositories or fetch all and filter here for now
+            // For efficiency, repositories should support search. TugasRepository already does.
+            val tasksResult = tugasRepository.getTasksByTeknisi("", query) // Empty ID to search all if logic allows, or we need a new method
+            // Actually getTasksByTeknisi filters by ID. We need a general search or search by current user role.
+            // Let's assume we search all tasks for now or use observeAllTasks and filter.
             
-            _state.update { it.copy(results = filtered, isLoading = false) }
+            // Using observeAllTasks().first() to get current snapshot
+            val allTasks = tugasRepository.observeAllTasks().first()
+            val filteredTasks = allTasks.filter { 
+                it.judul.contains(query, ignoreCase = true) || 
+                it.deskripsi.contains(query, ignoreCase = true) 
+            }
+            results.addAll(filteredTasks.map { 
+                SearchResult(it.id, it.judul, it.status, SearchResultType.TASK) 
+            })
+
+            // 2. Search Equipment
+            val allEquipment = alatRepository.getAllAlat().first()
+            val filteredEquipment = allEquipment.filter { 
+                it.namaAlat.contains(query, ignoreCase = true) || 
+                it.kodeAlat.contains(query, ignoreCase = true) 
+            }
+            results.addAll(filteredEquipment.map { 
+                SearchResult(it.id, it.namaAlat, "${it.kodeAlat} - ${it.kondisi}", SearchResultType.EQUIPMENT) 
+            })
+
+            // 3. Search Technicians
+            val techniciansResult = userRepository.getAllTeknisi()
+            val technicians = techniciansResult.getOrDefault(emptyList())
+            val filteredTechnicians = technicians.filter { 
+                it.namaLengkap.contains(query, ignoreCase = true) || 
+                it.email.contains(query, ignoreCase = true) 
+            }
+            results.addAll(filteredTechnicians.map { 
+                SearchResult(it.id, it.namaLengkap, "Teknisi", SearchResultType.TECHNICIAN) 
+            })
+            
+            _state.update { it.copy(results = results, isLoading = false) }
         }
     }
 }

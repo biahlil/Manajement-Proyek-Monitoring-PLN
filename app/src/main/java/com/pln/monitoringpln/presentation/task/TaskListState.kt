@@ -9,5 +9,7 @@ data class TaskListState(
     val searchQuery: String = "",
     val isAdmin: Boolean = false,
     val showDeleteConfirmation: Boolean = false,
-    val taskToDelete: Tugas? = null
+    val taskToDelete: Tugas? = null,
+    val technicianNames: Map<String, String> = emptyMap(),
+    val equipmentNames: Map<String, String> = emptyMap()
 )

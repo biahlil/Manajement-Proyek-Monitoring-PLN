@@ -3,19 +3,33 @@ package com.pln.monitoringpln.presentation.task
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pln.monitoringpln.domain.model.Tugas
+import com.pln.monitoringpln.domain.repository.AlatRepository
 import com.pln.monitoringpln.domain.repository.AuthRepository
+import com.pln.monitoringpln.domain.usecase.tugas.ObserveTasksUseCase
+import com.pln.monitoringpln.domain.usecase.tugas.SyncTasksUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+import com.pln.monitoringpln.domain.repository.UserRepository
+
 class TaskListViewModel(
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val observeTasksUseCase: ObserveTasksUseCase,
+    private val syncTasksUseCase: SyncTasksUseCase,
+    private val alatRepository: AlatRepository,
+    private val userRepository: UserRepository
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(TaskListState())
+    private val _state = MutableStateFlow(TaskListState(isLoading = true))
     val state: StateFlow<TaskListState> = _state.asStateFlow()
+
+    private var allTasksCache: List<Tugas> = emptyList()
+    private var currentUserId: String = ""
+    private var isUserAdmin: Boolean = false
 
     init {
         loadTasks()
@@ -25,50 +39,76 @@ class TaskListViewModel(
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
 
-            // Check User Role
+            // Check User Role & ID
             val roleResult = authRepository.getUserRole()
             val role = roleResult.getOrDefault("technician")
-            val isAdmin = role == "admin"
+            isUserAdmin = role.equals("admin", ignoreCase = true)
+            currentUserId = authRepository.getCurrentUserId() ?: ""
+            
+            android.util.Log.d("TaskListViewModel", "User: $currentUserId, Role: $role, IsAdmin: $isUserAdmin")
 
-            // Mock Data
-            // Mock Data
-            val allTasks = listOf(
-                Tugas(id = "1", deskripsi = "Inspeksi Gardu A", idAlat = "GRD-A", idTeknisi = "1", status = "In Progress", tglJatuhTempo = java.util.Date()),
-                Tugas(id = "2", deskripsi = "Perbaikan Trafo B", idAlat = "GRD-B", idTeknisi = "1", status = "To Do", tglJatuhTempo = java.util.Date()),
-                Tugas(id = "3", deskripsi = "Pengecekan Kabel C", idAlat = "GRD-C", idTeknisi = "3", status = "Done", tglJatuhTempo = java.util.Date()),
-                Tugas(id = "4", deskripsi = "Ganti Oli Trafo D", idAlat = "GRD-D", idTeknisi = "2", status = "In Progress", tglJatuhTempo = java.util.Date()),
-                Tugas(id = "5", deskripsi = "Inspeksi Rutin E", idAlat = "GRD-E", idTeknisi = "1", status = "To Do", tglJatuhTempo = java.util.Date())
-            )
-
-            val tasks = if (isAdmin) {
-                allTasks
-            } else {
-            } else {
-                allTasks.filter { it.idTeknisi == "1" } // Mock filter for current user (ID: 1)
+            // Trigger Sync
+            launch {
+                syncTasksUseCase()
             }
 
-            _state.update {
-                it.copy(
-                    isLoading = false,
-                    tasks = tasks,
-                    filteredTasks = tasks,
-                    isAdmin = isAdmin
-                )
+            // Fetch Technicians for Name Mapping
+            launch {
+                val result = userRepository.getAllTeknisi()
+                if (result.isSuccess) {
+                    val technicians = result.getOrNull() ?: emptyList()
+                    android.util.Log.d("TaskListViewModel", "Fetched ${technicians.size} technicians: ${technicians.map { "${it.id}:${it.namaLengkap}" }}")
+                    val nameMap = technicians.associate { it.id to it.namaLengkap }
+                    _state.update { it.copy(technicianNames = nameMap) }
+                } else {
+                    android.util.Log.e("TaskListViewModel", "Failed to fetch technicians", result.exceptionOrNull())
+                }
+            }
+
+            // Fetch Equipments for Name Mapping
+            launch {
+                alatRepository.getAllAlat().collect { equipments ->
+                    val equipmentMap = equipments.associate { it.id to it.namaAlat }
+                    _state.update { it.copy(equipmentNames = equipmentMap) }
+                }
+            }
+
+            // Observe Tasks
+            val teknisiId = if (isUserAdmin) null else currentUserId
+            observeTasksUseCase(teknisiId).collect { tasks ->
+                android.util.Log.d("TaskListViewModel", "Observed ${tasks.size} tasks for teknisiId: $teknisiId")
+                allTasksCache = tasks
+                applyFilters()
             }
         }
     }
 
     fun onSearchQueryChange(query: String) {
-        _state.update { state ->
-            val filtered = if (query.isBlank()) {
-                state.tasks
-            } else {
-                state.tasks.filter {
-                    it.deskripsi.contains(query, ignoreCase = true) ||
-                    it.idAlat.contains(query, ignoreCase = true)
-                }
+        _state.update { it.copy(searchQuery = query) }
+        applyFilters()
+    }
+
+    private fun applyFilters() {
+        val query = _state.value.searchQuery
+        
+        // Filter by Search
+        val filtered = if (query.isBlank()) {
+            allTasksCache
+        } else {
+            allTasksCache.filter {
+                it.judul.contains(query, ignoreCase = true) ||
+                it.deskripsi.contains(query, ignoreCase = true) ||
+                it.idAlat.contains(query, ignoreCase = true)
             }
-            state.copy(searchQuery = query, filteredTasks = filtered)
+        }
+
+        _state.update {
+            it.copy(
+                isLoading = false,
+                tasks = allTasksCache,
+                filteredTasks = filtered,
+                isAdmin = isUserAdmin
+            )
         }
     }
 
@@ -79,17 +119,16 @@ class TaskListViewModel(
     fun onConfirmDelete() {
         val taskToDelete = _state.value.taskToDelete
         if (taskToDelete != null) {
-            // Mock Delete
-            val updatedTasks = _state.value.tasks.filter { it.id != taskToDelete.id }
-            val updatedFiltered = _state.value.filteredTasks.filter { it.id != taskToDelete.id }
-            
-            _state.update { 
-                it.copy(
-                    tasks = updatedTasks,
-                    filteredTasks = updatedFiltered,
-                    showDeleteConfirmation = false,
-                    taskToDelete = null
-                )
+            viewModelScope.launch {
+                // TODO: Implement Delete in Repository
+                // tugasRepository.deleteTask(taskToDelete.id)
+                // For now just hide dialog
+                _state.update { 
+                    it.copy(
+                        showDeleteConfirmation = false,
+                        taskToDelete = null
+                    )
+                }
             }
         }
     }

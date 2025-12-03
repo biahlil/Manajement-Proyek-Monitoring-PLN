@@ -11,4 +11,9 @@ interface TugasRepository {
     suspend fun getTaskDetail(taskId: String): Result<Tugas>
     suspend fun uploadTaskProof(taskId: String, photoBytes: ByteArray): Result<String>
     suspend fun getTasksByAlat(idAlat: String): Result<List<Tugas>>
+    fun observeTasksByAlat(idAlat: String): kotlinx.coroutines.flow.Flow<List<Tugas>>
+    fun observeAllTasks(): kotlinx.coroutines.flow.Flow<List<Tugas>>
+    fun observeTasksByTeknisi(idTeknisi: String): kotlinx.coroutines.flow.Flow<List<Tugas>>
+    suspend fun deleteTask(taskId: String): Result<Unit>
+    suspend fun updateTask(tugas: Tugas): Result<Unit>
 }

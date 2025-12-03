@@ -56,6 +56,10 @@ class AlatRepositoryImpl(
         }
     }
 
+    override fun observeAlat(id: String): Flow<Alat?> {
+        return localDataSource.observeAlatDetail(id).map { it?.toDomain() }
+    }
+
     override suspend fun getAlatByKode(kode: String): Result<Alat> {
         return try {
             val local = localDataSource.getAlatByKode(kode)

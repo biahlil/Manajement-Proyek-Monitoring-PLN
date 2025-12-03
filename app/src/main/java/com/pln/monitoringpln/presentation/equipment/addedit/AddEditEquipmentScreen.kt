@@ -13,6 +13,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.border
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.shape.RoundedCornerShape
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -23,9 +26,13 @@ fun AddEditEquipmentScreen(
     onTipeChange: (String) -> Unit,
     onStatusChange: (String) -> Unit,
     onLokasiChange: (String) -> Unit,
+    onLatChange: (String) -> Unit,
+    onLngChange: (String) -> Unit,
     onSave: () -> Unit,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    viewModel: androidx.lifecycle.ViewModel? = null // Optional for Geocoding access
 ) {
+    val context = androidx.compose.ui.platform.LocalContext.current
     val scrollState = rememberScrollState()
     var expandedStatus by remember { mutableStateOf(false) }
     val statusOptions = listOf("Normal", "Rusak", "Perlu Perhatian")
@@ -122,14 +129,53 @@ fun AddEditEquipmentScreen(
                     }
                 }
 
-                // Lokasi
+                // Latitude
                 OutlinedTextField(
-                    value = state.lokasi,
-                    onValueChange = onLokasiChange,
-                    label = { Text("Lokasi") },
+                    value = state.latitude.toString(),
+                    onValueChange = onLatChange,
+                    label = { Text("Latitude") },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
+
+                // Longitude
+                OutlinedTextField(
+                    value = state.longitude.toString(),
+                    onValueChange = onLngChange,
+                    label = { Text("Longitude") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                Text("Pilih Lokasi di Peta:", style = MaterialTheme.typography.labelLarge)
+                
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(300.dp)
+                        .padding(vertical = 8.dp)
+                        .border(
+                            width = 1.dp,
+                            color = MaterialTheme.colorScheme.outline,
+                            shape = RoundedCornerShape(4.dp)
+                        )
+                        .clip(RoundedCornerShape(4.dp))
+                ) {
+                    com.pln.monitoringpln.presentation.components.MapPicker(
+                        modifier = Modifier.fillMaxSize(),
+                        initialLocation = if (state.latitude != 0.0 && state.longitude != 0.0) 
+                            org.osmdroid.util.GeoPoint(state.latitude, state.longitude) 
+                        else null,
+                        onLocationSelected = { lat, lng ->
+                            onLatChange(lat.toString())
+                            onLngChange(lng.toString())
+                            // Trigger Reverse Geocoding
+                            (viewModel as? AddEditEquipmentViewModel)?.updateLocationName(context, lat, lng)
+                        }
+                    )
+                }
 
                 Spacer(modifier = Modifier.height(16.dp))
 

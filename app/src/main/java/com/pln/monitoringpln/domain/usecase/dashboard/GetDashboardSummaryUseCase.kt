@@ -4,5 +4,5 @@ import com.pln.monitoringpln.domain.model.DashboardSummary
 import com.pln.monitoringpln.domain.repository.DashboardRepository
 
 class GetDashboardSummaryUseCase(private val repository: DashboardRepository) {
-    suspend operator fun invoke(): Result<DashboardSummary> = repository.getDashboardSummary()
+    operator fun invoke(technicianId: String? = null): kotlinx.coroutines.flow.Flow<DashboardSummary> = repository.getDashboardSummary(technicianId)
 }

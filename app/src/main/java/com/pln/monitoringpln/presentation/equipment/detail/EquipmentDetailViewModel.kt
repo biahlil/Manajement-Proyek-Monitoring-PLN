@@ -3,53 +3,64 @@ package com.pln.monitoringpln.presentation.equipment.detail
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pln.monitoringpln.domain.model.Alat
+import com.pln.monitoringpln.domain.model.AlatHistory
+import com.pln.monitoringpln.domain.repository.AlatRepository
 import com.pln.monitoringpln.domain.repository.AuthRepository
+import com.pln.monitoringpln.domain.repository.TugasRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class EquipmentDetailViewModel(
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val alatRepository: AlatRepository,
+    private val tugasRepository: TugasRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(EquipmentDetailState())
     val state: StateFlow<EquipmentDetailState> = _state.asStateFlow()
 
-    // Mock Data (Same as List for consistency)
-    private val allEquipments = listOf(
-        Alat(id = "1", kodeAlat = "TRF-001", namaAlat = "Trafo Kayu Tangi 1", latitude = -3.3194, longitude = 114.5908, kondisi = "Normal"),
-        Alat(id = "2", kodeAlat = "TRF-002", namaAlat = "Trafo Kayu Tangi 2", latitude = -3.3200, longitude = 114.5910, kondisi = "Normal"),
-        Alat(id = "3", kodeAlat = "CBL-001", namaAlat = "Kabel Bawah Tanah", latitude = -3.3210, longitude = 114.5920, kondisi = "Rusak"),
-        Alat(id = "4", kodeAlat = "PNL-001", namaAlat = "Panel Distribusi", latitude = -3.3220, longitude = 114.5930, kondisi = "Perlu Perhatian"),
-        Alat(id = "5", kodeAlat = "TRF-003", namaAlat = "Trafo C", latitude = -3.3230, longitude = 114.5940, kondisi = "Normal")
-    )
-
     fun loadEquipment(id: String) {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
-            delay(500) // Simulate network
-
+            
+            // Check Role
             val roleResult = authRepository.getUserRole()
-            val isAdmin = roleResult.getOrNull() == "admin"
-            val equipment = allEquipments.find { it.id == id }
+            val isAdmin = roleResult.getOrNull()?.equals("admin", ignoreCase = true) == true
 
-            if (equipment != null) {
-                _state.update { 
-                    it.copy(
-                        isLoading = false, 
-                        equipment = equipment, 
-                        isAdmin = isAdmin 
-                    ) 
+            // Observe Data
+            combine(
+                alatRepository.observeAlat(id),
+                tugasRepository.observeTasksByAlat(id)
+            ) { alat, tasks ->
+                if (alat != null) {
+                    // Sort tasks by created date descending (newest first)
+                    val sortedTasks = tasks.sortedByDescending { it.tglDibuat }
+                    AlatHistory(alat, sortedTasks)
+                } else {
+                    null
                 }
-            } else {
-                _state.update { 
-                    it.copy(
-                        isLoading = false, 
-                        error = "Alat tidak ditemukan" 
-                    ) 
+            }.collect { history ->
+                if (history != null) {
+                    _state.update { 
+                        it.copy(
+                            isLoading = false, 
+                            alatHistory = history, 
+                            isAdmin = isAdmin,
+                            error = null
+                        ) 
+                    }
+                } else {
+                    _state.update { 
+                        it.copy(
+                            isLoading = false, 
+                            error = "Alat tidak ditemukan" 
+                        ) 
+                    }
                 }
             }
         }
@@ -61,14 +72,27 @@ class EquipmentDetailViewModel(
 
     fun onConfirmDelete() {
         viewModelScope.launch {
+            val equipment = state.value.alatHistory?.alat ?: return@launch
             _state.update { it.copy(isDeleting = true) }
-            delay(1000) // Simulate delete
-            _state.update { 
-                it.copy(
-                    isDeleting = false, 
-                    showDeleteDialog = false, 
-                    isDeleted = true 
-                ) 
+            
+            val result = alatRepository.archiveAlat(equipment.id)
+            
+            if (result.isSuccess) {
+                _state.update { 
+                    it.copy(
+                        isDeleting = false, 
+                        showDeleteDialog = false, 
+                        isDeleted = true 
+                    ) 
+                }
+            } else {
+                _state.update { 
+                    it.copy(
+                        isDeleting = false,
+                        showDeleteDialog = false,
+                        error = "Gagal menghapus alat: ${result.exceptionOrNull()?.message}"
+                    )
+                }
             }
         }
     }

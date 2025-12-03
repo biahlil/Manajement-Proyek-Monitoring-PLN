@@ -2,8 +2,6 @@ package com.pln.monitoringpln.presentation.dashboard
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.pln.monitoringpln.domain.repository.AuthRepository
-import com.pln.monitoringpln.domain.repository.DashboardRepository
 import com.pln.monitoringpln.domain.repository.TugasRepository
 import com.pln.monitoringpln.domain.repository.UserRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -12,14 +10,26 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+import com.pln.monitoringpln.domain.usecase.auth.CheckUserRoleUseCase
+import com.pln.monitoringpln.domain.usecase.dashboard.GetDashboardSummaryUseCase
+
+import com.pln.monitoringpln.domain.usecase.auth.GetCurrentUserIdUseCase
+import com.pln.monitoringpln.domain.usecase.tugas.ObserveTasksUseCase
+
+import com.pln.monitoringpln.domain.usecase.tugas.SyncTasksUseCase
+
+import com.pln.monitoringpln.domain.repository.AuthRepository
+
 class DashboardViewModel(
-    private val dashboardRepository: DashboardRepository,
+    private val getDashboardSummaryUseCase: GetDashboardSummaryUseCase,
     private val authRepository: AuthRepository,
-    // private val userRepository: UserRepository, // Uncomment when ready
-    // private val tugasRepository: TugasRepository // Uncomment when ready
+    private val observeTasksUseCase: ObserveTasksUseCase,
+    private val userRepository: UserRepository,
+    private val syncTasksUseCase: SyncTasksUseCase,
+    private val getDashboardTechniciansUseCase: com.pln.monitoringpln.domain.usecase.dashboard.GetDashboardTechniciansUseCase
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(DashboardState())
+    private val _state = MutableStateFlow(DashboardState(isLoading = true))
     val state: StateFlow<DashboardState> = _state.asStateFlow()
 
     init {
@@ -30,51 +40,62 @@ class DashboardViewModel(
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
 
-            // Check User Role
+            // 1. Get User Role & ID
             val roleResult = authRepository.getUserRole()
-            val isAdmin = roleResult.getOrNull() == "admin" // Adjust based on actual role string
+            val role = roleResult.getOrDefault("technician")
+            val isUserAdmin = role.equals("admin", ignoreCase = true)
+            val currentUserId = authRepository.getCurrentUserId() ?: ""
 
-            // Fetch Summary
-            val summaryResult = dashboardRepository.getDashboardSummary()
-            val currentSummary = summaryResult.getOrDefault(com.pln.monitoringpln.domain.model.DashboardSummary())
+            _state.update { it.copy(isAdmin = isUserAdmin) }
+
+            // Trigger Sync
+            launch {
+                syncTasksUseCase()
+            }
+
+            // Fetch Summary (Reactive)
+            launch {
+                val summaryTechnicianId = if (isUserAdmin) null else currentUserId
+                getDashboardSummaryUseCase(summaryTechnicianId).collect { summary ->
+                    _state.update { it.copy(summary = summary, isLoading = false) }
+                }
+            }
+
+            // Fetch Tasks (Reactive)
+            launch {
+                val teknisiId = if (isUserAdmin) null else currentUserId
+                observeTasksUseCase(teknisiId).collect { tasks ->
+                    _state.update {
+                        it.copy(
+                            // Filter "In Progress" case-insensitive, handling both "In Progress" and "IN_PROGRESS"
+                            inProgressTasks = tasks.filter { t -> 
+                                val status = t.status.replace("_", " ")
+                                status.equals("In Progress", ignoreCase = true) 
+                            },
+                            technicianTasks = tasks.filter { t -> 
+                                val status = t.status.replace("_", " ")
+                                !status.equals("Done", ignoreCase = true) 
+                            }
+                        )
+                    }
+                }
+            }
             
-            // Mocking breakdown for UI demo
-            val updatedSummary = currentSummary.copy(
-                totalAlatNormal = (currentSummary.totalAlat * 0.7).toInt(),
-                totalAlatPerluPerhatian = (currentSummary.totalAlat * 0.2).toInt(),
-                totalAlatRusak = (currentSummary.totalAlat * 0.1).toInt()
-            )
+            // Fetch Technicians (Reactive + Sync)
+            if (isUserAdmin) {
+                // Observe Local Data
+                launch {
+                    getDashboardTechniciansUseCase().collect { technicians ->
+                        _state.update { it.copy(technicians = technicians) }
+                    }
+                }
 
-            // Mocking other data for now since Repositories might not have specific methods yet
-            // In a real app, we would call userRepository.getTechnicians() and tugasRepository.getPendingApprovals()
-
-            _state.update { 
-                it.copy(
-                    isLoading = false,
-                    isAdmin = isAdmin,
-                    summary = updatedSummary,
-                    // Mock data for Technician
-                    technicianTasks = if (!isAdmin) List(2) { 
-                        com.pln.monitoringpln.domain.model.Tugas(
-                            id = "TASK-00${it+1}",
-                            deskripsi = "Trafo KTG-00${it+1}", 
-                            idAlat = "1", 
-                            idTeknisi = "1", 
-                            tglJatuhTempo = java.util.Date(),
-                            status = "In Progress"
-                        ) 
-                    } else emptyList(),
-                    activeWarnings = if (!isAdmin) List(2) { 
-                        com.pln.monitoringpln.domain.model.Tugas(
-                            id = "WARN-00${it+1}",
-                            deskripsi = "Warning Trafo ${it+1}", 
-                            idAlat = "1", 
-                            idTeknisi = "1", 
-                            tglJatuhTempo = java.util.Date(),
-                            status = "To Do"
-                        ) 
-                    } else emptyList()
-                )
+                // Trigger Refresh
+                launch {
+                    _state.update { it.copy(isTechniciansLoading = true) }
+                    getDashboardTechniciansUseCase.refresh()
+                    _state.update { it.copy(isTechniciansLoading = false) }
+                }
             }
         }
     }

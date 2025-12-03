@@ -34,12 +34,22 @@ class AuthRepositoryImpl(
 
     override fun isUserLoggedIn(): Flow<Boolean> {
         return supabaseClient.auth.sessionStatus.map { status ->
+            android.util.Log.d("AuthRepository", "SessionStatus changed: $status")
             status is SessionStatus.Authenticated
         }
+    }
+    
+    override suspend fun loadSession() {
+        val result = supabaseClient.auth.loadFromStorage()
+        android.util.Log.d("AuthRepository", "Explicit loadFromStorage result: $result")
     }
 
     override suspend fun getCurrentUserEmail(): String? {
         return supabaseClient.auth.currentUserOrNull()?.email
+    }
+
+    override suspend fun getCurrentUserId(): String? {
+        return supabaseClient.auth.currentUserOrNull()?.id
     }
 
     override suspend fun getUserRole(): Result<String> {
@@ -64,18 +74,31 @@ class AuthRepositoryImpl(
         val email: String,
         val password: String,
         val fullName: String,
-        val role: String
+        val role: String,
+        val photoUrl: String? = null
     )
 
-    override suspend fun createUser(email: String, password: String, fullName: String, role: String): Result<Unit> {
+    override suspend fun createUser(email: String, password: String, fullName: String, role: String, photoUrl: String?): Result<Unit> {
         return try {
             val params = CreateUserParams(
                 email = email,
                 password = password,
                 fullName = fullName,
-                role = role
+                role = role,
+                photoUrl = photoUrl
             )
             supabaseClient.functions.invoke("create-user", params)
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun updatePassword(password: String): Result<Unit> {
+        return try {
+            supabaseClient.auth.updateUser {
+                this.password = password
+            }
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)

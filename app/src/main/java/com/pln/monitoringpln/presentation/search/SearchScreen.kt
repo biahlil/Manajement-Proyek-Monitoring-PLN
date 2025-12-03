@@ -19,12 +19,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+
+import com.pln.monitoringpln.presentation.navigation.Screen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchScreen(
-    state: SearchState,
-    onQueryChange: (String) -> Unit
+    navController: NavController,
+    state: SearchState = SearchState(),
+    onQueryChange: (String) -> Unit = {}
 ) {
     Column(
         modifier = Modifier
@@ -75,7 +79,13 @@ fun SearchScreen(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 items(state.results) { result ->
-                    SearchResultItem(result)
+                    SearchResultItem(result) {
+                        when (result.type) {
+                            SearchResultType.TASK -> navController.navigate(Screen.DetailTask.createRoute(result.id))
+                            SearchResultType.EQUIPMENT -> navController.navigate(Screen.DetailEquipment.createRoute(result.id))
+                            SearchResultType.TECHNICIAN -> { /* Navigate to Technician Detail if exists, or List */ }
+                        }
+                    }
                 }
             }
         }
@@ -83,9 +93,9 @@ fun SearchScreen(
 }
 
 @Composable
-fun SearchResultItem(result: SearchResult) {
+fun SearchResultItem(result: SearchResult, onClick: () -> Unit) {
     Card(
-        modifier = Modifier.fillMaxWidth().clickable { /* TODO: Navigate to detail */ },
+        modifier = Modifier.fillMaxWidth().clickable { onClick() },
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
@@ -130,7 +140,11 @@ fun SearchResultItem(result: SearchResult) {
             
             // Type Label
             Text(
-                text = result.type.name,
+                text = when (result.type) {
+                    SearchResultType.TASK -> "TUGAS"
+                    SearchResultType.EQUIPMENT -> "ALAT"
+                    SearchResultType.TECHNICIAN -> "TEKNISI"
+                },
                 style = MaterialTheme.typography.labelSmall,
                 color = Color.Gray
             )

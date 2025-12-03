@@ -44,20 +44,29 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.pln.monitoringpln.R
 
+import androidx.compose.runtime.LaunchedEffect
+
 @Composable
 fun LoginScreen(
     state: LoginState,
-    onEvent: (LoginEvent) -> Unit
+    onEvent: (LoginEvent) -> Unit,
+    onLoginSuccess: () -> Unit
 ) {
+    LaunchedEffect(state.isSuccess) {
+        if (state.isSuccess) {
+            onLoginSuccess()
+        }
+    }
+
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
-    // Theme Gradient Brush
+    // Theme Gradient Brush using Material Theme colors
     val themeGradient = Brush.radialGradient(
         colors = listOf(
-            Color(0xFF1F64B0).copy(alpha = 0.46f),
-            Color(0xFF16477D).copy(alpha = 0.73f),
-            Color(0xFF0D2A4A)
+            MaterialTheme.colorScheme.primary,
+            MaterialTheme.colorScheme.primaryContainer,
+            MaterialTheme.colorScheme.onPrimaryContainer
         ),
         radius = 1000f
     )
@@ -76,7 +85,7 @@ fun LoginScreen(
         ) {
             // Logo Section
              Image(
-                painter = painterResource(id = R.mipmap.ic_launcher),
+                painter = painterResource(id = R.drawable.ic_launcher_foreground),
                 contentDescription = "Logo PLN",
                 modifier = Modifier.size(115.dp)
             )
@@ -85,7 +94,7 @@ fun LoginScreen(
 
             Text(
                 text = "PLN\nSIAGA",
-                color = Color.White,
+                color = MaterialTheme.colorScheme.onPrimary,
                 fontSize = 24.sp,
                 fontWeight = FontWeight.ExtraBold,
                 textAlign = TextAlign.Center,
@@ -97,7 +106,7 @@ fun LoginScreen(
             // Login Card
             Card(
                 shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp)
@@ -132,10 +141,10 @@ fun LoginScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(48.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1F64B0)),
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                         enabled = !state.isLoading
                     ) {
-                        Text("Login")
+                        Text("Login", color = MaterialTheme.colorScheme.onPrimary)
                     }
                     
                     if (state.error != null) {
@@ -176,7 +185,7 @@ fun LoginScreen(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(Color(0xFF0D2A4A).copy(alpha = 0.9f)) // Dark themed overlay
+                    .background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.9f)) // Dark themed overlay
                     .clickable(enabled = false) {},
                 contentAlignment = Alignment.Center
             ) {
@@ -185,7 +194,7 @@ fun LoginScreen(
                     verticalArrangement = Arrangement.Center
                 ) {
                     Image(
-                        painter = painterResource(id = R.mipmap.ic_launcher),
+                        painter = painterResource(id = R.drawable.ic_launcher_foreground),
                         contentDescription = "Loading Logo",
                         modifier = Modifier
                             .size(100.dp)
@@ -198,7 +207,7 @@ fun LoginScreen(
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
                         text = "Memuat...",
-                        color = Color.White,
+                        color = MaterialTheme.colorScheme.onPrimary,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Medium,
                         modifier = Modifier.graphicsLayer {
@@ -216,6 +225,7 @@ fun LoginScreen(
 fun LoginScreenPreview() {
     LoginScreen(
         state = LoginState(),
-        onEvent = {}
+        onEvent = {},
+        onLoginSuccess = {}
     )
 }

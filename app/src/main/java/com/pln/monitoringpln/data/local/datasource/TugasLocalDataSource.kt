@@ -24,4 +24,6 @@ class TugasLocalDataSource(
     suspend fun updateTugas(tugas: TugasEntity) = tugasDao.updateTugas(tugas)
 
     suspend fun getUnsyncedTugas(): List<TugasEntity> = tugasDao.getUnsyncedTugas()
+
+    suspend fun deleteTask(id: String) = tugasDao.deleteTask(id)
 }

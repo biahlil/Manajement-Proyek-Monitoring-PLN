@@ -15,6 +15,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import androidx.navigation.NavType
 import com.pln.monitoringpln.presentation.auth.LoginScreen
 import com.pln.monitoringpln.presentation.auth.LoginViewModel
 import com.pln.monitoringpln.presentation.dashboard.DashboardScreen
@@ -41,30 +43,70 @@ import com.pln.monitoringpln.presentation.profile.edit.EditProfileScreen
 import com.pln.monitoringpln.presentation.profile.edit.EditProfileViewModel
 import org.koin.androidx.compose.koinViewModel
 
+import androidx.compose.runtime.setValue
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
+    
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
+    var lastClickTime by androidx.compose.runtime.remember { androidx.compose.runtime.mutableLongStateOf(0L) }
+
+    fun navigateWithDebounce(
+        route: String, 
+        popUpTo: String? = null, 
+        inclusive: Boolean = false,
+        saveState: Boolean = false,
+        restoreState: Boolean = false
+    ) {
+        val currentTime = System.currentTimeMillis()
+        if (currentTime - lastClickTime > 150) {
+            lastClickTime = currentTime
+            scope.launch {
+                kotlinx.coroutines.delay(150)
+                navController.navigate(route) {
+                    if (popUpTo != null) {
+                        popUpTo(popUpTo) { 
+                            this.inclusive = inclusive
+                            this.saveState = saveState
+                        }
+                    }
+                    launchSingleTop = true
+                    this.restoreState = restoreState
+                }
+            }
+        }
+    }
 
     Scaffold(
         topBar = {
-            if (currentRoute != Screen.Login.route) {
+            val showHeader = currentRoute == Screen.Dashboard.route || 
+                             currentRoute == Screen.Search.route || 
+                             currentRoute == Screen.Profile.route
+            
+            androidx.compose.animation.AnimatedVisibility(
+                visible = showHeader,
+                enter = androidx.compose.animation.fadeIn(),
+                exit = androidx.compose.animation.fadeOut()
+            ) {
                 AppHeader()
             }
         },
         bottomBar = {
-            if (currentRoute != Screen.Login.route) {
+            if (currentRoute != Screen.Login.route && currentRoute != Screen.Splash.route) {
                 BottomNavigationBar(
                     navController = navController,
                     onItemClick = { item ->
-                        navController.navigate(item.route) {
-                            popUpTo(Screen.Dashboard.route) {
-                                saveState = true
-                            }
-                            launchSingleTop = true
+                        navigateWithDebounce(
+                            route = item.route, 
+                            popUpTo = Screen.Dashboard.route,
+                            saveState = true,
                             restoreState = true
-                        }
+                        )
                     }
                 )
             }
@@ -72,25 +114,34 @@ fun AppNavigation() {
     ) { paddingValues ->
         NavHost(
             navController = navController,
-            startDestination = Screen.Login.route,
+            startDestination = Screen.Splash.route,
             modifier = Modifier.padding(paddingValues)
         ) {
+            // ... (Splash, Login, Dashboard, Search remain same)
+
+            composable(Screen.Splash.route) {
+                val viewModel: com.pln.monitoringpln.presentation.splash.SplashViewModel = koinViewModel()
+                com.pln.monitoringpln.presentation.splash.SplashScreen(
+                    viewModel = viewModel,
+                    onNavigateToLogin = {
+                        navigateWithDebounce(Screen.Login.route, popUpTo = Screen.Splash.route, inclusive = true)
+                    },
+                    onNavigateToDashboard = {
+                        navigateWithDebounce(Screen.Dashboard.route, popUpTo = Screen.Splash.route, inclusive = true)
+                    }
+                )
+            }
+
             composable(Screen.Login.route) {
                 val loginViewModel: LoginViewModel = koinViewModel()
                 val loginState by loginViewModel.state.collectAsState()
 
-                // Navigate to Dashboard on Success
-                LaunchedEffect(loginState.isSuccess) {
-                    if (loginState.isSuccess) {
-                        navController.navigate(Screen.Dashboard.route) {
-                            popUpTo(Screen.Login.route) { inclusive = true }
-                        }
-                    }
-                }
-
                 LoginScreen(
                     state = loginState,
-                    onEvent = loginViewModel::onEvent
+                    onEvent = loginViewModel::onEvent,
+                    onLoginSuccess = {
+                        navigateWithDebounce(Screen.Dashboard.route, popUpTo = Screen.Login.route, inclusive = true)
+                    }
                 )
             }
 
@@ -99,10 +150,8 @@ fun AppNavigation() {
                 val dashboardState by dashboardViewModel.state.collectAsState()
 
                 DashboardScreen(
-                    state = dashboardState,
-                    onEquipmentClick = { navController.navigate(Screen.EquipmentList.route) },
-                    onTechnicianClick = { navController.navigate(Screen.TechnicianList.route) },
-                    onTaskClick = { navController.navigate(Screen.TaskList.route) }
+                    onNavigate = { route -> navigateWithDebounce(route) },
+                    viewModel = dashboardViewModel
                 )
             }
 
@@ -110,7 +159,12 @@ fun AppNavigation() {
                 val viewModel: SearchViewModel = koinViewModel()
                 val state by viewModel.state.collectAsState()
 
+                androidx.activity.compose.BackHandler {
+                    navigateWithDebounce(Screen.Dashboard.route, popUpTo = Screen.Dashboard.route)
+                }
+
                 SearchScreen(
+                    navController = navController,
                     state = state,
                     onQueryChange = viewModel::onQueryChange
                 )
@@ -120,24 +174,46 @@ fun AppNavigation() {
                 val taskListViewModel: TaskListViewModel = koinViewModel()
                 val taskListState by taskListViewModel.state.collectAsState()
 
+                androidx.activity.compose.BackHandler {
+                    navigateWithDebounce(Screen.Dashboard.route, popUpTo = Screen.Dashboard.route)
+                }
+
                 TaskListScreen(
                     state = taskListState,
                     onSearchQueryChange = taskListViewModel::onSearchQueryChange,
-                    onDeleteTask = taskListViewModel::onDeleteTask,
-                    onConfirmDelete = taskListViewModel::onConfirmDelete,
-                    onDismissDelete = taskListViewModel::onDismissDelete,
-                    onAddTask = { navController.navigate(Screen.AddEditTask.route) },
-                    onEditTask = { task -> navController.navigate(Screen.AddEditTask.route) } // Pass ID later
+                    onAddTask = { navigateWithDebounce(Screen.AddEditTask.createRoute(null)) },
+                    onTaskClick = { taskId -> navigateWithDebounce(Screen.DetailTask.createRoute(taskId)) },
+                    onBack = { navigateWithDebounce(Screen.Dashboard.route, popUpTo = Screen.Dashboard.route) }
                 )
             }
 
-            composable(Screen.AddEditTask.route) {
+            composable(
+                route = Screen.AddEditTask.route,
+                arguments = listOf(navArgument("taskId") {
+                    type = NavType.StringType
+                    nullable = true
+                })
+            ) { backStackEntry ->
+                val taskId = backStackEntry.arguments?.getString("taskId")
                 val viewModel: AddEditTaskViewModel = koinViewModel()
                 val state by viewModel.state.collectAsState()
                 
+                LaunchedEffect(taskId) {
+                    viewModel.loadTask(taskId)
+                }
+                
+                androidx.activity.compose.BackHandler {
+                    navigateWithDebounce(Screen.TaskList.route, popUpTo = Screen.TaskList.route)
+                }
+
                 LaunchedEffect(state.isTaskSaved) {
                     if (state.isTaskSaved) {
-                        navController.popBackStack()
+                        val savedTaskId = state.savedTaskId
+                        if (savedTaskId != null) {
+                            navigateWithDebounce(Screen.DetailTask.createRoute(savedTaskId), popUpTo = Screen.TaskList.route)
+                        } else {
+                            navigateWithDebounce(Screen.TaskList.route, popUpTo = Screen.TaskList.route)
+                        }
                     }
                 }
 
@@ -150,7 +226,7 @@ fun AppNavigation() {
                     onDeadlineSelected = viewModel::onDeadlineSelected,
                     onTechnicianSelected = viewModel::onTechnicianSelected,
                     onSaveTask = viewModel::onSaveTask,
-                    onBack = { navController.popBackStack() }
+                    onBack = { navigateWithDebounce(Screen.TaskList.route, popUpTo = Screen.TaskList.route) }
                 )
             }
 
@@ -168,33 +244,68 @@ fun AppNavigation() {
 
                 LaunchedEffect(state.isDeleted) {
                     if (state.isDeleted) {
-                        navController.popBackStack()
+                        navigateWithDebounce(Screen.TaskList.route, popUpTo = Screen.TaskList.route)
                     }
                 }
 
                 TaskDetailScreen(
                     state = state,
                     onBack = { navController.popBackStack() },
-                    onEdit = { navController.navigate(Screen.AddEditTask.route) }, // For now just open AddEditTask, later pass ID
+                    onEdit = { navigateWithDebounce(Screen.AddEditTask.createRoute(taskId)) },
                     onDelete = viewModel::onDeleteTask,
                     onConfirmDelete = viewModel::onConfirmDelete,
-                    onDismissDelete = viewModel::onDismissDeleteDialog
+                    onDismissDelete = viewModel::onDismissDeleteDialog,
+                    onCompleteTask = { navigateWithDebounce(Screen.CompleteTask.createRoute(taskId)) }
                 )
             }
 
-            composable(Screen.EquipmentList.route) {
+            composable(
+                route = Screen.CompleteTask.route,
+                arguments = listOf(navArgument("taskId") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val taskId = backStackEntry.arguments?.getString("taskId") ?: return@composable
+                val viewModel: com.pln.monitoringpln.presentation.task.complete.CompleteTaskViewModel = koinViewModel()
+                val state by viewModel.state.collectAsState()
+
+                LaunchedEffect(taskId) {
+                    viewModel.loadTask(taskId)
+                }
+
+                com.pln.monitoringpln.presentation.task.complete.CompleteTaskScreen(
+                    state = state,
+                    onBack = { navController.popBackStack() },
+                    onConditionChange = viewModel::onConditionChange,
+                    onEquipmentStatusChange = viewModel::onEquipmentStatusChange,
+                    onProofSelected = viewModel::onProofSelected,
+                    onCompleteTask = viewModel::onCompleteTask
+                )
+            }
+
+            composable(
+                route = Screen.EquipmentList.route,
+                arguments = listOf(navArgument("filterType") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val filterType = backStackEntry.arguments?.getString("filterType") ?: "all_equipment"
                 val viewModel: EquipmentListViewModel = koinViewModel()
                 val state by viewModel.state.collectAsState()
+
+                androidx.activity.compose.BackHandler {
+                    navigateWithDebounce(Screen.Dashboard.route, popUpTo = Screen.Dashboard.route)
+                }
+
+                LaunchedEffect(filterType) {
+                    viewModel.setFilter(filterType)
+                }
 
                 EquipmentListScreen(
                     state = state,
                     onSearchQueryChange = viewModel::onSearchQueryChange,
-                    onBack = { navController.popBackStack() },
-                    onAddEquipment = { navController.navigate(Screen.AddEditEquipment.createRoute(null)) },
+                    onBack = { navigateWithDebounce(Screen.Dashboard.route, popUpTo = Screen.Dashboard.route) },
+                    onAddEquipment = { navigateWithDebounce(Screen.AddEditEquipment.createRoute(null)) },
                     onDeleteEquipment = viewModel::onDeleteEquipment,
                     onConfirmDelete = viewModel::onConfirmDelete,
                     onDismissDelete = viewModel::onDismissDeleteDialog,
-                    onItemClick = { equipment -> navController.navigate(Screen.DetailEquipment.createRoute(equipment.id)) }
+                    onItemClick = { equipment -> navigateWithDebounce(Screen.DetailEquipment.createRoute(equipment.id)) }
                 )
             }
 
@@ -212,17 +323,19 @@ fun AppNavigation() {
 
                 LaunchedEffect(state.isDeleted) {
                     if (state.isDeleted) {
-                        navController.popBackStack()
+                        navigateWithDebounce(Screen.EquipmentList.createRoute("all_equipment"), popUpTo = Screen.EquipmentList.route)
                     }
                 }
 
                 EquipmentDetailScreen(
                     state = state,
                     onBack = { navController.popBackStack() },
-                    onEdit = { navController.navigate(Screen.AddEditEquipment.createRoute(equipmentId)) },
+                    onEdit = { navigateWithDebounce(Screen.AddEditEquipment.createRoute(equipmentId)) },
                     onDelete = viewModel::onDeleteClick,
                     onConfirmDelete = viewModel::onConfirmDelete,
-                    onDismissDelete = viewModel::onDismissDeleteDialog
+                    onDismissDelete = viewModel::onDismissDeleteDialog,
+                    onAddTask = { navigateWithDebounce(Screen.AddEditTask.route) },
+                    onTaskClick = { taskId -> navigateWithDebounce(Screen.DetailTask.createRoute(taskId)) }
                 )
             }
 
@@ -237,13 +350,25 @@ fun AppNavigation() {
                 val viewModel: AddEditEquipmentViewModel = koinViewModel()
                 val state by viewModel.state.collectAsState()
 
+                val navigateBack = {
+                    if (equipmentId != null) {
+                        navigateWithDebounce(Screen.DetailEquipment.createRoute(equipmentId), popUpTo = Screen.DetailEquipment.route)
+                    } else {
+                        navigateWithDebounce(Screen.EquipmentList.createRoute("all_equipment"), popUpTo = Screen.EquipmentList.route)
+                    }
+                }
+
+                androidx.activity.compose.BackHandler {
+                    navigateBack()
+                }
+
                 LaunchedEffect(equipmentId) {
                     viewModel.loadEquipment(equipmentId)
                 }
 
                 LaunchedEffect(state.isSaved) {
                     if (state.isSaved) {
-                        navController.popBackStack()
+                        navigateBack()
                     }
                 }
 
@@ -254,8 +379,11 @@ fun AppNavigation() {
                     onTipeChange = viewModel::onTipeChange,
                     onStatusChange = viewModel::onStatusChange,
                     onLokasiChange = viewModel::onLokasiChange,
+                    onLatChange = viewModel::onLatitudeChange,
+                    onLngChange = viewModel::onLongitudeChange,
                     onSave = viewModel::onSaveEquipment,
-                    onBack = { navController.popBackStack() }
+                    onBack = navigateBack,
+                    viewModel = viewModel
                 )
             }
 
@@ -263,14 +391,19 @@ fun AppNavigation() {
                 val viewModel: TechnicianListViewModel = koinViewModel()
                 val state by viewModel.state.collectAsState()
 
+                androidx.activity.compose.BackHandler {
+                    navigateWithDebounce(Screen.Dashboard.route, popUpTo = Screen.Dashboard.route)
+                }
+
                 TechnicianListScreen(
                     state = state,
                     onSearchQueryChange = viewModel::onSearchQueryChange,
-                    onBack = { navController.popBackStack() },
-                    onAddTechnician = { navController.navigate(Screen.AddTechnician.route) },
+                    onBack = { navigateWithDebounce(Screen.Dashboard.route, popUpTo = Screen.Dashboard.route) },
+                    onAddTechnician = { navigateWithDebounce(Screen.AddTechnician.route) },
                     onDeleteTechnician = viewModel::onDeleteTechnician,
                     onConfirmDelete = viewModel::onConfirmDelete,
-                    onDismissDelete = viewModel::onDismissDeleteDialog
+                    onDismissDelete = viewModel::onDismissDeleteDialog,
+                    onRefresh = viewModel::refreshTechnicians
                 )
             }
 
@@ -278,21 +411,44 @@ fun AppNavigation() {
                 val viewModel: AddTechnicianViewModel = koinViewModel()
                 val state by viewModel.state.collectAsState()
 
+                androidx.activity.compose.BackHandler {
+                    navigateWithDebounce(Screen.TechnicianList.route, popUpTo = Screen.TechnicianList.route)
+                }
+
                 LaunchedEffect(state.isSaved) {
                     if (state.isSaved) {
-                        navController.popBackStack()
+                        navigateWithDebounce(Screen.TechnicianList.route, popUpTo = Screen.TechnicianList.route)
                     }
                 }
 
                 AddTechnicianScreen(
                     state = state,
                     onNamaChange = viewModel::onNamaChange,
-                    onIdChange = viewModel::onIdChange,
                     onEmailChange = viewModel::onEmailChange,
-                    onNoTeleponChange = viewModel::onNoTeleponChange,
-                    onAreaTugasChange = viewModel::onAreaTugasChange,
+                    onPasswordChange = viewModel::onPasswordChange,
+                    onPhotoSelected = viewModel::onPhotoSelected,
                     onSave = viewModel::onSaveTechnician,
-                    onBack = { navController.popBackStack() }
+                    onBack = { navigateWithDebounce(Screen.TechnicianList.route, popUpTo = Screen.TechnicianList.route) }
+                )
+            }
+
+            composable(Screen.Report.route) {
+                val viewModel: com.pln.monitoringpln.presentation.report.ReportViewModel = koinViewModel()
+                val state by viewModel.state.collectAsState()
+
+                androidx.activity.compose.BackHandler {
+                    navigateWithDebounce(Screen.Dashboard.route, popUpTo = Screen.Dashboard.route)
+                }
+
+                com.pln.monitoringpln.presentation.report.ReportScreen(
+                    state = state,
+                    onStartDateChange = viewModel::onStartDateChange,
+                    onEndDateChange = viewModel::onEndDateChange,
+                    onFormatChange = viewModel::onFormatChange,
+                    onExport = viewModel::onExport,
+                    onBack = { navigateWithDebounce(Screen.Dashboard.route, popUpTo = Screen.Dashboard.route) },
+                    onClearMessages = viewModel::clearMessages,
+                    onFullReportChange = viewModel::onFullReportChange
                 )
             }
 
@@ -300,18 +456,25 @@ fun AppNavigation() {
                 val profileViewModel: com.pln.monitoringpln.presentation.profile.ProfileViewModel = koinViewModel()
                 val profileState by profileViewModel.state.collectAsState()
 
+                androidx.activity.compose.BackHandler {
+                    navigateWithDebounce(Screen.Dashboard.route, popUpTo = Screen.Dashboard.route)
+                }
+
                 // Handle Logout Navigation
                 LaunchedEffect(profileState.isLoggedOut) {
                     if (profileState.isLoggedOut) {
                         navController.navigate(Screen.Login.route) {
-                            popUpTo(Screen.Dashboard.route) { inclusive = true }
+                            popUpTo(0) { inclusive = true }
+                            launchSingleTop = true
                         }
                     }
                 }
 
                 com.pln.monitoringpln.presentation.profile.ProfileScreen(
                     state = profileState,
-                    onLogout = profileViewModel::onLogout,
+                    onLogout = {
+                        profileViewModel.onLogout()
+                    },
                     onEditProfile = { navController.navigate(Screen.EditProfile.route) }
                 )
             }
@@ -320,9 +483,13 @@ fun AppNavigation() {
                 val viewModel: EditProfileViewModel = koinViewModel()
                 val state by viewModel.state.collectAsState()
 
+                androidx.activity.compose.BackHandler {
+                    navigateWithDebounce(Screen.Profile.route, popUpTo = Screen.Profile.route)
+                }
+
                 LaunchedEffect(state.isSaved) {
                     if (state.isSaved) {
-                        navController.popBackStack()
+                        navigateWithDebounce(Screen.Profile.route, popUpTo = Screen.Profile.route)
                     }
                 }
 
@@ -331,6 +498,9 @@ fun AppNavigation() {
                     onNameChange = viewModel::onNameChange,
                     onEmailChange = viewModel::onEmailChange,
                     onPhoneChange = viewModel::onPhoneChange,
+                    onPasswordChange = viewModel::onPasswordChange,
+                    onConfirmPasswordChange = viewModel::onConfirmPasswordChange,
+                    onAvatarSelected = viewModel::onAvatarSelected,
                     onSave = viewModel::onSave,
                     onBack = { navController.popBackStack() }
                 )

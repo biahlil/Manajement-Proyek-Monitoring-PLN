@@ -9,8 +9,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+import com.pln.monitoringpln.domain.repository.UserRepository
+
 class ProfileViewModel(
-    private val authRepository: AuthRepository
+    private val getUserProfileUseCase: com.pln.monitoringpln.domain.usecase.user.GetUserProfileUseCase,
+    private val logoutUseCase: com.pln.monitoringpln.domain.usecase.auth.LogoutUseCase,
+    private val observeUserProfileUseCase: com.pln.monitoringpln.domain.usecase.user.ObserveUserProfileUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(ProfileState())
@@ -18,52 +22,49 @@ class ProfileViewModel(
 
     init {
         loadProfile()
+        observeProfile()
     }
 
-    private fun loadProfile() {
+    private fun observeProfile() {
+        viewModelScope.launch {
+            observeUserProfileUseCase().collect { user ->
+                if (user != null) {
+                    _state.update { 
+                        it.copy(
+                            isLoading = false,
+                            name = user.namaLengkap,
+                            role = user.role.lowercase().replaceFirstChar { it.uppercase() },
+                            id = user.id,
+                            username = user.email.substringBefore("@"),
+                            email = user.email,
+                            photoUrl = user.photoUrl,
+                            phone = "-", // Phone not in User model yet
+                            area = if (user.role.equals("admin", ignoreCase = true)) "-" else "Area Tugas"
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    fun loadProfile() {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
 
-            // Check User Role
-            val roleResult = authRepository.getUserRole()
-            val role = roleResult.getOrDefault("technician") // Default to technician for now
-            val isAdmin = role == "admin"
+            val result = getUserProfileUseCase()
+            val user = result.getOrNull()
 
-            // Mock Data based on Role
-            val user = if (isAdmin) {
-                com.pln.monitoringpln.domain.model.User(
-                    id = "ADM-001",
-                    email = "admin@pln.co.id",
-                    namaLengkap = "Admin PLN",
-                    role = "admin"
-                )
+            if (user != null) {
+                // Initial load handled by observation mostly, but this ensures fetch if needed
             } else {
-                com.pln.monitoringpln.domain.model.User(
-                    id = "TKN-BJM-001-PLN",
-                    email = "rusmanhadi@gmail.com",
-                    namaLengkap = "Rusman Hadi",
-                    role = "technician"
-                )
-            }
-
-            _state.update { 
-                it.copy(
-                    isLoading = false,
-                    name = user.namaLengkap,
-                    role = if (user.role == "admin") "Administrator" else "Teknisi",
-                    id = user.id,
-                    username = user.email.substringBefore("@"), // Mock username from email
-                    email = user.email,
-                    phone = if (isAdmin) "0812-3456-7890" else "+62 849 - 1328 - 7124",
-                    area = if (isAdmin) "-" else "Gardu Kayu Tangi 1, Gardu Kayu Tangi 2"
-                )
+                 _state.update { it.copy(isLoading = false) }
             }
         }
     }
 
     fun onLogout() {
         viewModelScope.launch {
-            authRepository.logout()
+            logoutUseCase()
             _state.update { it.copy(isLoggedOut = true) }
         }
     }

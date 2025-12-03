@@ -12,8 +12,10 @@ fun AlatEntity.toDomain(): Alat {
         longitude = longitude,
         kondisi = kondisi,
         status = status,
+        tipe = tipe,
         lastModifiedById = lastModifiedById,
-        isArchived = isArchived
+        isArchived = isArchived,
+        locationName = locationName
     )
 }
 
@@ -26,9 +28,11 @@ fun Alat.toEntity(isSynced: Boolean = true): AlatEntity {
         longitude = longitude,
         kondisi = kondisi,
         status = status,
+        tipe = tipe,
         lastModifiedById = lastModifiedById,
         isSynced = isSynced,
-        isArchived = false // Default to false when converting from domain
+        isArchived = false, // Default to false when converting from domain
+        locationName = locationName
     )
 }
 
@@ -41,6 +45,8 @@ fun com.pln.monitoringpln.data.model.AlatDto.toDomain(): Alat {
         longitude = longitude,
         kondisi = kondisi,
         status = status,
-        lastModifiedById = lastModifiedById
+        tipe = tipe ?: "Umum",
+        lastModifiedById = lastModifiedById,
+        locationName = locationName
     )
 }
