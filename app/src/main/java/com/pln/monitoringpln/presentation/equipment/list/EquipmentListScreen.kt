@@ -209,23 +209,7 @@ fun EquipmentCard(
                 )
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
-            Divider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
-            Spacer(modifier = Modifier.height(12.dp))
 
-            // Last Checked
-            Column {
-                Text(
-                    text = "Cek Terakhir",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = Color.Gray
-                )
-                Text(
-                    text = "20 Min Lalu", // Mock data
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Bold
-                )
-            }
         }
     }
 }

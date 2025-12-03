@@ -16,7 +16,7 @@ class CompleteTaskUseCase(
     ): Result<Unit> {
         // 1. Validasi Input
         if (taskId.isBlank()) return Result.failure(IllegalArgumentException("ID Tugas tidak valid."))
-        if (photoBytes == null && currentProofUrl.isNullOrBlank()) {
+        if ((photoBytes == null || photoBytes.isEmpty()) && currentProofUrl.isNullOrBlank()) {
             return Result.failure(IllegalArgumentException("Foto bukti wajib diunggah."))
         }
         if (newCondition.isBlank()) return Result.failure(IllegalArgumentException("Kondisi alat wajib diisi."))

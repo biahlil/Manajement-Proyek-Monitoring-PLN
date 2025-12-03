@@ -39,7 +39,7 @@ class FakeAlatRepository : AlatRepository {
         }
     }
 
-    override suspend fun updateAlatInfo(id: String, nama: String, kode: String, lat: Double, lng: Double): Result<Unit> {
+    override suspend fun updateAlatInfo(id: String, nama: String, kode: String, lat: Double, lng: Double, locationName: String?): Result<Unit> {
         println("  ➡️ [FakeRepo] updateAlatInfo() dipanggil. ID: $id, Nama Baru: $nama")
         val existing = database[id]
 
@@ -55,10 +55,15 @@ class FakeAlatRepository : AlatRepository {
             kodeAlat = kode,
             latitude = lat,
             longitude = lng,
+            locationName = locationName
             // kondisi tidak disentuh!
         )
         println("     ✅ Update Berhasil. Kondisi setelah update: '${database[id]?.kondisi}'")
         return Result.success(Unit)
+    }
+
+    override fun observeAlat(id: String): kotlinx.coroutines.flow.Flow<Alat?> {
+        return kotlinx.coroutines.flow.flowOf(database[id])
     }
 
     // --- UC1b: SOFT DELETE (ARCHIVE) ---

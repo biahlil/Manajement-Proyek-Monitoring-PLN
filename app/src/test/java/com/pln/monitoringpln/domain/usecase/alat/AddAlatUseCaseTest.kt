@@ -27,6 +27,21 @@ class AddAlatUseCaseTest {
         assertEquals("Normal", fakeRepo.lastSavedAlat?.kondisi)
 
         println("--- ✅ LULUS ---")
+        println("--- ✅ LULUS ---")
+    }
+
+    @Test
+    fun `add valid alat with location name, should save correctly`() = runTest {
+        println("\n--- 🔴 TEST: `add valid alat with location name` ---")
+
+        println("  [Act] Memanggil UseCase dengan location name...")
+        val result = useCase("Trafo B", "TRF-2", -3.3, 114.5, "Banjarmasin")
+
+        println("  [Assert] Cek sukses dan location name...")
+        assertTrue(result.isSuccess)
+        assertEquals("Banjarmasin", fakeRepo.lastSavedAlat?.locationName)
+
+        println("--- ✅ LULUS ---")
     }
 
     // --- Edge Case: Whitespace ---

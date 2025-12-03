@@ -117,7 +117,36 @@ class FakeTugasRepository : TugasRepository {
         database.addAll(tasks)
     }
 
+    fun addTask(task: Tugas) {
+        database.add(task)
+    }
+
     fun clear() {
         database.clear()
+    }
+    override fun observeTasksByAlat(idAlat: String): kotlinx.coroutines.flow.Flow<List<Tugas>> {
+        return kotlinx.coroutines.flow.flowOf(database.filter { it.idAlat == idAlat })
+    }
+
+    override fun observeAllTasks(): kotlinx.coroutines.flow.Flow<List<Tugas>> {
+        return kotlinx.coroutines.flow.flowOf(database)
+    }
+
+    override fun observeTasksByTeknisi(idTeknisi: String): kotlinx.coroutines.flow.Flow<List<Tugas>> {
+        return kotlinx.coroutines.flow.flowOf(database.filter { it.idTeknisi == idTeknisi })
+    }
+
+    override suspend fun deleteTask(taskId: String): Result<Unit> {
+        val removed = database.removeIf { it.id == taskId }
+        return if (removed) Result.success(Unit) else Result.failure(Exception("Task not found"))
+    }
+
+    override suspend fun updateTask(tugas: Tugas): Result<Unit> {
+        val index = database.indexOfFirst { it.id == tugas.id }
+        if (index != -1) {
+            database[index] = tugas
+            return Result.success(Unit)
+        }
+        return Result.failure(Exception("Task not found"))
     }
 }

@@ -6,6 +6,8 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
+import kotlinx.coroutines.flow.first
+
 class DashboardRepositoryImplTest {
 
     private lateinit var database: com.pln.monitoringpln.data.local.AppDatabase
@@ -41,25 +43,23 @@ class DashboardRepositoryImplTest {
         database.alatDao().insertAlat(alat1)
 
         val task1 = com.pln.monitoringpln.data.local.entity.TugasEntity(
-            id = "task-1", deskripsi = "Fix Trafo", idAlat = "alat-1", idTeknisi = "tech-1",
+            id = "task-1", judul = "Fix Trafo", deskripsi = "Fix Trafo", idAlat = "alat-1", idTeknisi = "tech-1",
             tglDibuat = java.util.Date(), tglJatuhTempo = java.util.Date(), status = "To Do", isSynced = true
         )
         val task2 = com.pln.monitoringpln.data.local.entity.TugasEntity(
-            id = "task-2", deskripsi = "Check Trafo", idAlat = "alat-1", idTeknisi = "tech-1",
+            id = "task-2", judul = "Check Trafo", deskripsi = "Check Trafo", idAlat = "alat-1", idTeknisi = "tech-1",
             tglDibuat = java.util.Date(), tglJatuhTempo = java.util.Date(), status = "Done", isSynced = true
         )
         database.tugasDao().insertAll(listOf(task1, task2))
 
         // When
-        val result = dashboardRepository.getDashboardSummary()
+        val summary = dashboardRepository.getDashboardSummary().first()
 
         // Then
-        assertTrue(result.isSuccess)
-        val summary = result.getOrNull()
         println(logAssert.format("Summary retrieved: $summary"))
         
         assertTrue(summary != null)
-        assertTrue("Total Alat should be 1", summary!!.totalAlat == 1)
+        assertTrue("Total Alat should be 1", summary.totalAlat == 1)
         assertTrue("Total Tugas should be 2", summary.totalTugas == 2)
         assertTrue("To Do should be 1", summary.tugasToDo == 1)
         assertTrue("Done should be 1", summary.tugasDone == 1)

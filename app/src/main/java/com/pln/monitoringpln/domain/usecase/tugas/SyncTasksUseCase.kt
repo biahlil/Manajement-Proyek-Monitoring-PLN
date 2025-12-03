@@ -5,12 +5,12 @@ import com.pln.monitoringpln.domain.repository.TugasRepository
 
 class SyncTasksUseCase(private val repository: TugasRepository) {
     suspend operator fun invoke(): Result<Unit> {
-        android.util.Log.d("SyncTasksUseCase", "Starting sync...")
+        // Log.d("SyncTasksUseCase", "Starting sync...")
         val result = repository.sync()
         result.onSuccess {
-            android.util.Log.d("SyncTasksUseCase", "Sync successful")
+            // Log.d("SyncTasksUseCase", "Sync successful")
         }.onFailure {
-            android.util.Log.e("SyncTasksUseCase", "Sync failed", it)
+            // Log.e("SyncTasksUseCase", "Sync failed", it)
         }
         return result
     }

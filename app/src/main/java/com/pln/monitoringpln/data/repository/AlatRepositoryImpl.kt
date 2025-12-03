@@ -85,7 +85,8 @@ class AlatRepositoryImpl(
         nama: String,
         kode: String,
         lat: Double,
-        lng: Double
+        lng: Double,
+        locationName: String?
     ): Result<Unit> {
         return try {
             val existing = localDataSource.getAlatDetail(id) ?: return Result.failure(Exception("Alat not found locally"))
@@ -95,6 +96,7 @@ class AlatRepositoryImpl(
                 kodeAlat = kode,
                 latitude = lat,
                 longitude = lng,
+                locationName = locationName,
                 isSynced = false
             )
             localDataSource.updateAlat(updated)

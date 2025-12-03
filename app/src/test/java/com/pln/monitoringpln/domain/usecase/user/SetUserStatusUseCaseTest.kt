@@ -20,7 +20,7 @@ class SetUserStatusUseCaseTest {
     fun setUp() {
         fakeRepo = FakeUserRepository()
         useCase = SetUserStatusUseCase(fakeRepo)
-        fakeRepo.addDummyUser(TestObjects.TEKNISI_VALID)
+        fakeRepo.addDummy(TestObjects.TEKNISI_VALID)
     }
 
     @Test

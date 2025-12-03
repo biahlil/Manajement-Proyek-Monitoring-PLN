@@ -115,13 +115,14 @@ class AlatRepositoryImplTest {
         val id = alatRepository.getAlatByKode(uniqueCode).getOrNull()?.id ?: throw IllegalStateException("Alat not found")
 
         // When
-        val updatedAlat = alat.copy(id = id, namaAlat = "Updated Name", latitude = 1.0, longitude = 1.0)
+        val updatedAlat = alat.copy(id = id, namaAlat = "Updated Name", latitude = 1.0, longitude = 1.0, locationName = "New Location")
         val result = alatRepository.updateAlatInfo(
             id = updatedAlat.id,
             nama = updatedAlat.namaAlat,
             kode = updatedAlat.kodeAlat,
             lat = updatedAlat.latitude,
-            lng = updatedAlat.longitude
+            lng = updatedAlat.longitude,
+            locationName = updatedAlat.locationName
         )
 
         // Then
@@ -130,6 +131,7 @@ class AlatRepositoryImplTest {
         assertEquals("Updated Name", fetchedAlat?.namaAlat)
         assertEquals(1.0, fetchedAlat?.latitude)
         assertEquals(1.0, fetchedAlat?.longitude)
+        assertEquals("New Location", fetchedAlat?.locationName)
         println(logAssert.format("Alat info updated successfully"))
         
         println(logResult)

@@ -15,7 +15,8 @@ class UpdateUserProfileUseCase(
         if (user.email.isBlank()) {
             return Result.failure(ValidationException("Email tidak boleh kosong"))
         }
-        if (!android.util.Patterns.EMAIL_ADDRESS.matcher(user.email).matches()) {
+        val emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$".toRegex()
+        if (!emailRegex.matches(user.email)) {
             return Result.failure(ValidationException("Format email tidak valid"))
         }
         return userRepository.updateUser(user)

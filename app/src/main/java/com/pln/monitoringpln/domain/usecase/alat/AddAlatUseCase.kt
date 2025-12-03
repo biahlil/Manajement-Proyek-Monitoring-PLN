@@ -13,6 +13,7 @@ class AddAlatUseCase(
         kodeAlat: String,
         latitude: Double,
         longitude: Double,
+        locationName: String? = null
     ): Result<Unit> {
         // 1. Validasi Dasar
         if (namaAlat.isBlank()) {
@@ -34,6 +35,7 @@ class AddAlatUseCase(
             namaAlat = namaAlat,
             latitude = latitude,
             longitude = longitude,
+            locationName = locationName,
             kondisi = "Normal", // <-- Hardcoded Default sesuai User Story
         )
 
