@@ -39,7 +39,15 @@ class FakeAlatRepository : AlatRepository {
         }
     }
 
-
+    override suspend fun getAlatByKode(kode: String): Result<Alat> {
+        println("  ➡️ [FakeRepo] getAlatByKode() dipanggil. Kode: $kode")
+        val found = database.values.find { it.kodeAlat == kode }
+        return if (found != null && !found.isArchived) {
+            Result.success(found)
+        } else {
+            Result.failure(Exception("Alat tidak ditemukan"))
+        }
+    }
 
     override suspend fun updateAlatInfo(id: String, nama: String, kode: String, lat: Double, lng: Double, locationName: String?): Result<Unit> {
         println("  ➡️ [FakeRepo] updateAlatInfo() dipanggil. ID: $id, Nama Baru: $nama")
@@ -96,7 +104,14 @@ class FakeAlatRepository : AlatRepository {
         return Result.success(Unit)
     }
 
+    override fun getAllAlat(): kotlinx.coroutines.flow.Flow<List<Alat>> {
+        return kotlinx.coroutines.flow.flowOf(database.values.toList())
+    }
 
+    override suspend fun sync(): Result<Unit> {
+        println("  ➡️ [FakeRepo] Sync triggered")
+        return Result.success(Unit)
+    }
 
     fun addDummy(alat: Alat) {
         println("  🔧 [Setup] Menambahkan dummy data: ${alat.namaAlat} (ID: ${alat.id})")
