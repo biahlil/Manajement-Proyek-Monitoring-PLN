@@ -35,10 +35,13 @@ interface AlatRepository {
 
     // Sync Data
     suspend fun sync(): Result<Unit>
+<<<<<<< HEAD
 
     // Offline-First: Observe All Active Alat
     fun getAllAlat(): kotlinx.coroutines.flow.Flow<List<Alat>>
 
     // Sync Data
     suspend fun sync(): Result<Unit>
+=======
+>>>>>>> 135fdb74b264e751a6084b618aa39f3d6a749dd3
 }
