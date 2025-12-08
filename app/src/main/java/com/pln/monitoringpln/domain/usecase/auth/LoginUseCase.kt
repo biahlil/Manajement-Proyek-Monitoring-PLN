@@ -1,11 +1,14 @@
 package com.pln.monitoringpln.domain.usecase.auth
 
 import com.pln.monitoringpln.domain.repository.AuthRepository
+import com.pln.monitoringpln.domain.repository.AuthRepository
 
 class LoginUseCase(
     private val authRepository: AuthRepository
 ) {
     private val emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$".toRegex()
+
+    suspend operator fun invoke(email: String, password: String): Result<Unit> {
 
     suspend operator fun invoke(email: String, password: String): Result<Unit> {
         // 1. Validasi Format

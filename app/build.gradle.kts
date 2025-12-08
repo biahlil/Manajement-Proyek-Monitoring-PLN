@@ -58,6 +58,7 @@ android {
     buildFeatures {
         compose = true
         buildConfig = true
+        buildConfig = true
     }
 }
 
@@ -71,6 +72,21 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
+    
+    // Room
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.room.compiler)
+
+    // Supabase
+    implementation(platform(libs.supabase.bom))
+    implementation(libs.supabase.gotrue)
+    implementation(libs.supabase.postgrest)
+    implementation(libs.supabase.storage)
+    implementation(libs.supabase.functions)
+    implementation(libs.ktor.client.android)
+    implementation(libs.ktor.client.core)
+
     
     // Room
     implementation(libs.androidx.room.runtime)
