@@ -31,7 +31,7 @@ class ReportRepositoryImplTest {
         context = ApplicationProvider.getApplicationContext()
         database = androidx.room.Room.inMemoryDatabaseBuilder(
             context,
-            com.pln.monitoringpln.data.local.AppDatabase::class.java
+            com.pln.monitoringpln.data.local.AppDatabase::class.java,
         ).build()
 
         reportRepository = ReportRepositoryImpl(database.tugasDao(), context)
@@ -40,15 +40,21 @@ class ReportRepositoryImplTest {
     @Test
     fun export_report_to_PDF_should_succeed() = runBlocking {
         println(logHeader.format("Integration: Export PDF"))
-        
+
         // Given
         val startDate = Date(System.currentTimeMillis() - 86400000 * 7) // 7 days ago
         val endDate = Date(System.currentTimeMillis() + 86400000 * 7) // 7 days ahead
-        
+
         // Insert dummy data
         val task1 = com.pln.monitoringpln.data.local.entity.TugasEntity(
-            id = "task-1", deskripsi = "Task for Report", idAlat = "alat-1", idTeknisi = "tech-1",
-            tglDibuat = Date(), tglJatuhTempo = Date(), status = "Done", isSynced = true
+            id = "task-1",
+            deskripsi = "Task for Report",
+            idAlat = "alat-1",
+            idTeknisi = "tech-1",
+            tglDibuat = Date(),
+            tglJatuhTempo = Date(),
+            status = "Done",
+            isSynced = true,
         )
         database.tugasDao().insertTugas(task1)
 
@@ -63,7 +69,7 @@ class ReportRepositoryImplTest {
         }
         // Note: If no tasks found, it might fail as per logic.
         // We assume there are tasks or we accept failure if "Tidak ada data"
-        
+
         if (result.isSuccess) {
             val path = result.getOrNull()
             println(logAssert.format("File created at: $path"))
@@ -73,22 +79,28 @@ class ReportRepositoryImplTest {
         } else {
             println(logAssert.format("Failed (likely no data): ${result.exceptionOrNull()?.message}"))
         }
-        
+
         println(logResult)
     }
 
     @Test
     fun export_report_to_CSV_should_succeed() = runBlocking {
         println(logHeader.format("Integration: Export CSV"))
-        
+
         // Given
         val startDate = Date(System.currentTimeMillis() - 86400000 * 7) // 7 days ago
         val endDate = Date(System.currentTimeMillis() + 86400000 * 7) // 7 days ahead
-        
+
         // Insert dummy data
         val task1 = com.pln.monitoringpln.data.local.entity.TugasEntity(
-            id = "task-1", deskripsi = "Task for Report CSV", idAlat = "alat-1", idTeknisi = "tech-1",
-            tglDibuat = Date(), tglJatuhTempo = Date(), status = "Done", isSynced = true
+            id = "task-1",
+            deskripsi = "Task for Report CSV",
+            idAlat = "alat-1",
+            idTeknisi = "tech-1",
+            tglDibuat = Date(),
+            tglJatuhTempo = Date(),
+            status = "Done",
+            isSynced = true,
         )
         database.tugasDao().insertTugas(task1)
 
@@ -101,7 +113,7 @@ class ReportRepositoryImplTest {
         if (result.isFailure) {
             println("Error: ${result.exceptionOrNull()?.message}")
         }
-        
+
         if (result.isSuccess) {
             val path = result.getOrNull()
             println(logAssert.format("File created at: $path"))
@@ -112,7 +124,7 @@ class ReportRepositoryImplTest {
         } else {
             println(logAssert.format("Failed (likely no data): ${result.exceptionOrNull()?.message}"))
         }
-        
+
         println(logResult)
     }
 }

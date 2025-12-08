@@ -79,7 +79,7 @@ object TestObjects {
         longitude: Double = 106.8,
         kondisi: String = "Baik",
         status: String = "ACTIVE",
-        isArchived: Boolean = false
+        isArchived: Boolean = false,
     ): Alat {
         return Alat(
             id = id,
@@ -89,7 +89,7 @@ object TestObjects {
             longitude = longitude,
             kondisi = kondisi,
             status = status,
-            isArchived = isArchived
+            isArchived = isArchived,
         )
     }
 }

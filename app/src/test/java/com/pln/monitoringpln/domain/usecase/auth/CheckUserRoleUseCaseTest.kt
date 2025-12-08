@@ -26,7 +26,7 @@ class CheckUserRoleUseCaseTest {
     @Test
     fun `should return role when user is logged in`() = runTest {
         println(logTestStart.format("Get User Role Success"))
-        
+
         // Given
         authRepository.fakeRole = "ADMIN"
         println(logAct.format("Get role for logged in user"))
@@ -44,7 +44,7 @@ class CheckUserRoleUseCaseTest {
     @Test
     fun `should return failure when repository fails`() = runTest {
         println(logTestStart.format("Get User Role Failure"))
-        
+
         // Given
         authRepository.shouldFailRole = true
         println(logAct.format("Get role when repo fails"))

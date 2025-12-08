@@ -7,7 +7,7 @@ import io.github.jan.supabase.postgrest.postgrest
 import io.github.jan.supabase.storage.storage
 
 class TugasRemoteDataSource(
-    private val supabaseClient: SupabaseClient
+    private val supabaseClient: SupabaseClient,
 ) {
     suspend fun fetchAllTugas(): Result<List<TugasDto>> {
         return try {
@@ -51,7 +51,7 @@ class TugasRemoteDataSource(
     suspend fun updateTugasStatus(id: String, status: String): Result<Unit> {
         return try {
             supabaseClient.postgrest["tugas"].update(
-                mapOf("status" to status)
+                mapOf("status" to status),
             ) {
                 filter {
                     eq("id", id)

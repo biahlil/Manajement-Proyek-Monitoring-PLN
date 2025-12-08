@@ -19,13 +19,13 @@ import java.util.Locale
 
 class ReportRepositoryImpl(
     private val tugasDao: com.pln.monitoringpln.data.local.dao.TugasDao,
-    private val context: Context
+    private val context: Context,
 ) : ReportRepository {
 
     override suspend fun exportTaskReport(
         startDate: Date,
         endDate: Date,
-        format: ExportFormat
+        format: ExportFormat,
     ): Result<String> {
         return try {
             // 1. Fetch Data from Local DB (Offline-First)

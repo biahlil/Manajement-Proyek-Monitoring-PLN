@@ -26,7 +26,8 @@ class BaseApplication : Application() {
             .build()
 
         val syncRequest = androidx.work.PeriodicWorkRequestBuilder<com.pln.monitoringpln.data.worker.SyncWorker>(
-            5, java.util.concurrent.TimeUnit.MINUTES
+            5,
+            java.util.concurrent.TimeUnit.MINUTES,
         )
             .setConstraints(constraints)
             .build()
@@ -34,7 +35,7 @@ class BaseApplication : Application() {
         androidx.work.WorkManager.getInstance(this).enqueueUniquePeriodicWork(
             "SyncWorker",
             androidx.work.ExistingPeriodicWorkPolicy.KEEP,
-            syncRequest
+            syncRequest,
         )
     }
 }

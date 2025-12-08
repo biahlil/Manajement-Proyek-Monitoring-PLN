@@ -7,7 +7,7 @@ import kotlinx.coroutines.coroutineScope
 
 class DashboardRepositoryImpl(
     private val alatDao: com.pln.monitoringpln.data.local.dao.AlatDao,
-    private val tugasDao: com.pln.monitoringpln.data.local.dao.TugasDao
+    private val tugasDao: com.pln.monitoringpln.data.local.dao.TugasDao,
 ) : DashboardRepository {
 
     override suspend fun getDashboardSummary(): Result<DashboardSummary> = coroutineScope {
@@ -28,7 +28,7 @@ class DashboardRepositoryImpl(
                 totalTugas = totalTugasDeferred.await(),
                 tugasToDo = tugasToDoDeferred.await(),
                 tugasInProgress = tugasInProgressDeferred.await(),
-                tugasDone = tugasDoneDeferred.await()
+                tugasDone = tugasDoneDeferred.await(),
             )
 
             Result.success(summary)

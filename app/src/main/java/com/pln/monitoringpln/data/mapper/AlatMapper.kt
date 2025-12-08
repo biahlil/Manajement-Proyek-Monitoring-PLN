@@ -13,7 +13,7 @@ fun AlatEntity.toDomain(): Alat {
         kondisi = kondisi,
         status = status,
         lastModifiedById = lastModifiedById,
-        isArchived = isArchived
+        isArchived = isArchived,
     )
 }
 
@@ -28,7 +28,7 @@ fun Alat.toEntity(isSynced: Boolean = true): AlatEntity {
         status = status,
         lastModifiedById = lastModifiedById,
         isSynced = isSynced,
-        isArchived = false // Default to false when converting from domain
+        isArchived = false, // Default to false when converting from domain
     )
 }
 
@@ -41,6 +41,6 @@ fun com.pln.monitoringpln.data.model.AlatDto.toDomain(): Alat {
         longitude = longitude,
         kondisi = kondisi,
         status = status,
-        lastModifiedById = lastModifiedById
+        lastModifiedById = lastModifiedById,
     )
 }

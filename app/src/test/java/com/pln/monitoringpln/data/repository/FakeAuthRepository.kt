@@ -9,7 +9,7 @@ class FakeAuthRepository : AuthRepository {
 
     private val _isLoggedIn = MutableStateFlow(false)
     private var currentUserEmail: String? = null
-    
+
     // Configurable behavior for testing
     var shouldFailLogin = false
     var failureMessage = "Login failed"
@@ -18,10 +18,10 @@ class FakeAuthRepository : AuthRepository {
         if (shouldFailLogin) {
             return Result.failure(Exception(failureMessage))
         }
-        
+
         // Simple mock logic: accept any login if not set to fail
         if (password == "wrong") {
-             return Result.failure(Exception("Invalid credentials"))
+            return Result.failure(Exception("Invalid credentials"))
         }
 
         _isLoggedIn.value = true
@@ -54,7 +54,7 @@ class FakeAuthRepository : AuthRepository {
     }
 
     var shouldFailCreateUser = false
-    
+
     override suspend fun createUser(email: String, password: String, fullName: String, role: String): Result<Unit> {
         if (shouldFailCreateUser) {
             return Result.failure(Exception("Failed to create user"))
