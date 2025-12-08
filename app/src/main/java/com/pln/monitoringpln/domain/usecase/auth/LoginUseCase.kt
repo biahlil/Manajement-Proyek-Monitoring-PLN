@@ -1,7 +1,7 @@
 package com.pln.monitoringpln.domain.usecase.auth
 
 import com.pln.monitoringpln.domain.repository.AuthRepository
-import com.pln.monitoringpln.domain.repository.AuthRepository
+
 
 class LoginUseCase(
     private val authRepository: AuthRepository,
@@ -10,7 +10,7 @@ class LoginUseCase(
 
     suspend operator fun invoke(email: String, password: String): Result<Unit> {
 
-    suspend operator fun invoke(email: String, password: String): Result<Unit> {
+
         // 1. Validasi Format
         if (email.isBlank()) return Result.failure(IllegalArgumentException("Email tidak boleh kosong."))
         if (!email.matches(emailRegex)) return Result.failure(IllegalArgumentException("Format email tidak valid."))

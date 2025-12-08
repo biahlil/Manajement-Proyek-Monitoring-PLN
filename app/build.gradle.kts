@@ -49,15 +49,14 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "21"
     }
     buildFeatures {
         compose = true
-        buildConfig = true
         buildConfig = true
     }
 }
@@ -88,19 +87,7 @@ dependencies {
     implementation(libs.ktor.client.core)
 
     
-    // Room
-    implementation(libs.androidx.room.runtime)
-    implementation(libs.androidx.room.ktx)
-    ksp(libs.androidx.room.compiler)
 
-    // Supabase
-    implementation(platform(libs.supabase.bom))
-    implementation(libs.supabase.gotrue)
-    implementation(libs.supabase.postgrest)
-    implementation(libs.supabase.storage)
-    implementation(libs.supabase.functions)
-    implementation(libs.ktor.client.android)
-    implementation(libs.ktor.client.core)
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)

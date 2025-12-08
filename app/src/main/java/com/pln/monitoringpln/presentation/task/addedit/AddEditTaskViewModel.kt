@@ -50,7 +50,7 @@ class AddEditTaskViewModel(
             // Load Equipments
             alatRepository.getAllAlat().collect { list ->
                 // Filter out equipment with empty IDs
-                val validList = list.filter { it.id.isNotBlank() }
+                val validList = list.filter { alat -> alat.id.isNotBlank() }
                 allEquipmentsCache = validList
                 _state.update { it.copy(availableEquipments = validList) }
             }
