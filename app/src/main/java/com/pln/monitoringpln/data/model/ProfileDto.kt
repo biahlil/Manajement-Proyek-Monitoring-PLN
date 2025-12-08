@@ -10,5 +10,5 @@ data class ProfileDto(
     @SerialName("full_name") val fullName: String? = null,
     @SerialName("email") val email: String? = null,
     @SerialName("is_active") val isActive: Boolean? = true,
-    @SerialName("avatar_url") val avatarUrl: String? = null
+    @SerialName("avatar_url") val avatarUrl: String? = null,
 )

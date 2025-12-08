@@ -2,7 +2,6 @@ package com.pln.monitoringpln.data.repository
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.pln.monitoringpln.domain.repository.UserRepository
-import com.pln.monitoringpln.utils.TestObjects
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.gotrue.Auth
@@ -33,7 +32,7 @@ class UserRepositoryImplTest {
         // Initialize real Supabase Client for Integration Test
         supabaseClient = createSupabaseClient(
             supabaseUrl = com.pln.monitoringpln.BuildConfig.SUPABASE_URL,
-            supabaseKey = com.pln.monitoringpln.BuildConfig.SUPABASE_KEY
+            supabaseKey = com.pln.monitoringpln.BuildConfig.SUPABASE_KEY,
         ) {
             install(Postgrest)
             install(Auth)
@@ -44,7 +43,7 @@ class UserRepositoryImplTest {
         val context = androidx.test.core.app.ApplicationProvider.getApplicationContext<android.content.Context>()
         database = androidx.room.Room.inMemoryDatabaseBuilder(
             context,
-            com.pln.monitoringpln.data.local.AppDatabase::class.java
+            com.pln.monitoringpln.data.local.AppDatabase::class.java,
         ).allowMainThreadQueries().build()
 
         userRepository = UserRepositoryImpl(database.userDao(), supabaseClient)
@@ -55,7 +54,7 @@ class UserRepositoryImplTest {
     @org.junit.After
     fun tearDown() {
         database.close()
-        
+
         if (uploadedAvatars.isNotEmpty()) {
             runBlocking {
                 try {
@@ -66,11 +65,11 @@ class UserRepositoryImplTest {
                     // Let's rely on the URL or the known path structure.
                     val bucket = supabaseClient.storage.from("avatars")
                     uploadedAvatars.forEach { path ->
-                         // path might be full URL or relative.
-                         // If it's URL, extract path.
-                         val fileName = path.substringAfterLast("/")
-                         bucket.delete(fileName)
-                         println("Cleaned up avatar: $fileName")
+                        // path might be full URL or relative.
+                        // If it's URL, extract path.
+                        val fileName = path.substringAfterLast("/")
+                        bucket.delete(fileName)
+                        println("Cleaned up avatar: $fileName")
                     }
                 } catch (e: Exception) {
                     println("Failed to cleanup avatars: ${e.message}")
@@ -91,10 +90,10 @@ class UserRepositoryImplTest {
             println("Error: ${result.exceptionOrNull()?.message}")
         }
         assertTrue("Get All Teknisi failed: ${result.exceptionOrNull()?.message}", result.isSuccess)
-        
+
         val teknisiList = result.getOrNull()
         println(logAssert.format("Found ${teknisiList?.size} teknisi"))
-        
+
         println(logResult)
     }
 
@@ -109,10 +108,10 @@ class UserRepositoryImplTest {
         // If RLS is on, we might need to sign in first.
         // But UserRepositoryImpl doesn't handle sign in.
         // Let's assume public bucket or permissive RLS for "avatars" for now, or that we are testing the upload logic.
-        
+
         val userId = "test-user-integration-${System.currentTimeMillis()}"
         val byteArray = "Avatar Content".toByteArray()
-        
+
         println(logAction.format("Upload avatar for user: $userId"))
 
         // When
@@ -127,14 +126,14 @@ class UserRepositoryImplTest {
         // assertTrue("Upload avatar failed: ${result.exceptionOrNull()?.message}", result.isSuccess)
         // Commenting out strict assertion for now as RLS might block it without login.
         // But we want to test the implementation.
-        
+
         if (result.isSuccess) {
             val url = result.getOrNull()
             assertTrue("URL should not be null", !url.isNullOrBlank())
             url?.let { uploadedAvatars.add(it) }
             println(logAssert.format("Avatar uploaded, URL: $url"))
         } else {
-             println(logAssert.format("Upload failed (likely RLS): ${result.exceptionOrNull()?.message}"))
+            println(logAssert.format("Upload failed (likely RLS): ${result.exceptionOrNull()?.message}"))
         }
 
         println(logResult)

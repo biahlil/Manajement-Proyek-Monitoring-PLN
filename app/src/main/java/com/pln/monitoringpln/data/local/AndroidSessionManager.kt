@@ -2,7 +2,6 @@ package com.pln.monitoringpln.data.local
 
 import android.content.Context
 import io.github.jan.supabase.gotrue.SessionManager
-
 import io.github.jan.supabase.gotrue.user.UserSession
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json

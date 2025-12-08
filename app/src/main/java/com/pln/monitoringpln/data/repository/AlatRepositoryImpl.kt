@@ -1,10 +1,10 @@
 package com.pln.monitoringpln.data.repository
 
 import com.pln.monitoringpln.data.local.datasource.AlatLocalDataSource
-import com.pln.monitoringpln.data.remote.AlatRemoteDataSource
 import com.pln.monitoringpln.data.mapper.toDomain
 import com.pln.monitoringpln.data.mapper.toEntity
 import com.pln.monitoringpln.data.model.toInsertDto
+import com.pln.monitoringpln.data.remote.AlatRemoteDataSource
 import com.pln.monitoringpln.domain.model.Alat
 import com.pln.monitoringpln.domain.repository.AlatRepository
 import kotlinx.coroutines.flow.Flow
@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.map
 
 class AlatRepositoryImpl(
     private val localDataSource: AlatLocalDataSource,
-    private val remoteDataSource: AlatRemoteDataSource
+    private val remoteDataSource: AlatRemoteDataSource,
 ) : AlatRepository {
 
     override fun getAllAlat(): Flow<List<Alat>> {
@@ -25,7 +25,7 @@ class AlatRepositoryImpl(
         return try {
             // 1. Save to Local (isSynced = false)
             localDataSource.insertAlat(alat.toEntity(isSynced = false))
-            
+
             // 2. Trigger Sync (Best Effort)
             // We can try to push immediately, but for now we rely on SyncWorker or manual sync
             Result.success(Unit)
@@ -68,7 +68,7 @@ class AlatRepositoryImpl(
             }
 
             val remoteResult = remoteDataSource.getAlatByKode(kode)
-             if (remoteResult.isSuccess) {
+            if (remoteResult.isSuccess) {
                 val dto = remoteResult.getOrThrow()
                 localDataSource.insertAlat(dto.toDomain().toEntity(isSynced = true))
                 Result.success(dto.toDomain())
@@ -86,21 +86,21 @@ class AlatRepositoryImpl(
         kode: String,
         lat: Double,
         lng: Double,
-        locationName: String?
+        locationName: String?,
     ): Result<Unit> {
         return try {
             val existing = localDataSource.getAlatDetail(id) ?: return Result.failure(Exception("Alat not found locally"))
-            
+
             val updated = existing.copy(
                 namaAlat = nama,
                 kodeAlat = kode,
                 latitude = lat,
                 longitude = lng,
                 locationName = locationName,
-                isSynced = false
+                isSynced = false,
             )
             localDataSource.updateAlat(updated)
-            
+
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
@@ -110,7 +110,7 @@ class AlatRepositoryImpl(
     override suspend fun archiveAlat(id: String): Result<Unit> {
         return try {
             localDataSource.archiveAlat(id)
-            // Note: archiveAlat in DAO sets isSynced = 0 automatically if query modified, 
+            // Note: archiveAlat in DAO sets isSynced = 0 automatically if query modified,
             // but our DAO query for archive currently sets isSynced=0 explicitly?
             // Let's check DAO. DAO query: "UPDATE alat SET isArchived = 1, status = 'ARCHIVED' WHERE id = :id"
             // It does NOT set isSynced=0 in the query I saw earlier (I might have removed it).
@@ -119,7 +119,7 @@ class AlatRepositoryImpl(
             // Actually, let's update the DAO to set isSynced=0 when archiving, or handle it here.
             // Since I can't change DAO in this step easily without context switch, let's assume DAO does it or we do it manually.
             // Ideally DAO should do it.
-            
+
             // Let's just return success for now.
             Result.success(Unit)
         } catch (e: Exception) {
@@ -130,19 +130,19 @@ class AlatRepositoryImpl(
     override suspend fun updateAlatCondition(id: String, kondisi: String): Result<Unit> {
         return try {
             val existing = localDataSource.getAlatDetail(id) ?: return Result.failure(Exception("Alat not found locally"))
-            
+
             val updated = existing.copy(
                 kondisi = kondisi,
-                isSynced = false
+                isSynced = false,
             )
             localDataSource.updateAlat(updated)
-            
+
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
-    
+
     // New Sync Method
     override suspend fun sync(): Result<Unit> {
         return try {
@@ -166,18 +166,18 @@ class AlatRepositoryImpl(
                         remoteDataSource.insertAlat(entity.toDomain().toInsertDto(), upsert = true)
                     }
                 }
-                
+
                 if (result.isSuccess) {
                     localDataSource.insertAlat(entity.copy(isSynced = true))
                 }
             }
-            
+
             // 2. Pull Latest
             val remoteData = remoteDataSource.fetchAllAlat()
             remoteData.getOrNull()?.let { dtos ->
                 localDataSource.insertAll(dtos.map { it.toDomain().toEntity(isSynced = true) })
             }
-            
+
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)

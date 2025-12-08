@@ -1,6 +1,8 @@
 package com.pln.monitoringpln.di
 
 import com.pln.monitoringpln.BuildConfig
+import com.pln.monitoringpln.data.local.datasource.AlatLocalDataSource
+import com.pln.monitoringpln.data.remote.AlatRemoteDataSource
 import com.pln.monitoringpln.data.repository.AlatRepositoryImpl
 import com.pln.monitoringpln.data.repository.AuthRepositoryImpl
 import com.pln.monitoringpln.data.repository.DashboardRepositoryImpl
@@ -12,12 +14,10 @@ import com.pln.monitoringpln.domain.repository.DashboardRepository
 import com.pln.monitoringpln.domain.repository.ReportRepository
 import com.pln.monitoringpln.domain.repository.TugasRepository
 import io.github.jan.supabase.createSupabaseClient
+import io.github.jan.supabase.functions.Functions
 import io.github.jan.supabase.gotrue.Auth
 import io.github.jan.supabase.postgrest.Postgrest
 import io.github.jan.supabase.storage.Storage
-import io.github.jan.supabase.functions.Functions
-import com.pln.monitoringpln.data.local.datasource.AlatLocalDataSource
-import com.pln.monitoringpln.data.remote.AlatRemoteDataSource
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 
@@ -25,7 +25,7 @@ val dataModule = module {
     single {
         createSupabaseClient(
             supabaseUrl = BuildConfig.SUPABASE_URL,
-            supabaseKey = BuildConfig.SUPABASE_KEY
+            supabaseKey = BuildConfig.SUPABASE_KEY,
         ) {
             install(Auth) {
                 sessionManager = com.pln.monitoringpln.data.local.AndroidSessionManager(androidContext())
@@ -41,7 +41,7 @@ val dataModule = module {
         androidx.room.Room.databaseBuilder(
             androidContext(),
             com.pln.monitoringpln.data.local.AppDatabase::class.java,
-            "monitoring_pln.db"
+            "monitoring_pln.db",
         ).build()
     }
 

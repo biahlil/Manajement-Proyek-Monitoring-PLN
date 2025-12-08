@@ -12,7 +12,7 @@ class CompleteTaskUseCase(
         taskId: String,
         photoBytes: ByteArray?,
         newCondition: String,
-        currentProofUrl: String? = null
+        currentProofUrl: String? = null,
     ): Result<Unit> {
         // 1. Validasi Input
         if (taskId.isBlank()) return Result.failure(IllegalArgumentException("ID Tugas tidak valid."))

@@ -5,7 +5,7 @@ import com.pln.monitoringpln.domain.repository.UserRepository
 import kotlinx.coroutines.flow.Flow
 
 class GetTechniciansUseCase(
-    private val repository: UserRepository
+    private val repository: UserRepository,
 ) {
     operator fun invoke(): Flow<List<User>> {
         return repository.observeTeknisi()

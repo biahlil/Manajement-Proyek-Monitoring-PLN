@@ -9,7 +9,7 @@ fun UserEntity.toDomain(): User {
         email = email,
         namaLengkap = namaLengkap,
         role = role,
-        photoUrl = photoUrl
+        photoUrl = photoUrl,
     )
 }
 
@@ -20,6 +20,6 @@ fun User.toEntity(): UserEntity {
         namaLengkap = namaLengkap,
         role = role,
         isActive = true,
-        photoUrl = photoUrl
+        photoUrl = photoUrl,
     )
 }

@@ -1,12 +1,11 @@
 package com.pln.monitoringpln.domain.usecase.user
 
+import com.pln.monitoringpln.domain.exception.ValidationException
 import com.pln.monitoringpln.domain.model.User
 import com.pln.monitoringpln.domain.repository.UserRepository
 
-import com.pln.monitoringpln.domain.exception.ValidationException
-
 class UpdateUserProfileUseCase(
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
 ) {
     suspend operator fun invoke(user: User): Result<Unit> {
         if (user.namaLengkap.isBlank()) {

@@ -2,22 +2,20 @@ package com.pln.monitoringpln.presentation.profile.edit
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.delay
+import com.pln.monitoringpln.domain.repository.AuthRepository
+import com.pln.monitoringpln.domain.repository.UserRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-import com.pln.monitoringpln.domain.repository.AuthRepository
-import com.pln.monitoringpln.domain.repository.UserRepository
-
 class EditProfileViewModel(
     private val authRepository: AuthRepository,
     private val userRepository: UserRepository,
     private val updateUserProfileUseCase: com.pln.monitoringpln.domain.usecase.user.UpdateUserProfileUseCase,
     private val updatePasswordUseCase: com.pln.monitoringpln.domain.usecase.auth.UpdatePasswordUseCase,
-    private val uploadAvatarUseCase: com.pln.monitoringpln.domain.usecase.user.UploadAvatarUseCase
+    private val uploadAvatarUseCase: com.pln.monitoringpln.domain.usecase.user.UploadAvatarUseCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(EditProfileState())
@@ -35,7 +33,7 @@ class EditProfileViewModel(
             val user = userResult.getOrNull()
 
             if (user != null) {
-                _state.update { 
+                _state.update {
                     it.copy(
                         name = user.namaLengkap,
                         id = user.id,
@@ -43,8 +41,8 @@ class EditProfileViewModel(
                         phone = "-", // Placeholder
                         role = user.role,
                         photoUrl = user.photoUrl,
-                        isLoading = false
-                    ) 
+                        isLoading = false,
+                    )
                 }
             } else {
                 _state.update { it.copy(isLoading = false) }
@@ -91,22 +89,22 @@ class EditProfileViewModel(
     fun onSave() {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, error = null, nameError = null, emailError = null, passwordError = null) }
-            
+
             val currentUserState = _state.value
 
             // 1. Update Profile
             val currentRole = if (currentUserState.role.isNotEmpty()) currentUserState.role else "TEKNISI"
-            
+
             val user = com.pln.monitoringpln.domain.model.User(
                 id = currentUserState.id,
                 email = currentUserState.email,
                 namaLengkap = currentUserState.name,
                 role = currentRole,
-                photoUrl = currentUserState.photoUrl
+                photoUrl = currentUserState.photoUrl,
             )
 
             val profileResult = updateUserProfileUseCase(user)
-            
+
             if (profileResult.isFailure) {
                 val exception = profileResult.exceptionOrNull()
                 if (exception is com.pln.monitoringpln.domain.exception.ValidationException) {
@@ -118,22 +116,22 @@ class EditProfileViewModel(
                     return@launch
                 }
             }
-            
+
             // 2. Update Password (if provided)
             var passwordResult: Result<Unit> = Result.success(Unit)
             if (currentUserState.password.isNotEmpty()) {
                 passwordResult = updatePasswordUseCase(currentUserState.password, currentUserState.confirmPassword)
-                
+
                 if (passwordResult.isFailure) {
                     val exception = passwordResult.exceptionOrNull()
                     if (exception is com.pln.monitoringpln.domain.exception.ValidationException) {
-                         _state.update { it.copy(isLoading = false, passwordError = exception.message) }
+                        _state.update { it.copy(isLoading = false, passwordError = exception.message) }
                         return@launch
                     }
                     // Handle Supabase specific error "New password should be different from the old password"
                     if (exception?.message?.contains("different from the old password", ignoreCase = true) == true) {
-                         _state.update { it.copy(isLoading = false, passwordError = "Password baru tidak boleh sama dengan password lama") }
-                         return@launch
+                        _state.update { it.copy(isLoading = false, passwordError = "Password baru tidak boleh sama dengan password lama") }
+                        return@launch
                     }
                 }
             }
@@ -141,8 +139,8 @@ class EditProfileViewModel(
             if (profileResult.isSuccess && passwordResult.isSuccess) {
                 _state.update { it.copy(isLoading = false, isSaved = true) }
             } else {
-                val errorMessage = profileResult.exceptionOrNull()?.message 
-                    ?: passwordResult.exceptionOrNull()?.message 
+                val errorMessage = profileResult.exceptionOrNull()?.message
+                    ?: passwordResult.exceptionOrNull()?.message
                     ?: "Gagal menyimpan perubahan"
                 _state.update { it.copy(isLoading = false, error = errorMessage) }
             }

@@ -1,11 +1,10 @@
 package com.pln.monitoringpln.di
 
-import org.koin.dsl.module
-
 import com.pln.monitoringpln.domain.usecase.auth.CheckUserRoleUseCase
-import com.pln.monitoringpln.domain.usecase.auth.LoginUseCase
 import com.pln.monitoringpln.domain.usecase.auth.CreateUserUseCase
 import com.pln.monitoringpln.domain.usecase.auth.GetCurrentUserIdUseCase
+import com.pln.monitoringpln.domain.usecase.auth.LoginUseCase
+import org.koin.dsl.module
 
 val domainModule = module {
     factory { LoginUseCase(get()) }

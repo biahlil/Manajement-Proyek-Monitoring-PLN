@@ -20,9 +20,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.pln.monitoringpln.domain.model.Alat
+import com.pln.monitoringpln.domain.model.Tugas
 import java.text.SimpleDateFormat
 import java.util.Locale
-import com.pln.monitoringpln.domain.model.Tugas
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -34,7 +34,7 @@ fun EquipmentDetailScreen(
     onConfirmDelete: () -> Unit,
     onDismissDelete: () -> Unit,
     onAddTask: () -> Unit,
-    onTaskClick: (String) -> Unit
+    onTaskClick: (String) -> Unit,
 ) {
     val context = LocalContext.current
 
@@ -49,8 +49,8 @@ fun EquipmentDetailScreen(
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                )
+                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                ),
             )
         },
 
@@ -60,7 +60,7 @@ fun EquipmentDetailScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
                     OutlinedButton(
                         onClick = onDelete,
@@ -68,7 +68,7 @@ fun EquipmentDetailScreen(
                             .weight(1f)
                             .height(50.dp),
                         shape = RoundedCornerShape(8.dp),
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
                     ) {
                         Icon(Icons.Default.Delete, contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(modifier = Modifier.width(8.dp))
@@ -80,7 +80,7 @@ fun EquipmentDetailScreen(
                         modifier = Modifier
                             .weight(1f)
                             .height(50.dp),
-                        shape = RoundedCornerShape(8.dp)
+                        shape = RoundedCornerShape(8.dp),
                     ) {
                         Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(modifier = Modifier.width(8.dp))
@@ -88,7 +88,7 @@ fun EquipmentDetailScreen(
                     }
                 }
             }
-        }
+        },
     ) { paddingValues ->
         if (state.isLoading) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -104,7 +104,7 @@ fun EquipmentDetailScreen(
                     .fillMaxSize()
                     .padding(paddingValues)
                     .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 // Header
                 item {
@@ -125,7 +125,7 @@ fun EquipmentDetailScreen(
                         onMapClick = {
                             val uri = Uri.parse("geo:${equipment.latitude},${equipment.longitude}?q=${equipment.latitude},${equipment.longitude}(${equipment.namaAlat})")
                             val mapIntent = Intent(Intent.ACTION_VIEW, uri)
-                            
+
                             try {
                                 context.startActivity(mapIntent)
                             } catch (e: android.content.ActivityNotFoundException) {
@@ -139,7 +139,7 @@ fun EquipmentDetailScreen(
                                     android.widget.Toast.makeText(context, "Tidak ada aplikasi untuk membuka peta", android.widget.Toast.LENGTH_SHORT).show()
                                 }
                             }
-                        }
+                        },
                     )
                 }
 
@@ -149,24 +149,24 @@ fun EquipmentDetailScreen(
                         text = "Riwayat Inspeksi",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(vertical = 8.dp)
+                        modifier = Modifier.padding(vertical = 8.dp),
                     )
                 }
-                
+
                 if (history.isEmpty()) {
                     item {
                         Text(
                             text = "Belum ada riwayat inspeksi",
                             style = MaterialTheme.typography.bodyMedium,
                             color = Color.Gray,
-                            modifier = Modifier.padding(vertical = 8.dp)
+                            modifier = Modifier.padding(vertical = 8.dp),
                         )
                     }
                 } else {
                     items(history.size) { index ->
                         HistoryItem(
                             tugas = history[index],
-                            onClick = { onTaskClick(history[index].id) }
+                            onClick = { onTaskClick(history[index].id) },
                         )
                     }
                 }
@@ -186,7 +186,7 @@ fun EquipmentDetailScreen(
                 confirmButton = {
                     TextButton(
                         onClick = onConfirmDelete,
-                        colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                        colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error),
                     ) {
                         if (state.isDeleting) {
                             CircularProgressIndicator(modifier = Modifier.size(24.dp))
@@ -199,7 +199,7 @@ fun EquipmentDetailScreen(
                     TextButton(onClick = onDismissDelete) {
                         Text("Batal")
                     }
-                }
+                },
             )
         }
     }
@@ -212,35 +212,35 @@ fun DetailHeader(equipment: Alat, lastMaintenance: Tugas?) {
 
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFEDE7F6)) // Light Purple
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFEDE7F6)), // Light Purple
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Top
+                verticalAlignment = Alignment.Top,
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = equipment.namaAlat,
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF311B92) // Dark Purple
+                        color = Color(0xFF311B92), // Dark Purple
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = equipment.kodeAlat,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = Color(0xFF5E35B1) // Medium Purple
+                        color = Color(0xFF5E35B1), // Medium Purple
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = equipment.tipe,
                         style = MaterialTheme.typography.bodySmall,
-                        color = Color(0xFF757575)
+                        color = Color(0xFF757575),
                     )
                 }
-                
+
                 // Status Badge
                 Surface(
                     shape = RoundedCornerShape(16.dp),
@@ -253,13 +253,13 @@ fun DetailHeader(equipment: Alat, lastMaintenance: Tugas?) {
                         "Normal" -> Color(0xFF1B5E20)
                         "Rusak" -> Color(0xFFB71C1C)
                         else -> Color(0xFFE65100)
-                    }
+                    },
                 ) {
                     Text(
                         text = equipment.kondisi,
                         style = MaterialTheme.typography.labelMedium,
                         fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
                     )
                 }
             }
@@ -267,7 +267,7 @@ fun DetailHeader(equipment: Alat, lastMaintenance: Tugas?) {
             Text(
                 text = "Pemeliharaan Terakhir: $lastMaintenanceDate",
                 style = MaterialTheme.typography.bodySmall,
-                color = Color(0xFF757575)
+                color = Color(0xFF757575),
             )
         }
     }
@@ -277,17 +277,17 @@ fun DetailHeader(equipment: Alat, lastMaintenance: Tugas?) {
 fun WarningCard(equipment: Alat) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFFFEBEE)) // Light Red
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFFFEBEE)), // Light Red
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(
                 Icons.Default.Warning,
                 contentDescription = "Warning",
                 tint = Color(0xFFB71C1C), // Red
-                modifier = Modifier.size(32.dp)
+                modifier = Modifier.size(32.dp),
             )
             Spacer(modifier = Modifier.width(16.dp))
             Column {
@@ -295,12 +295,12 @@ fun WarningCard(equipment: Alat) {
                     text = "Perhatian Diperlukan",
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFFB71C1C)
+                    color = Color(0xFFB71C1C),
                 )
                 Text(
                     text = "Kondisi alat ${equipment.kondisi}. Segera lakukan pengecekan.",
                     style = MaterialTheme.typography.bodySmall,
-                    color = Color(0xFFB71C1C)
+                    color = Color(0xFFB71C1C),
                 )
             }
         }
@@ -314,9 +314,9 @@ fun SpecificationsCard(equipment: Alat, onMapClick: () -> Unit) {
             text = "Lokasi",
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(bottom = 16.dp)
+            modifier = Modifier.padding(bottom = 16.dp),
         )
-        
+
         // Map View
         Box(
             modifier = Modifier
@@ -326,22 +326,22 @@ fun SpecificationsCard(equipment: Alat, onMapClick: () -> Unit) {
                 .border(
                     width = 1.dp,
                     color = MaterialTheme.colorScheme.outlineVariant,
-                    shape = RoundedCornerShape(12.dp)
-                )
+                    shape = RoundedCornerShape(12.dp),
+                ),
         ) {
             // Map Component
             com.pln.monitoringpln.presentation.components.MapPicker(
                 modifier = Modifier.fillMaxSize(),
                 initialLocation = org.osmdroid.util.GeoPoint(equipment.latitude, equipment.longitude),
-                onLocationSelected = { _, _ -> } // No-op for read-only view
+                onLocationSelected = { _, _ -> }, // No-op for read-only view
             )
-            
+
             // Transparent Overlay for Click
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(Color.Transparent)
-                    .clickable(onClick = onMapClick)
+                    .clickable(onClick = onMapClick),
             )
         }
     }
@@ -365,25 +365,25 @@ fun HistoryItem(tugas: Tugas, onClick: () -> Unit) {
             .fillMaxWidth()
             .clickable(onClick = onClick)
             .padding(vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(
-            if (tugas.status == "Done") Icons.Default.CheckCircle else Icons.Default.Info, 
-            contentDescription = null, 
+            if (tugas.status == "Done") Icons.Default.CheckCircle else Icons.Default.Info,
+            contentDescription = null,
             tint = if (tugas.status == "Done") Color(0xFF4CAF50) else Color(0xFFFFC107),
-            modifier = Modifier.size(24.dp)
+            modifier = Modifier.size(24.dp),
         )
         Spacer(modifier = Modifier.width(16.dp))
         Column {
             Text(
-                text = tugas.judul, 
-                fontWeight = FontWeight.Bold, 
-                style = MaterialTheme.typography.bodyMedium
+                text = tugas.judul,
+                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.bodyMedium,
             )
             Text(
-                text = "$dateStr • Status: ${tugas.status}", 
-                style = MaterialTheme.typography.labelSmall, 
-                color = Color.Gray
+                text = "$dateStr • Status: ${tugas.status}",
+                style = MaterialTheme.typography.labelSmall,
+                color = Color.Gray,
             )
         }
     }

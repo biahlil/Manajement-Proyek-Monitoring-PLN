@@ -32,7 +32,7 @@ fun ReportScreen(
     onExport: () -> Unit,
     onBack: () -> Unit,
     onClearMessages: () -> Unit,
-    onFullReportChange: (Boolean) -> Unit
+    onFullReportChange: (Boolean) -> Unit,
 ) {
     val context = LocalContext.current
     val dateFormat = SimpleDateFormat("dd MMM yyyy", Locale("id", "ID"))
@@ -53,28 +53,28 @@ fun ReportScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { 
+                title = {
                     Text(
                         "Laporan Tugas",
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary
-                    ) 
+                        color = MaterialTheme.colorScheme.primary,
+                    )
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
-                            Icons.Default.ArrowBack, 
+                            Icons.Default.ArrowBack,
                             contentDescription = "Kembali",
-                            tint = MaterialTheme.colorScheme.onSurface
+                            tint = MaterialTheme.colorScheme.onSurface,
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                )
+                    containerColor = MaterialTheme.colorScheme.surface,
+                ),
             )
         },
-        snackbarHost = { SnackbarHost(snackbarHostState) }
+        snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -82,45 +82,45 @@ fun ReportScreen(
                 .padding(paddingValues)
                 .background(MaterialTheme.colorScheme.background)
                 .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             // Card 1: Periode Laporan
             Card(
                 colors = CardDefaults.cardColors(containerColor = Color.White),
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                 shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             ) {
                 Column(
                     modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
                     Text(
                         text = "Pilih Periode Laporan",
                         style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
                     )
 
                     // Full Report Option
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Checkbox(
                             checked = state.isFullReport,
-                            onCheckedChange = { onFullReportChange(it) }
+                            onCheckedChange = { onFullReportChange(it) },
                         )
                         Text(
                             text = "Download Full Database Report",
                             style = MaterialTheme.typography.bodyLarge,
-                            modifier = Modifier.clickable { onFullReportChange(!state.isFullReport) }
+                            modifier = Modifier.clickable { onFullReportChange(!state.isFullReport) },
                         )
                     }
 
                     // Date Pickers (Disabled if Full Report)
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
                     ) {
                         // Start Date
                         DatePickerField(
@@ -130,7 +130,7 @@ fun ReportScreen(
                             context = context,
                             dateFormat = dateFormat,
                             modifier = Modifier.weight(1f),
-                            enabled = !state.isFullReport
+                            enabled = !state.isFullReport,
                         )
 
                         // End Date
@@ -141,7 +141,7 @@ fun ReportScreen(
                             context = context,
                             dateFormat = dateFormat,
                             modifier = Modifier.weight(1f),
-                            enabled = !state.isFullReport
+                            enabled = !state.isFullReport,
                         )
                     }
                 }
@@ -152,34 +152,34 @@ fun ReportScreen(
                 colors = CardDefaults.cardColors(containerColor = Color.White),
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                 shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             ) {
                 Column(
                     modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
                     Text(
                         text = "Format Laporan",
                         style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
                     )
 
                     // Format Selection
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
                     ) {
                         FormatOption(
                             format = ExportFormat.PDF,
                             isSelected = state.format == ExportFormat.PDF,
                             onSelect = onFormatChange,
-                            modifier = Modifier.weight(1f)
+                            modifier = Modifier.weight(1f),
                         )
                         FormatOption(
                             format = ExportFormat.EXCEL_CSV,
                             isSelected = state.format == ExportFormat.EXCEL_CSV,
                             onSelect = onFormatChange,
-                            modifier = Modifier.weight(1f)
+                            modifier = Modifier.weight(1f),
                         )
                     }
                 }
@@ -194,12 +194,12 @@ fun ReportScreen(
                     .fillMaxWidth()
                     .height(50.dp),
                 enabled = !state.isLoading,
-                shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
+                shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp),
             ) {
                 if (state.isLoading) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(24.dp),
-                        color = Color.White
+                        color = Color.White,
                     )
                 } else {
                     Text("Unduh Laporan")
@@ -217,7 +217,7 @@ fun DatePickerField(
     context: Context,
     dateFormat: SimpleDateFormat,
     modifier: Modifier = Modifier,
-    enabled: Boolean = true
+    enabled: Boolean = true,
 ) {
     val calendar = Calendar.getInstance()
     calendar.time = date
@@ -230,7 +230,7 @@ fun DatePickerField(
         },
         calendar.get(Calendar.YEAR),
         calendar.get(Calendar.MONTH),
-        calendar.get(Calendar.DAY_OF_MONTH)
+        calendar.get(Calendar.DAY_OF_MONTH),
     )
 
     OutlinedTextField(
@@ -247,8 +247,8 @@ fun DatePickerField(
             disabledTextColor = if (enabled) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
             disabledBorderColor = if (enabled) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.outline.copy(alpha = 0.12f),
             disabledLabelColor = if (enabled) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f),
-            disabledTrailingIconColor = if (enabled) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f)
-        )
+            disabledTrailingIconColor = if (enabled) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f),
+        ),
     )
 }
 
@@ -257,26 +257,26 @@ fun FormatOption(
     format: ExportFormat,
     isSelected: Boolean,
     onSelect: (ExportFormat) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Card(
         modifier = modifier
             .height(80.dp)
             .clickable { onSelect(format) },
         colors = CardDefaults.cardColors(
-            containerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant
+            containerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant,
         ),
-        border = if (isSelected) androidx.compose.foundation.BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null
+        border = if (isSelected) androidx.compose.foundation.BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null,
     ) {
         Box(
             modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
+            contentAlignment = Alignment.Center,
         ) {
             Text(
                 text = if (format == ExportFormat.PDF) "PDF" else "CSV / Excel",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
+                color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
     }

@@ -1,6 +1,5 @@
 package com.pln.monitoringpln.presentation.search
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -16,11 +15,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-
 import com.pln.monitoringpln.presentation.navigation.Screen
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -28,12 +25,12 @@ import com.pln.monitoringpln.presentation.navigation.Screen
 fun SearchScreen(
     navController: NavController,
     state: SearchState = SearchState(),
-    onQueryChange: (String) -> Unit = {}
+    onQueryChange: (String) -> Unit = {},
 ) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .padding(16.dp),
     ) {
         // Search Bar
         OutlinedTextField(
@@ -46,8 +43,8 @@ fun SearchScreen(
             singleLine = true,
             colors = OutlinedTextFieldDefaults.colors(
                 focusedContainerColor = MaterialTheme.colorScheme.surface,
-                unfocusedContainerColor = MaterialTheme.colorScheme.surface
-            )
+                unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+            ),
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -65,10 +62,10 @@ fun SearchScreen(
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Icon(
-                        Icons.Default.Search, 
-                        contentDescription = null, 
-                        modifier = Modifier.size(64.dp), 
-                        tint = Color.LightGray
+                        Icons.Default.Search,
+                        contentDescription = null,
+                        modifier = Modifier.size(64.dp),
+                        tint = Color.LightGray,
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     Text("Mulai pencarian...", color = Color.Gray)
@@ -76,7 +73,7 @@ fun SearchScreen(
             }
         } else {
             LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 items(state.results) { result ->
                     SearchResultItem(result) {
@@ -98,11 +95,11 @@ fun SearchResultItem(result: SearchResult, onClick: () -> Unit) {
         modifier = Modifier.fillMaxWidth().clickable { onClick() },
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             // Icon based on type
             val (icon, color) = when (result.type) {
@@ -114,7 +111,7 @@ fun SearchResultItem(result: SearchResult, onClick: () -> Unit) {
             Surface(
                 shape = RoundedCornerShape(8.dp),
                 color = color.copy(alpha = 0.1f),
-                modifier = Modifier.size(40.dp)
+                modifier = Modifier.size(40.dp),
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Icon(icon, contentDescription = null, tint = color)
@@ -127,17 +124,17 @@ fun SearchResultItem(result: SearchResult, onClick: () -> Unit) {
                 Text(
                     text = result.title,
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
                 )
                 Text(
                     text = result.subtitle,
                     style = MaterialTheme.typography.bodySmall,
-                    color = Color.Gray
+                    color = Color.Gray,
                 )
             }
-            
+
             Spacer(modifier = Modifier.weight(1f))
-            
+
             // Type Label
             Text(
                 text = when (result.type) {
@@ -146,7 +143,7 @@ fun SearchResultItem(result: SearchResult, onClick: () -> Unit) {
                     SearchResultType.TECHNICIAN -> "TEKNISI"
                 },
                 style = MaterialTheme.typography.labelSmall,
-                color = Color.Gray
+                color = Color.Gray,
             )
         }
     }

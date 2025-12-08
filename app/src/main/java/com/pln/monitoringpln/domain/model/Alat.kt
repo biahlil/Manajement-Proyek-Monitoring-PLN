@@ -13,5 +13,5 @@ data class Alat(
     val status: String = "ACTIVE", // Default "ACTIVE", bisa jadi "PENDING_DELETE"
     val lastModifiedById: String? = null, // ID Teknisi terakhir yang update
     val isArchived: Boolean = false, // Soft Delete flag
-    val locationName: String? = null // Reverse Geocoded Address
+    val locationName: String? = null, // Reverse Geocoded Address
 )

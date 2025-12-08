@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class LoginViewModel(
-    private val loginUseCase: LoginUseCase
+    private val loginUseCase: LoginUseCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(LoginState())
@@ -28,7 +28,7 @@ class LoginViewModel(
             } catch (e: Exception) {
                 android.util.Log.e("LoginViewModel", "Error loading session", e)
             }
-            
+
             loginUseCase.isUserLoggedIn().collect { isLoggedIn ->
                 android.util.Log.d("LoginViewModel", "Session status: $isLoggedIn")
                 if (isLoggedIn) {
@@ -60,15 +60,15 @@ class LoginViewModel(
                     .setConstraints(
                         androidx.work.Constraints.Builder()
                             .setRequiredNetworkType(androidx.work.NetworkType.CONNECTED)
-                            .build()
+                            .build(),
                     )
                     .addTag("SyncWorker")
                     .build()
-                
+
                 workManager.enqueueUniqueWork(
                     "SyncWorker",
                     androidx.work.ExistingWorkPolicy.REPLACE,
-                    syncRequest
+                    syncRequest,
                 )
 
                 _state.update { it.copy(isLoading = false, isSuccess = true) }

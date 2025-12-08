@@ -8,13 +8,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -29,7 +26,7 @@ fun TaskListScreen(
     onSearchQueryChange: (String) -> Unit,
     onAddTask: () -> Unit,
     onTaskClick: (String) -> Unit,
-    onBack: () -> Unit
+    onBack: () -> Unit,
 ) {
     val snackbarHostState = androidx.compose.runtime.remember { SnackbarHostState() }
 
@@ -37,25 +34,25 @@ fun TaskListScreen(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = {
             TopAppBar(
-                title = { 
+                title = {
                     Text(
-                        "Daftar Tugas", 
+                        "Daftar Tugas",
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary
-                    ) 
+                        color = MaterialTheme.colorScheme.primary,
+                    )
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
-                            Icons.Default.ArrowBack, 
+                            Icons.Default.ArrowBack,
                             contentDescription = "Back",
-                            tint = MaterialTheme.colorScheme.onSurface
+                            tint = MaterialTheme.colorScheme.onSurface,
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                )
+                    containerColor = MaterialTheme.colorScheme.surface,
+                ),
             )
         },
         floatingActionButton = {
@@ -63,18 +60,18 @@ fun TaskListScreen(
                 FloatingActionButton(
                     onClick = onAddTask,
                     containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = Color.White
+                    contentColor = Color.White,
                 ) {
                     Icon(imageVector = Icons.Default.Add, contentDescription = "Add Task")
                 }
             }
-        }
+        },
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .background(MaterialTheme.colorScheme.background)
+                .background(MaterialTheme.colorScheme.background),
         ) {
             // Search Bar
             OutlinedTextField(
@@ -90,8 +87,8 @@ fun TaskListScreen(
                     focusedContainerColor = Color.White,
                     unfocusedContainerColor = Color.White,
                     unfocusedBorderColor = Color.Transparent,
-                    focusedBorderColor = MaterialTheme.colorScheme.primary
-                )
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                ),
             )
 
             // Total Tasks Label
@@ -99,18 +96,18 @@ fun TaskListScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 8.dp),
-                horizontalArrangement = Arrangement.Start
+                horizontalArrangement = Arrangement.Start,
             ) {
                 Surface(
                     shape = RoundedCornerShape(16.dp),
                     color = MaterialTheme.colorScheme.primaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                 ) {
                     Text(
                         text = "Total Tugas: ${state.filteredTasks.size}",
                         style = MaterialTheme.typography.labelMedium,
                         fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
                     )
                 }
             }
@@ -119,14 +116,14 @@ fun TaskListScreen(
             LazyColumn(
                 contentPadding = PaddingValues(bottom = 80.dp), // Space for FAB and BottomNav
                 verticalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.padding(horizontal = 16.dp)
+                modifier = Modifier.padding(horizontal = 16.dp),
             ) {
                 items(state.filteredTasks) { task ->
                     TaskItem(
                         task = task,
                         technicianNames = state.technicianNames,
                         equipmentNames = state.equipmentNames,
-                        onClick = { onTaskClick(task.id) }
+                        onClick = { onTaskClick(task.id) },
                     )
                 }
             }
@@ -139,39 +136,39 @@ fun TaskItem(
     task: Tugas,
     technicianNames: Map<String, String>,
     equipmentNames: Map<String, String>,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
     Card(
         onClick = onClick,
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        shape = RoundedCornerShape(12.dp)
+        shape = RoundedCornerShape(12.dp),
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(16.dp),
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Top
+                verticalAlignment = Alignment.Top,
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = task.judul,
                         style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     val technicianName = technicianNames[task.idTeknisi] ?: task.idTeknisi
                     Text(
                         text = "Teknisi: $technicianName",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.primary
+                        color = MaterialTheme.colorScheme.primary,
                     )
                 }
-                
+
                 // Status Badge
                 val status = task.status.replace("_", " ")
                 Surface(
@@ -180,7 +177,7 @@ fun TaskItem(
                         status.equals("In Progress", ignoreCase = true) -> Color(0xFFFEF7E0)
                         else -> MaterialTheme.colorScheme.surfaceVariant
                     },
-                    shape = RoundedCornerShape(4.dp)
+                    shape = RoundedCornerShape(4.dp),
                 ) {
                     Text(
                         text = status.lowercase().replaceFirstChar { if (it.isLowerCase()) it.titlecase(java.util.Locale.ROOT) else it.toString() }.split(" ").joinToString(" ") { it.replaceFirstChar { char -> if (char.isLowerCase()) char.titlecase(java.util.Locale.ROOT) else char.toString() } },
@@ -190,7 +187,7 @@ fun TaskItem(
                             status.equals("In Progress", ignoreCase = true) -> Color(0xFFB06000)
                             else -> MaterialTheme.colorScheme.onSurfaceVariant
                         },
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                     )
                 }
             }
@@ -202,17 +199,17 @@ fun TaskItem(
                     imageVector = Icons.Default.LocationOn,
                     contentDescription = "Location",
                     tint = Color.Gray,
-                    modifier = Modifier.size(16.dp)
+                    modifier = Modifier.size(16.dp),
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 val equipmentName = equipmentNames[task.idAlat] ?: task.idAlat
                 Text(
                     text = "Alat: $equipmentName",
                     style = MaterialTheme.typography.bodySmall,
-                    color = Color.Gray
+                    color = Color.Gray,
                 )
                 Spacer(modifier = Modifier.weight(1f))
-                
+
                 // Format Date
                 val dateFormat = java.text.SimpleDateFormat("dd/MM/yyyy HH:mm", java.util.Locale.getDefault())
                 val dateString = try {
@@ -220,15 +217,13 @@ fun TaskItem(
                 } catch (e: Exception) {
                     task.tglJatuhTempo.toString()
                 }
-                
+
                 Text(
                     text = dateString,
                     style = MaterialTheme.typography.bodySmall,
-                    color = Color.Gray
+                    color = Color.Gray,
                 )
             }
-
-
         }
     }
 }

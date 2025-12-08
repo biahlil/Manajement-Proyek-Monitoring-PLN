@@ -26,6 +26,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,7 +34,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -44,13 +44,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.pln.monitoringpln.R
 
-import androidx.compose.runtime.LaunchedEffect
-
 @Composable
 fun LoginScreen(
     state: LoginState,
     onEvent: (LoginEvent) -> Unit,
-    onLoginSuccess: () -> Unit
+    onLoginSuccess: () -> Unit,
 ) {
     LaunchedEffect(state.isSuccess) {
         if (state.isSuccess) {
@@ -66,30 +64,30 @@ fun LoginScreen(
         colors = listOf(
             MaterialTheme.colorScheme.primary,
             MaterialTheme.colorScheme.primaryContainer,
-            MaterialTheme.colorScheme.onPrimaryContainer
+            MaterialTheme.colorScheme.onPrimaryContainer,
         ),
-        radius = 1000f
+        radius = 1000f,
     )
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(brush = themeGradient)
+            .background(brush = themeGradient),
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            verticalArrangement = Arrangement.Center,
         ) {
             // Logo Section
-             Image(
+            Image(
                 painter = painterResource(id = R.drawable.ic_launcher_foreground),
                 contentDescription = "Logo PLN",
-                modifier = Modifier.size(115.dp)
+                modifier = Modifier.size(115.dp),
             )
-            
+
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
@@ -98,7 +96,7 @@ fun LoginScreen(
                 fontSize = 24.sp,
                 fontWeight = FontWeight.ExtraBold,
                 textAlign = TextAlign.Center,
-                lineHeight = 30.sp
+                lineHeight = 30.sp,
             )
 
             Spacer(modifier = Modifier.height(48.dp))
@@ -109,18 +107,18 @@ fun LoginScreen(
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
+                    .padding(horizontal = 16.dp),
             ) {
                 Column(
                     modifier = Modifier.padding(24.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     OutlinedTextField(
                         value = email,
                         onValueChange = { email = it },
                         label = { Text("Username / Email") },
                         modifier = Modifier.fillMaxWidth(),
-                        singleLine = true
+                        singleLine = true,
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -131,7 +129,7 @@ fun LoginScreen(
                         label = { Text("Password") },
                         visualTransformation = PasswordVisualTransformation(),
                         modifier = Modifier.fillMaxWidth(),
-                        singleLine = true
+                        singleLine = true,
                     )
 
                     Spacer(modifier = Modifier.height(24.dp))
@@ -142,17 +140,17 @@ fun LoginScreen(
                             .fillMaxWidth()
                             .height(48.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-                        enabled = !state.isLoading
+                        enabled = !state.isLoading,
                     ) {
                         Text("Login", color = MaterialTheme.colorScheme.onPrimary)
                     }
-                    
+
                     if (state.error != null) {
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
                             text = state.error,
                             color = MaterialTheme.colorScheme.error,
-                            textAlign = TextAlign.Center
+                            textAlign = TextAlign.Center,
                         )
                     }
                 }
@@ -168,18 +166,18 @@ fun LoginScreen(
                 targetValue = 1.2f,
                 animationSpec = infiniteRepeatable(
                     animation = tween(1000),
-                    repeatMode = RepeatMode.Reverse
+                    repeatMode = RepeatMode.Reverse,
                 ),
-                label = "scale"
+                label = "scale",
             )
             val alpha by infiniteTransition.animateFloat(
                 initialValue = 0.5f,
                 targetValue = 1f,
                 animationSpec = infiniteRepeatable(
                     animation = tween(1000),
-                    repeatMode = RepeatMode.Reverse
+                    repeatMode = RepeatMode.Reverse,
                 ),
-                label = "alpha"
+                label = "alpha",
             )
 
             Box(
@@ -187,11 +185,11 @@ fun LoginScreen(
                     .fillMaxSize()
                     .background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.9f)) // Dark themed overlay
                     .clickable(enabled = false) {},
-                contentAlignment = Alignment.Center
+                contentAlignment = Alignment.Center,
             ) {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
+                    verticalArrangement = Arrangement.Center,
                 ) {
                     Image(
                         painter = painterResource(id = R.drawable.ic_launcher_foreground),
@@ -202,7 +200,7 @@ fun LoginScreen(
                                 scaleX = scale
                                 scaleY = scale
                                 this.alpha = alpha
-                            }
+                            },
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
@@ -212,7 +210,7 @@ fun LoginScreen(
                         fontWeight = FontWeight.Medium,
                         modifier = Modifier.graphicsLayer {
                             this.alpha = alpha
-                        }
+                        },
                     )
                 }
             }
@@ -226,6 +224,6 @@ fun LoginScreenPreview() {
     LoginScreen(
         state = LoginState(),
         onEvent = {},
-        onLoginSuccess = {}
+        onLoginSuccess = {},
     )
 }

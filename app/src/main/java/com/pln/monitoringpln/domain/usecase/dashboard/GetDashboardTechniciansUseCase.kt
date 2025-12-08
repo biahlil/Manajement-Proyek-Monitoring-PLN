@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
 class GetDashboardTechniciansUseCase(
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
 ) {
     operator fun invoke(): Flow<List<User>> {
         return userRepository.observeTeknisi().map { users ->

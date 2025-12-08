@@ -12,5 +12,5 @@ data class Tugas(
     val tglJatuhTempo: Date,
     val status: String = "To Do", // Default status
     val buktiFoto: String? = null,
-    val kondisiAkhir: String? = null
+    val kondisiAkhir: String? = null,
 )

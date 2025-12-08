@@ -31,7 +31,7 @@ class GetAllAlatUseCaseTest {
 
         // Then
         assertEquals(2, result.size)
-        // Note: Map doesn't guarantee order unless LinkedHashMap (which mutableMapOf usually is), 
+        // Note: Map doesn't guarantee order unless LinkedHashMap (which mutableMapOf usually is),
         // but to be safe we can check containment or sort.
         // For this simple fake, insertion order is likely preserved.
         val sortedResult = result.sortedBy { it.id }

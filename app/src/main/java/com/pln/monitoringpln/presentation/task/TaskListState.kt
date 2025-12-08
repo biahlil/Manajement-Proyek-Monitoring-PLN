@@ -11,5 +11,5 @@ data class TaskListState(
     val showDeleteConfirmation: Boolean = false,
     val taskToDelete: Tugas? = null,
     val technicianNames: Map<String, String> = emptyMap(),
-    val equipmentNames: Map<String, String> = emptyMap()
+    val equipmentNames: Map<String, String> = emptyMap(),
 )

@@ -21,7 +21,7 @@ interface AlatRepository {
         kode: String,
         lat: Double,
         lng: Double,
-        locationName: String? = null
+        locationName: String? = null,
     ): Result<Unit>
 
     // UC1b: Soft Delete (Archive)

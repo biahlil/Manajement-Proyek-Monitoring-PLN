@@ -11,5 +11,5 @@ data class EquipmentListState(
     val error: String? = null,
     val showDeleteDialog: Boolean = false,
     val equipmentToDelete: Alat? = null,
-    val isDeleting: Boolean = false
+    val isDeleting: Boolean = false,
 )

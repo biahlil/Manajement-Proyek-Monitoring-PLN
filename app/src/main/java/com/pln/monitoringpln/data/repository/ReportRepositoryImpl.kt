@@ -1,15 +1,15 @@
 package com.pln.monitoringpln.data.repository
 
+import android.content.ContentValues
 import android.content.Context
+import android.os.Build
+import android.os.Environment
+import android.provider.MediaStore
 import com.itextpdf.kernel.pdf.PdfDocument
 import com.itextpdf.kernel.pdf.PdfWriter
 import com.itextpdf.layout.Document
 import com.itextpdf.layout.element.Paragraph
 import com.itextpdf.layout.element.Table
-import android.content.ContentValues
-import android.os.Build
-import android.os.Environment
-import android.provider.MediaStore
 import com.pln.monitoringpln.data.mapper.toDomain
 import com.pln.monitoringpln.domain.model.ExportFormat
 import com.pln.monitoringpln.domain.repository.ReportRepository
@@ -26,13 +26,13 @@ class ReportRepositoryImpl(
     private val tugasDao: com.pln.monitoringpln.data.local.dao.TugasDao,
     private val userDao: com.pln.monitoringpln.data.local.dao.UserDao,
     private val alatDao: com.pln.monitoringpln.data.local.dao.AlatDao,
-    private val context: Context
+    private val context: Context,
 ) : ReportRepository {
 
     override suspend fun exportTaskReport(
         startDate: Date,
         endDate: Date,
-        format: ExportFormat
+        format: ExportFormat,
     ): Result<String> {
         return try {
             val tasks = tugasDao.getTasksByDateRange(startDate.time, endDate.time)
@@ -119,10 +119,10 @@ class ReportRepositoryImpl(
     }
 
     private suspend fun generateFullPdf(
-        fileName: String, 
-        tasks: List<com.pln.monitoringpln.domain.model.Tugas>, 
-        technicians: List<com.pln.monitoringpln.domain.model.User>, 
-        equipment: List<com.pln.monitoringpln.domain.model.Alat>
+        fileName: String,
+        tasks: List<com.pln.monitoringpln.domain.model.Tugas>,
+        technicians: List<com.pln.monitoringpln.domain.model.User>,
+        equipment: List<com.pln.monitoringpln.domain.model.Alat>,
     ): String {
         return saveToDownloads("$fileName.pdf", "application/pdf") { outputStream ->
             val writer = PdfWriter(outputStream)
@@ -212,7 +212,7 @@ class ReportRepositoryImpl(
                 writer.write(line)
             }
             writer.flush()
-            // Don't close writer here as it closes the underlying stream which might be needed if we were doing more, 
+            // Don't close writer here as it closes the underlying stream which might be needed if we were doing more,
             // but here it's fine. However, use block handles closing.
             // Actually bufferedWriter.close() closes the underlying stream.
             // If we close it here, the 'use' block in saveToDownloads might try to close it again.
@@ -224,7 +224,7 @@ class ReportRepositoryImpl(
         fileName: String,
         tasks: List<com.pln.monitoringpln.domain.model.Tugas>,
         technicians: List<com.pln.monitoringpln.domain.model.User>,
-        equipment: List<com.pln.monitoringpln.domain.model.Alat>
+        equipment: List<com.pln.monitoringpln.domain.model.Alat>,
     ): String {
         return saveToDownloads("$fileName.csv", "text/csv") { outputStream ->
             val writer = outputStream.bufferedWriter()
@@ -252,7 +252,7 @@ class ReportRepositoryImpl(
             equipment.forEachIndexed { index, alat ->
                 writer.write("${index + 1},\"${alat.namaAlat}\",\"${alat.tipe}\",\"${alat.latitude}, ${alat.longitude}\",${alat.kondisi}\n")
             }
-            
+
             writer.flush()
         }
     }

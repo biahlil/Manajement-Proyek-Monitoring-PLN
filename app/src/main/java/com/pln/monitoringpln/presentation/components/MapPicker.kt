@@ -1,13 +1,8 @@
 package com.pln.monitoringpln.presentation.components
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import org.osmdroid.config.Configuration
 import org.osmdroid.events.MapEventsReceiver
@@ -21,10 +16,10 @@ import org.osmdroid.views.overlay.Marker
 fun MapPicker(
     modifier: Modifier = Modifier,
     initialLocation: GeoPoint? = null,
-    onLocationSelected: (Double, Double) -> Unit
+    onLocationSelected: (Double, Double) -> Unit,
 ) {
     val context = LocalContext.current
-    
+
     // Initialize OSMDroid configuration
     LaunchedEffect(Unit) {
         Configuration.getInstance().load(context, android.preference.PreferenceManager.getDefaultSharedPreferences(context))
@@ -41,11 +36,11 @@ fun MapPicker(
     // ... (rest of the code)
 
     AndroidView(
-        factory = { 
+        factory = {
             mapView.apply {
                 val startPoint = initialLocation ?: GeoPoint(-3.316694, 114.590111) // Default to Banjarmasin
                 controller.setCenter(startPoint)
-                
+
                 // Add initial marker if location exists
                 if (initialLocation != null) {
                     val marker = Marker(this)
@@ -59,7 +54,7 @@ fun MapPicker(
                     override fun singleTapConfirmedHelper(p: GeoPoint?): Boolean {
                         p?.let { point ->
                             onLocationSelected(point.latitude, point.longitude)
-                            
+
                             // Update Marker
                             overlays.removeAll { it is Marker }
                             val marker = Marker(this@apply)
@@ -78,6 +73,6 @@ fun MapPicker(
                 overlays.add(MapEventsOverlay(mapEventsReceiver))
             }
         },
-        modifier = modifier
+        modifier = modifier,
     )
 }

@@ -2,23 +2,16 @@ package com.pln.monitoringpln.presentation.dashboard
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.pln.monitoringpln.domain.repository.TugasRepository
+import com.pln.monitoringpln.domain.repository.AuthRepository
 import com.pln.monitoringpln.domain.repository.UserRepository
+import com.pln.monitoringpln.domain.usecase.dashboard.GetDashboardSummaryUseCase
+import com.pln.monitoringpln.domain.usecase.tugas.ObserveTasksUseCase
+import com.pln.monitoringpln.domain.usecase.tugas.SyncTasksUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-
-import com.pln.monitoringpln.domain.usecase.auth.CheckUserRoleUseCase
-import com.pln.monitoringpln.domain.usecase.dashboard.GetDashboardSummaryUseCase
-
-import com.pln.monitoringpln.domain.usecase.auth.GetCurrentUserIdUseCase
-import com.pln.monitoringpln.domain.usecase.tugas.ObserveTasksUseCase
-
-import com.pln.monitoringpln.domain.usecase.tugas.SyncTasksUseCase
-
-import com.pln.monitoringpln.domain.repository.AuthRepository
 
 class DashboardViewModel(
     private val getDashboardSummaryUseCase: GetDashboardSummaryUseCase,
@@ -26,7 +19,7 @@ class DashboardViewModel(
     private val observeTasksUseCase: ObserveTasksUseCase,
     private val userRepository: UserRepository,
     private val syncTasksUseCase: SyncTasksUseCase,
-    private val getDashboardTechniciansUseCase: com.pln.monitoringpln.domain.usecase.dashboard.GetDashboardTechniciansUseCase
+    private val getDashboardTechniciansUseCase: com.pln.monitoringpln.domain.usecase.dashboard.GetDashboardTechniciansUseCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(DashboardState(isLoading = true))
@@ -68,19 +61,19 @@ class DashboardViewModel(
                     _state.update {
                         it.copy(
                             // Filter "In Progress" case-insensitive, handling both "In Progress" and "IN_PROGRESS"
-                            inProgressTasks = tasks.filter { t -> 
+                            inProgressTasks = tasks.filter { t ->
                                 val status = t.status.replace("_", " ")
-                                status.equals("In Progress", ignoreCase = true) 
+                                status.equals("In Progress", ignoreCase = true)
                             },
-                            technicianTasks = tasks.filter { t -> 
+                            technicianTasks = tasks.filter { t ->
                                 val status = t.status.replace("_", " ")
-                                !status.equals("Done", ignoreCase = true) 
-                            }
+                                !status.equals("Done", ignoreCase = true)
+                            },
                         )
                     }
                 }
             }
-            
+
             // Fetch Technicians (Reactive + Sync)
             if (isUserAdmin) {
                 // Observe Local Data

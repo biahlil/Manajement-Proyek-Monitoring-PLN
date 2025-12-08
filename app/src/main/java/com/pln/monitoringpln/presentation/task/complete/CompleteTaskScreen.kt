@@ -1,6 +1,5 @@
 package com.pln.monitoringpln.presentation.task.complete
 
-import android.content.Context
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -26,12 +25,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.pln.monitoringpln.domain.model.Tugas
-import com.pln.monitoringpln.domain.model.Alat
-import com.pln.monitoringpln.domain.model.User
-import com.pln.monitoringpln.presentation.task.detail.TaskHeaderCard
 import com.pln.monitoringpln.presentation.task.detail.LocationCard
 import com.pln.monitoringpln.presentation.task.detail.SpecificationCard
+import com.pln.monitoringpln.presentation.task.detail.TaskHeaderCard
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -41,7 +37,7 @@ fun CompleteTaskScreen(
     onConditionChange: (String) -> Unit,
     onEquipmentStatusChange: (String) -> Unit,
     onProofSelected: (String) -> Unit,
-    onCompleteTask: (ByteArray?) -> Unit
+    onCompleteTask: (ByteArray?) -> Unit,
 ) {
     val context = LocalContext.current
 
@@ -63,10 +59,10 @@ fun CompleteTaskScreen(
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                )
+                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                ),
             )
-        }
+        },
     ) { paddingValues ->
         if (state.isLoading) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -88,7 +84,7 @@ fun CompleteTaskScreen(
                         .padding(paddingValues)
                         .verticalScroll(rememberScrollState())
                         .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
                     TaskHeaderCard(task, technician)
                     LocationCard(equipment, context)
@@ -99,13 +95,13 @@ fun CompleteTaskScreen(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp),
                         colors = CardDefaults.cardColors(containerColor = Color.White),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                     ) {
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                            verticalArrangement = Arrangement.spacedBy(16.dp),
                         ) {
                             Text("Laporan Pengerjaan", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                             HorizontalDivider()
@@ -116,7 +112,7 @@ fun CompleteTaskScreen(
                                 onValueChange = onConditionChange,
                                 label = { Text("Kondisi Alat") },
                                 modifier = Modifier.fillMaxWidth(),
-                                minLines = 3
+                                minLines = 3,
                             )
 
                             // Status Alat (Chips)
@@ -129,16 +125,18 @@ fun CompleteTaskScreen(
                                         label = { Text(status) },
                                         leadingIcon = if (state.equipmentStatus == status) {
                                             { Icon(imageVector = Icons.Default.Check, contentDescription = null, modifier = Modifier.size(16.dp)) }
-                                        } else null
+                                        } else {
+                                            null
+                                        },
                                     )
                                 }
                             }
 
                             // Upload Bukti
                             Text("Bukti Foto", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
-                            
+
                             val photoPickerLauncher = rememberLauncherForActivityResult(
-                                contract = ActivityResultContracts.PickVisualMedia()
+                                contract = ActivityResultContracts.PickVisualMedia(),
                             ) { uri: Uri? ->
                                 if (uri != null) {
                                     onProofSelected(uri.toString())
@@ -154,28 +152,28 @@ fun CompleteTaskScreen(
                                             .fillMaxWidth()
                                             .height(200.dp)
                                             .clip(RoundedCornerShape(8.dp)),
-                                        contentScale = ContentScale.Crop
+                                        contentScale = ContentScale.Crop,
                                     )
                                     IconButton(
                                         onClick = { onProofSelected("") }, // Clear photo
                                         modifier = Modifier
                                             .align(Alignment.TopEnd)
                                             .padding(8.dp)
-                                            .background(Color.Black.copy(alpha = 0.5f), androidx.compose.foundation.shape.CircleShape)
+                                            .background(Color.Black.copy(alpha = 0.5f), androidx.compose.foundation.shape.CircleShape),
                                     ) {
                                         Icon(imageVector = Icons.Default.Delete, contentDescription = "Hapus Foto", tint = Color.White)
                                     }
                                 }
                             } else {
                                 OutlinedButton(
-                                    onClick = { 
+                                    onClick = {
                                         photoPickerLauncher.launch(
-                                            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                                            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
                                         )
                                     },
                                     modifier = Modifier.fillMaxWidth().height(100.dp),
                                     shape = RoundedCornerShape(8.dp),
-                                    colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.primary)
+                                    colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.primary),
                                 ) {
                                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                         Icon(imageVector = Icons.Default.Add, contentDescription = null)
@@ -192,28 +190,28 @@ fun CompleteTaskScreen(
                                 onClick = {
                                     val uriString = state.proofUri
                                     if (!uriString.isNullOrBlank()) {
-                                         if (uriString.startsWith("http")) {
-                                             // Existing remote URL, no need to upload bytes
-                                             onCompleteTask(null)
-                                         } else {
-                                             // New local URI, read bytes
-                                             try {
-                                                 val uri = Uri.parse(uriString)
-                                                 val inputStream = context.contentResolver.openInputStream(uri)
-                                                 val bytes = inputStream?.readBytes()
-                                                 inputStream?.close()
-                                                 onCompleteTask(bytes)
-                                             } catch (e: Exception) {
-                                                 // Handle error reading file
-                                                 onCompleteTask(null) // Will fail validation in VM
-                                             }
-                                         }
+                                        if (uriString.startsWith("http")) {
+                                            // Existing remote URL, no need to upload bytes
+                                            onCompleteTask(null)
+                                        } else {
+                                            // New local URI, read bytes
+                                            try {
+                                                val uri = Uri.parse(uriString)
+                                                val inputStream = context.contentResolver.openInputStream(uri)
+                                                val bytes = inputStream?.readBytes()
+                                                inputStream?.close()
+                                                onCompleteTask(bytes)
+                                            } catch (e: Exception) {
+                                                // Handle error reading file
+                                                onCompleteTask(null) // Will fail validation in VM
+                                            }
+                                        }
                                     } else {
-                                         onCompleteTask(null)
+                                        onCompleteTask(null)
                                     }
                                 },
                                 modifier = Modifier.fillMaxWidth().height(50.dp),
-                                enabled = !state.isSaving
+                                enabled = !state.isSaving,
                             ) {
                                 if (state.isSaving) {
                                     CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))

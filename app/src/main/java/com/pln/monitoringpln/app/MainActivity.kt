@@ -4,7 +4,6 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import com.pln.monitoringpln.presentation.navigation.AppNavigation
-
 import com.pln.monitoringpln.presentation.theme.MonitoringPLNTheme
 
 class MainActivity : ComponentActivity() {

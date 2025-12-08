@@ -3,7 +3,6 @@ package com.pln.monitoringpln.presentation.technician.list
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pln.monitoringpln.domain.model.User
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -15,7 +14,7 @@ class TechnicianListViewModel(
     private val observeTasksUseCase: com.pln.monitoringpln.domain.usecase.tugas.ObserveTasksUseCase,
     private val userRepository: com.pln.monitoringpln.domain.repository.UserRepository,
     private val getAllAlatUseCase: com.pln.monitoringpln.domain.usecase.alat.GetAllAlatUseCase,
-    private val deleteUserUseCase: com.pln.monitoringpln.domain.usecase.user.DeleteUserUseCase
+    private val deleteUserUseCase: com.pln.monitoringpln.domain.usecase.user.DeleteUserUseCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(TechnicianListState())
@@ -28,16 +27,16 @@ class TechnicianListViewModel(
     fun loadTechnicians() {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
-            
+
             // 1. Fetch Technicians
             launch {
                 getTechniciansUseCase().collect { technicians ->
-                    _state.update { 
+                    _state.update {
                         it.copy(
                             isLoading = false,
                             technicians = technicians,
-                            filteredTechnicians = technicians 
-                        ) 
+                            filteredTechnicians = technicians,
+                        )
                     }
                 }
             }
@@ -46,16 +45,16 @@ class TechnicianListViewModel(
             launch {
                 kotlinx.coroutines.flow.combine(
                     getAllAlatUseCase(),
-                    observeTasksUseCase()
+                    observeTasksUseCase(),
                 ) { alatList, tasks ->
                     val equipmentMap = alatList.associate { it.id to it.namaAlat }
-                    
+
                     // Task Counts
                     val counts = tasks
                         .filter { it.status != "Done" }
                         .groupBy { it.idTeknisi }
                         .mapValues { it.value.size }
-                    
+
                     // Random Equipment per Technician
                     val techEquipment = tasks
                         .groupBy { it.idTeknisi }
@@ -67,14 +66,14 @@ class TechnicianListViewModel(
                                 "Belum ada alat"
                             }
                         }
-                    
+
                     Triple(counts, techEquipment, equipmentMap)
                 }.collect { (counts, techEquipment, _) ->
-                    _state.update { 
+                    _state.update {
                         it.copy(
                             technicianTaskCounts = counts,
-                            technicianEquipment = techEquipment
-                        ) 
+                            technicianEquipment = techEquipment,
+                        )
                     }
                 }
             }
@@ -96,7 +95,7 @@ class TechnicianListViewModel(
             } else {
                 state.technicians.filter {
                     it.namaLengkap.contains(query, ignoreCase = true) ||
-                    it.email.contains(query, ignoreCase = true)
+                        it.email.contains(query, ignoreCase = true)
                 }
             }
             state.copy(searchQuery = query, filteredTechnicians = filtered)
@@ -111,25 +110,25 @@ class TechnicianListViewModel(
         val technician = _state.value.technicianToDelete ?: return
         viewModelScope.launch {
             _state.update { it.copy(isDeleting = true) }
-            
+
             val result = deleteUserUseCase(technician.id)
-            
+
             if (result.isSuccess) {
-                _state.update { 
+                _state.update {
                     it.copy(
-                        isDeleting = false, 
-                        showDeleteDialog = false, 
-                        technicianToDelete = null
-                    ) 
+                        isDeleting = false,
+                        showDeleteDialog = false,
+                        technicianToDelete = null,
+                    )
                 }
                 // Refresh list to ensure UI is in sync
                 loadTechnicians()
             } else {
-                _state.update { 
+                _state.update {
                     it.copy(
                         isDeleting = false,
                         // Optionally show error
-                    ) 
+                    )
                 }
             }
         }

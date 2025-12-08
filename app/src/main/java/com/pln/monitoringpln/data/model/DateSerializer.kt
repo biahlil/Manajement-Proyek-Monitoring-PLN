@@ -16,10 +16,10 @@ object DateSerializer : KSerializer<Date> {
 
     private val formats = listOf(
         SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSX", Locale.US), // Postgres default
-        SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX", Locale.US),    // Milliseconds
-        SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX", Locale.US),        // No millis
+        SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX", Locale.US), // Milliseconds
+        SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX", Locale.US), // No millis
         SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US).apply { timeZone = TimeZone.getTimeZone("UTC") },
-        SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US)            // Fallback
+        SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US), // Fallback
     )
 
     override fun serialize(encoder: Encoder, value: Date) {

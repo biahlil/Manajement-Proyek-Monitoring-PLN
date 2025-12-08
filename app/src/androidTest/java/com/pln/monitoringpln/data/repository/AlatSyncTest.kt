@@ -4,15 +4,15 @@ import com.pln.monitoringpln.domain.repository.AlatRepository
 import com.pln.monitoringpln.utils.TestObjects
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.createSupabaseClient
-import io.github.jan.supabase.postgrest.Postgrest
-import io.github.jan.supabase.postgrest.postgrest
 import io.github.jan.supabase.gotrue.Auth
 import io.github.jan.supabase.gotrue.auth
 import io.github.jan.supabase.gotrue.providers.builtin.Email
+import io.github.jan.supabase.postgrest.Postgrest
+import io.github.jan.supabase.postgrest.postgrest
 import kotlinx.coroutines.runBlocking
 import org.junit.After
-import org.junit.Assert.assertTrue
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
@@ -33,7 +33,7 @@ class AlatSyncTest {
         // Initialize real Supabase Client
         supabaseClient = createSupabaseClient(
             supabaseUrl = com.pln.monitoringpln.BuildConfig.SUPABASE_URL,
-            supabaseKey = com.pln.monitoringpln.BuildConfig.SUPABASE_KEY
+            supabaseKey = com.pln.monitoringpln.BuildConfig.SUPABASE_KEY,
         ) {
             install(Postgrest)
             install(Auth)
@@ -53,7 +53,7 @@ class AlatSyncTest {
         val context = androidx.test.core.app.ApplicationProvider.getApplicationContext<android.content.Context>()
         database = androidx.room.Room.inMemoryDatabaseBuilder(
             context,
-            com.pln.monitoringpln.data.local.AppDatabase::class.java
+            com.pln.monitoringpln.data.local.AppDatabase::class.java,
         ).allowMainThreadQueries().build()
 
         // Initialize DataSources
@@ -68,7 +68,7 @@ class AlatSyncTest {
     @After
     fun tearDown() {
         database.close()
-        
+
         if (createdRemoteIds.isNotEmpty()) {
             runBlocking {
                 try {
@@ -122,13 +122,13 @@ class AlatSyncTest {
             .select {
                 filter { eq("kode_alat", uniqueCode) }
             }.decodeSingleOrNull<com.pln.monitoringpln.data.model.AlatDto>()
-        
+
         // Track for cleanup
         createdRemoteIds.add(uniqueId)
-        
+
         assertNotNull(remoteResult)
         println(logAssert.format("Remote data found: ${remoteResult?.kodeAlat}"))
-        
+
         println(logResult)
     }
 }

@@ -18,7 +18,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 data class BottomNavItem(
     val name: String,
     val route: String,
-    val icon: ImageVector
+    val icon: ImageVector,
 )
 
 @Composable
@@ -28,27 +28,27 @@ fun BottomNavigationBar(
         BottomNavItem(
             name = "Dashboard",
             route = Screen.Dashboard.route,
-            icon = Icons.Default.Home
+            icon = Icons.Default.Home,
         ),
         BottomNavItem(
             name = "Pencarian", // Search
             route = Screen.Search.route,
-            icon = Icons.Default.Search
+            icon = Icons.Default.Search,
         ),
         BottomNavItem(
             name = "Profil",
             route = Screen.Profile.route,
-            icon = Icons.Default.Person
-        )
+            icon = Icons.Default.Person,
+        ),
     ),
-    onItemClick: (BottomNavItem) -> Unit
+    onItemClick: (BottomNavItem) -> Unit,
 ) {
     val backStackEntry = navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry.value?.destination?.route
 
     NavigationBar(
         containerColor = MaterialTheme.colorScheme.surface,
-        contentColor = MaterialTheme.colorScheme.onSurface
+        contentColor = MaterialTheme.colorScheme.onSurface,
     ) {
         items.forEach { item ->
             val selected = item.route == currentRoute
@@ -59,7 +59,7 @@ fun BottomNavigationBar(
                 icon = {
                     Icon(
                         imageVector = item.icon,
-                        contentDescription = item.name
+                        contentDescription = item.name,
                     )
                 },
                 colors = NavigationBarItemDefaults.colors(
@@ -67,8 +67,8 @@ fun BottomNavigationBar(
                     selectedTextColor = MaterialTheme.colorScheme.onSurface,
                     indicatorColor = MaterialTheme.colorScheme.secondaryContainer,
                     unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                    unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                    unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                ),
             )
         }
     }

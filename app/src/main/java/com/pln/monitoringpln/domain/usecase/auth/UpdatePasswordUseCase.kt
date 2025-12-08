@@ -1,11 +1,10 @@
 package com.pln.monitoringpln.domain.usecase.auth
 
+import com.pln.monitoringpln.domain.exception.ValidationException
 import com.pln.monitoringpln.domain.repository.AuthRepository
 
-import com.pln.monitoringpln.domain.exception.ValidationException
-
 class UpdatePasswordUseCase(
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
 ) {
     suspend operator fun invoke(password: String, confirmPassword: String): Result<Unit> {
         if (password.isBlank()) {

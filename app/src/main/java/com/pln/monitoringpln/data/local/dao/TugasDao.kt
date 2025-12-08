@@ -62,6 +62,7 @@ interface TugasDao {
 
     @Query("SELECT COUNT(*) FROM tugas WHERE status = :status AND isArchived = 0")
     fun observeCountByStatus(status: String): Flow<Int>
+
     @Query("DELETE FROM tugas WHERE id = :id")
     suspend fun deleteTask(id: String)
 

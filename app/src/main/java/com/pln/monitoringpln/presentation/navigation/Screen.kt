@@ -7,7 +7,7 @@ sealed class Screen(val route: String) {
     object Search : Screen("search")
     object TaskList : Screen("task_list")
     object AddEditTask : Screen("add_edit_task?taskId={taskId}") {
-        fun createRoute(taskId: String? = null) = 
+        fun createRoute(taskId: String? = null) =
             if (taskId != null) "add_edit_task?taskId=$taskId" else "add_edit_task"
     }
     object DetailTask : Screen("detail_task/{taskId}") {
@@ -23,7 +23,7 @@ sealed class Screen(val route: String) {
         fun createRoute(equipmentId: String) = "equipment_detail/$equipmentId"
     }
     object AddEditEquipment : Screen("add_edit_equipment?equipmentId={equipmentId}") {
-        fun createRoute(equipmentId: String? = null) = 
+        fun createRoute(equipmentId: String? = null) =
             if (equipmentId != null) "add_edit_equipment?equipmentId=$equipmentId" else "add_edit_equipment"
     }
     object TechnicianList : Screen("technician_list")

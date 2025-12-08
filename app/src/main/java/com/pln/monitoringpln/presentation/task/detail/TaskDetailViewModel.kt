@@ -16,7 +16,7 @@ class TaskDetailViewModel(
     private val authRepository: AuthRepository,
     private val getTaskDetailUseCase: GetTaskDetailUseCase,
     private val deleteTaskUseCase: DeleteTaskUseCase,
-    private val updateTaskStatusUseCase: UpdateTaskStatusUseCase
+    private val updateTaskStatusUseCase: UpdateTaskStatusUseCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(TaskDetailState())
@@ -25,7 +25,7 @@ class TaskDetailViewModel(
     fun loadTask(taskId: String) {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
-            
+
             // Check Role
             val roleResult = authRepository.getUserRole()
             val role = roleResult.getOrDefault("technician")
@@ -34,8 +34,8 @@ class TaskDetailViewModel(
             val result = getTaskDetailUseCase(taskId)
             if (result.isSuccess) {
                 val detail = result.getOrNull()!!
-                
-                _state.update { 
+
+                _state.update {
                     it.copy(
                         isLoading = false,
                         task = detail.task,
@@ -46,8 +46,8 @@ class TaskDetailViewModel(
                         condition = detail.task.kondisiAkhir ?: "",
                         equipmentStatus = detail.equipment?.kondisi ?: "Normal",
                         taskStatus = detail.task.status,
-                        proofUri = detail.task.buktiFoto
-                    ) 
+                        proofUri = detail.task.buktiFoto,
+                    )
                 }
             } else {
                 _state.update { it.copy(isLoading = false, error = result.exceptionOrNull()?.message ?: "Tugas tidak ditemukan") }
@@ -64,10 +64,10 @@ class TaskDetailViewModel(
             val taskId = _state.value.task?.id ?: return@launch
             val result = deleteTaskUseCase(taskId)
             if (result.isSuccess) {
-                 _state.update { it.copy(showDeleteDialog = false, isDeleted = true) }
+                _state.update { it.copy(showDeleteDialog = false, isDeleted = true) }
             } else {
                 // Handle error (optional: show snackbar)
-                 _state.update { it.copy(showDeleteDialog = false) }
+                _state.update { it.copy(showDeleteDialog = false) }
             }
         }
     }

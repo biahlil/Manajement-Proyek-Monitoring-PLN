@@ -5,7 +5,7 @@ data class AddEditEquipmentState(
     val isSaving: Boolean = false,
     val isSaved: Boolean = false,
     val error: String? = null,
-    
+
     // Form Fields
     val namaAlat: String = "",
     val kodeAlat: String = "",
@@ -14,8 +14,8 @@ data class AddEditEquipmentState(
     val lokasi: String = "",
     val latitude: Double = 0.0,
     val longitude: Double = 0.0,
-    
+
     // Mode
     val isEditMode: Boolean = false,
-    val equipmentId: String? = null
+    val equipmentId: String? = null,
 )

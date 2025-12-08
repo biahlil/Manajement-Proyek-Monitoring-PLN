@@ -2,20 +2,20 @@ package com.pln.monitoringpln.data.repository
 
 import com.pln.monitoringpln.data.local.dao.UserDao
 import com.pln.monitoringpln.data.local.entity.UserEntity
+import com.pln.monitoringpln.data.mapper.toDomain
+import com.pln.monitoringpln.data.mapper.toEntity
 import com.pln.monitoringpln.domain.model.User
 import com.pln.monitoringpln.domain.repository.UserRepository
 import io.github.jan.supabase.SupabaseClient
+import io.github.jan.supabase.functions.functions
 import io.github.jan.supabase.gotrue.auth
 import io.github.jan.supabase.postgrest.postgrest
 import io.github.jan.supabase.storage.storage
-import io.github.jan.supabase.functions.functions
 import kotlinx.coroutines.flow.map
-import com.pln.monitoringpln.data.mapper.toDomain
-import com.pln.monitoringpln.data.mapper.toEntity
 
 class UserRepositoryImpl(
     private val userDao: UserDao,
-    private val supabaseClient: SupabaseClient
+    private val supabaseClient: SupabaseClient,
 ) : UserRepository {
 
     override suspend fun login(email: String, password: String): Result<User> {
@@ -48,7 +48,7 @@ class UserRepositoryImpl(
                         email = profile.email ?: "",
                         namaLengkap = profile.fullName ?: "Pengguna",
                         role = profile.role,
-                        isActive = profile.isActive ?: true
+                        isActive = profile.isActive ?: true,
                     )
                     userDao.insertUser(userEntity)
                     Result.success(userEntity.toDomain())
@@ -65,10 +65,10 @@ class UserRepositoryImpl(
         return try {
             // 1. Call Edge Function to delete from Auth (and cascade to profiles)
             val functionResponse = supabaseClient.functions.invoke("delete-user", mapOf("user_id" to id))
-            
+
             // 2. Delete from Local DB
             userDao.deleteUserById(id)
-            
+
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
@@ -77,13 +77,13 @@ class UserRepositoryImpl(
 
     override suspend fun syncProfile(): Result<Unit> {
         return try {
-            // Get current user ID from Auth (assuming we can get it, or passed in. 
+            // Get current user ID from Auth (assuming we can get it, or passed in.
             // Since this is a repository, getting current user ID might need another dependency or we fetch all/current session)
-            // Ideally, we should sync the *current* user. 
+            // Ideally, we should sync the *current* user.
             // For now, let's assume we sync the user that is currently logged in.
             // But wait, UserRepository doesn't know about Auth state directly usually.
             // However, Supabase client has auth.
-            
+
             val currentUser = supabaseClient.auth.currentUserOrNull()
             if (currentUser != null) {
                 val id = currentUser.id
@@ -100,7 +100,7 @@ class UserRepositoryImpl(
                         email = profile.email ?: "",
                         namaLengkap = profile.fullName ?: "Pengguna",
                         role = profile.role,
-                        isActive = profile.isActive ?: true
+                        isActive = profile.isActive ?: true,
                     )
                     userDao.insertUser(userEntity)
                 }
@@ -149,7 +149,7 @@ class UserRepositoryImpl(
                     namaLengkap = profile.fullName ?: "Pengguna",
                     role = profile.role,
                     isActive = profile.isActive ?: true,
-                    photoUrl = profile.avatarUrl
+                    photoUrl = profile.avatarUrl,
                 )
             }
 
@@ -179,9 +179,9 @@ class UserRepositoryImpl(
                 role = normalizedRole,
                 fullName = user.namaLengkap,
                 email = user.email,
-                isActive = true // Assuming active for now
+                isActive = true, // Assuming active for now
             )
-            
+
             supabaseClient.postgrest["profiles"].update(profileDto) {
                 filter {
                     eq("id", user.id)
@@ -229,21 +229,21 @@ class UserRepositoryImpl(
                 // Supabase postgrest update can take a map or object.
                 // Let's create a minimal object or just use map if possible.
                 // Since we are using typed client, let's fetch current first to be safe or use patch.
-                // Actually, we can just update the specific column using a map if the library supports it, 
+                // Actually, we can just update the specific column using a map if the library supports it,
                 // but for now let's use the existing update flow but we need the role.
                 // Let's fetch current profile first.
-                avatarUrl = publicUrl
+                avatarUrl = publicUrl,
             )
-            
+
             // Using a map for partial update is safer to avoid overwriting other fields with nulls/defaults
             // But typed client expects object.
             // Let's fetch current user to get role.
             val currentProfile = supabaseClient.postgrest["profiles"].select {
                 filter { eq("id", userId) }
             }.decodeSingle<com.pln.monitoringpln.data.model.ProfileDto>()
-            
+
             val updatedProfile = currentProfile.copy(avatarUrl = publicUrl)
-            
+
             supabaseClient.postgrest["profiles"].update(updatedProfile) {
                 filter { eq("id", userId) }
             }
@@ -259,5 +259,4 @@ class UserRepositoryImpl(
             Result.failure(e)
         }
     }
-
 }
