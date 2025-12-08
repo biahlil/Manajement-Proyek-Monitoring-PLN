@@ -14,12 +14,14 @@ class CreateTaskUseCase(
 ) {
 
     suspend operator fun invoke(
+        judul: String,
         deskripsi: String,
         idAlat: String,
         idTeknisi: String,
         tglJatuhTempo: Date,
-    ): Result<Unit> {
+    ): Result<String> {
         // 1. Validasi Input Dasar
+        if (judul.isBlank()) return Result.failure(IllegalArgumentException("Judul tidak boleh kosong."))
         if (deskripsi.isBlank()) return Result.failure(IllegalArgumentException("Deskripsi tidak boleh kosong."))
         if (idAlat.isBlank()) return Result.failure(IllegalArgumentException("ID Alat tidak boleh kosong."))
         if (idTeknisi.isBlank()) return Result.failure(IllegalArgumentException("ID Teknisi tidak boleh kosong."))
@@ -51,12 +53,15 @@ class CreateTaskUseCase(
         }
 
         // Cek Role (Harus Teknisi)
-        if (userResult.getOrNull()?.role != "Teknisi") {
+        if (userResult.getOrNull()?.role?.equals("Teknisi", ignoreCase = true) != true) {
             return Result.failure(Exception("User yang dipilih bukan Teknisi."))
         }
 
         // 4. Buat Tugas
+        val id = java.util.UUID.randomUUID().toString()
         val tugas = Tugas(
+            id = id,
+            judul = judul,
             deskripsi = deskripsi,
             idAlat = idAlat,
             idTeknisi = idTeknisi,
@@ -64,6 +69,18 @@ class CreateTaskUseCase(
             status = "To Do",
         )
 
-        return tugasRepository.createTask(tugas)
+        val result = tugasRepository.createTask(tugas)
+
+        // Cek apakah berhasil dibuat
+        return if (result.isSuccess) {
+            val createdTask = result.getOrNull()
+            if (createdTask != null) {
+                Result.success(createdTask.id)
+            } else {
+                Result.failure(Exception("Gagal membuat tugas. Data tugas kosong."))
+            }
+        } else {
+            Result.failure(result.exceptionOrNull() ?: Exception("Gagal membuat tugas. Terjadi kesalahan database."))
+        }
     }
 }

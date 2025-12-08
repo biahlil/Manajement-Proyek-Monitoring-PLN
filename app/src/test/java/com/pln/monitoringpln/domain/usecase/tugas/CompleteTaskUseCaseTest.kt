@@ -125,7 +125,7 @@ class CompleteTaskUseCaseTest {
         val result = useCase("id-tugas-gaib", ByteArray(10), "Baik")
 
         assertTrue(result.isFailure)
-        assertEquals("Tugas tidak ditemukan", result.exceptionOrNull()?.message)
+        assertEquals("Task not found", result.exceptionOrNull()?.message)
         println(logResult)
     }
 

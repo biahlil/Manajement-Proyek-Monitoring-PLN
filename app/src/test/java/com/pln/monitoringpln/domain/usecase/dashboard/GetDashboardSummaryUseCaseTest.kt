@@ -1,6 +1,7 @@
 package com.pln.monitoringpln.domain.usecase.dashboard
 
 import com.pln.monitoringpln.domain.model.DashboardSummary
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.*
 import org.junit.Before
@@ -36,11 +37,10 @@ class GetDashboardSummaryUseCaseTest {
         )
         fakeRepo.summaryToReturn = dummy
 
-        val result = useCase()
-        val data = result.getOrNull()!!
+        val result = useCase().first()
 
-        assertEquals(10, data.totalTugas)
-        assertEquals(50.0, data.getCompletionRate(), 0.01) // Delta 0.01 untuk toleransi float
+        assertEquals(10, result.totalTugas)
+        assertEquals(50.0, result.getCompletionRate(), 0.01) // Delta 0.01 untuk toleransi float
         println(logResult)
     }
 
@@ -51,8 +51,8 @@ class GetDashboardSummaryUseCaseTest {
         val dummy = DashboardSummary(totalTugas = 50, tugasDone = 50)
         fakeRepo.summaryToReturn = dummy
 
-        val result = useCase()
-        assertEquals(100.0, result.getOrNull()!!.getCompletionRate(), 0.0)
+        val result = useCase().first()
+        assertEquals(100.0, result.getCompletionRate(), 0.0)
         println(logResult)
     }
 
@@ -63,9 +63,9 @@ class GetDashboardSummaryUseCaseTest {
         val dummy = DashboardSummary(totalTugas = 3, tugasDone = 1)
         fakeRepo.summaryToReturn = dummy
 
-        val result = useCase()
+        val result = useCase().first()
         // Harusnya 33.3333...
-        val rate = result.getOrNull()!!.getCompletionRate()
+        val rate = result.getCompletionRate()
         assertTrue(rate > 33.33 && rate < 33.34)
         println(logResult)
     }
@@ -81,8 +81,8 @@ class GetDashboardSummaryUseCaseTest {
         val dummy = DashboardSummary(totalTugas = 0, tugasDone = 0)
         fakeRepo.summaryToReturn = dummy
 
-        val result = useCase()
-        assertEquals(0.0, result.getOrNull()!!.getCompletionRate(), 0.0)
+        val result = useCase().first()
+        assertEquals(0.0, result.getCompletionRate(), 0.0)
         println(logResult)
     }
 
@@ -96,8 +96,8 @@ class GetDashboardSummaryUseCaseTest {
         )
         fakeRepo.summaryToReturn = dummy
 
-        val result = useCase()
-        assertEquals(50.0, result.getOrNull()!!.getCompletionRate(), 0.0)
+        val result = useCase().first()
+        assertEquals(50.0, result.getCompletionRate(), 0.0)
         println(logResult)
     }
 
@@ -113,13 +113,12 @@ class GetDashboardSummaryUseCaseTest {
         val dummy = DashboardSummary(totalTugas = 10, tugasDone = -5)
         fakeRepo.summaryToReturn = dummy
 
-        val result = useCase()
-        val data = result.getOrNull()!!
+        val result = useCase().first()
 
         // Rate = -5 / 10 * 100 = -50.0
         // Logic DTO 'bodoh' (hanya hitung), UI nanti yang harus handle tampilan negatif
         // Tapi minimal aplikasi TIDAK CRASH.
-        assertEquals(-50.0, data.getCompletionRate(), 0.0)
+        assertEquals(-50.0, result.getCompletionRate(), 0.0)
         println(logResult)
     }
 
@@ -131,11 +130,10 @@ class GetDashboardSummaryUseCaseTest {
         val dummy = DashboardSummary(totalTugas = 5, tugasDone = 10)
         fakeRepo.summaryToReturn = dummy
 
-        val result = useCase()
-        val data = result.getOrNull()!!
+        val result = useCase().first()
 
         // Rate = 200%
-        assertEquals(200.0, data.getCompletionRate(), 0.0)
+        assertEquals(200.0, result.getCompletionRate(), 0.0)
         println(logResult)
     }
 
@@ -148,10 +146,13 @@ class GetDashboardSummaryUseCaseTest {
         println(logHeader.format("Negative Case: Repo Failure"))
 
         fakeRepo.shouldFail = true
-        val result = useCase()
 
-        assertTrue(result.isFailure)
-        assertEquals("Gagal mengambil data dashboard", result.exceptionOrNull()?.message)
+        try {
+            useCase().first()
+            fail("Should have thrown exception")
+        } catch (e: Exception) {
+            assertEquals("Gagal mengambil data dashboard", e.message)
+        }
         println(logResult)
     }
 }

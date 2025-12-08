@@ -50,6 +50,40 @@ class FakeUserRepository : UserRepository {
         return if (user != null) Result.success(user) else Result.failure(Exception("User tidak ditemukan"))
     }
 
-    fun addDummyUser(user: User) { users[user.id] = user }
+    override suspend fun deleteUser(id: String): Result<Unit> {
+        val removed = users.remove(id)
+        return if (removed != null) Result.success(Unit) else Result.failure(Exception("User not found"))
+    }
+
+    override suspend fun getAllTeknisi(): Result<List<User>> {
+        return Result.success(users.values.filter { it.role == "Teknisi" })
+    }
+
+    override fun observeTeknisi(): kotlinx.coroutines.flow.Flow<List<User>> {
+        return kotlinx.coroutines.flow.flowOf(users.values.filter { it.role == "Teknisi" })
+    }
+
+    override suspend fun refreshTeknisi(): Result<Unit> {
+        return Result.success(Unit)
+    }
+
+    override suspend fun updateUser(user: User): Result<Unit> {
+        users[user.id] = user
+        return Result.success(Unit)
+    }
+
+    override fun getUserProfileFlow(id: String): kotlinx.coroutines.flow.Flow<User?> {
+        return kotlinx.coroutines.flow.flowOf(users[id])
+    }
+
+    override suspend fun syncProfile(): Result<Unit> {
+        return Result.success(Unit)
+    }
+
+    override suspend fun uploadAvatar(userId: String, byteArray: ByteArray): Result<String> {
+        return Result.success("https://dummy-avatar.com/$userId.jpg")
+    }
+
+    fun addDummy(user: User) { users[user.id] = user }
     fun clear() { users.clear() }
 }
