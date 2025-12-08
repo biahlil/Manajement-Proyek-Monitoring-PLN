@@ -14,7 +14,7 @@ data class TugasDto(
     @SerialName("due_date") @Serializable(with = DateSerializer::class) val dueDate: Date,
     @SerialName("alat_id") val alatId: String,
     @SerialName("teknisi_id") val teknisiId: String,
-    @SerialName("created_at") @Serializable(with = DateSerializer::class) val createdAt: Date
+    @SerialName("created_at") @Serializable(with = DateSerializer::class) val createdAt: Date,
 )
 
 fun TugasDto.toDomain(): Tugas {
@@ -25,7 +25,7 @@ fun TugasDto.toDomain(): Tugas {
         idTeknisi = teknisiId,
         tglDibuat = createdAt,
         tglJatuhTempo = dueDate,
-        status = status
+        status = status,
     )
 }
 
@@ -38,7 +38,7 @@ fun Tugas.toDto(): TugasDto {
         dueDate = tglJatuhTempo,
         alatId = idAlat,
         teknisiId = idTeknisi,
-        createdAt = tglDibuat
+        createdAt = tglDibuat,
     )
 }
 
@@ -50,7 +50,7 @@ data class TugasInsertDto(
     @SerialName("status") val status: String,
     @SerialName("due_date") @Serializable(with = DateSerializer::class) val dueDate: Date,
     @SerialName("alat_id") val alatId: String,
-    @SerialName("teknisi_id") val teknisiId: String
+    @SerialName("teknisi_id") val teknisiId: String,
 )
 
 fun Tugas.toInsertDto(): TugasInsertDto {
@@ -61,11 +61,11 @@ fun Tugas.toInsertDto(): TugasInsertDto {
         status = status,
         dueDate = tglJatuhTempo,
         alatId = idAlat,
-        teknisiId = idTeknisi
+        teknisiId = idTeknisi,
     )
 }
 
 @Serializable
 data class TugasUpdateStatusDto(
-    @SerialName("status") val status: String
+    @SerialName("status") val status: String,
 )

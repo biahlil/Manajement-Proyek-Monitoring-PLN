@@ -3,7 +3,7 @@ package com.pln.monitoringpln.domain.usecase.auth
 import com.pln.monitoringpln.domain.repository.AuthRepository
 
 class LoginUseCase(
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
 ) {
     private val emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$".toRegex()
 

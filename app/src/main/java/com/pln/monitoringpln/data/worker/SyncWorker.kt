@@ -12,7 +12,7 @@ import org.koin.core.component.inject
 
 class SyncWorker(
     context: Context,
-    params: WorkerParameters
+    params: WorkerParameters,
 ) : CoroutineWorker(context, params), KoinComponent {
 
     private val alatRepository: AlatRepository by inject()
@@ -22,7 +22,7 @@ class SyncWorker(
         try {
             // Sync Alat
             val alatResult = alatRepository.sync()
-            
+
             // Sync Tugas
             val tugasResult = tugasRepository.sync()
 

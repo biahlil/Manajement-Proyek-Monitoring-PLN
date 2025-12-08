@@ -7,6 +7,7 @@ import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.gotrue.Auth
 import io.github.jan.supabase.gotrue.auth
+import io.github.jan.supabase.gotrue.providers.builtin.Email
 import io.github.jan.supabase.postgrest.Postgrest
 import io.github.jan.supabase.storage.Storage
 import junit.framework.Assert.assertNotNull
@@ -14,8 +15,6 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-
-import io.github.jan.supabase.gotrue.providers.builtin.Email
 
 class TugasRepositoryImplTest {
 
@@ -38,7 +37,7 @@ class TugasRepositoryImplTest {
         // Initialize real Supabase Client
         supabaseClient = createSupabaseClient(
             supabaseUrl = com.pln.monitoringpln.BuildConfig.SUPABASE_URL,
-            supabaseKey = com.pln.monitoringpln.BuildConfig.SUPABASE_KEY
+            supabaseKey = com.pln.monitoringpln.BuildConfig.SUPABASE_KEY,
         ) {
             install(Postgrest)
             install(Storage)
@@ -59,9 +58,9 @@ class TugasRepositoryImplTest {
         val context = androidx.test.core.app.ApplicationProvider.getApplicationContext<android.content.Context>()
         database = androidx.room.Room.inMemoryDatabaseBuilder(
             context,
-            com.pln.monitoringpln.data.local.AppDatabase::class.java
+            com.pln.monitoringpln.data.local.AppDatabase::class.java,
         ).allowMainThreadQueries().build()
-        
+
         // Use real user ID if available, otherwise mock
         currentUserId = supabaseClient.auth.currentUserOrNull()?.id ?: "test-user-id"
         teknisiId = currentUserId
@@ -94,7 +93,7 @@ class TugasRepositoryImplTest {
         val alat = TestObjects.ALAT_VALID.copy(
             id = uniqueId,
             kodeAlat = uniqueCode,
-            namaAlat = "Test Alat ${System.currentTimeMillis()}"
+            namaAlat = "Test Alat ${System.currentTimeMillis()}",
         )
         val result = alatRepository.insertAlat(alat)
         if (result.isFailure) {
@@ -104,7 +103,7 @@ class TugasRepositoryImplTest {
         val localAlat = database.alatDao().getAlatDetail(uniqueId)
         println("Local Alat isSynced: ${localAlat?.isSynced}")
         if (localAlat?.isSynced == false) {
-             println("WARNING: Alat was not synced to remote. Tugas insert might fail due to FK constraint.")
+            println("WARNING: Alat was not synced to remote. Tugas insert might fail due to FK constraint.")
         }
         return uniqueId
     }
@@ -112,16 +111,16 @@ class TugasRepositoryImplTest {
     @Test
     fun create_and_get_task_should_succeed() = runBlocking {
         println(logHeader.format("Integration: Create & Get Task"))
-        
+
         // Given: Create Alat first
         val alatId = createTestAlat()
-        
+
         val uniqueId = java.util.UUID.randomUUID().toString()
         val tugas = TestObjects.TUGAS_TODO.copy(
-            id = uniqueId, 
+            id = uniqueId,
             deskripsi = "Test Task ${System.currentTimeMillis()}",
             idTeknisi = teknisiId,
-            idAlat = alatId
+            idAlat = alatId,
         )
         println(logAction.format("Create task: ${tugas.deskripsi} with ID: $uniqueId"))
 
@@ -140,32 +139,32 @@ class TugasRepositoryImplTest {
         val getResult = tugasRepository.getTasksByTeknisi(teknisiId)
         assertTrue(getResult.isSuccess)
         val tasks = getResult.getOrNull()
-        
+
         assertTrue(tasks?.any { it.deskripsi == tugas.deskripsi } == true)
         println(logAssert.format("Task found in list"))
-        
+
         println(logResult)
     }
 
     @Test
     fun update_task_status_should_succeed() = runBlocking {
         println(logHeader.format("Integration: Update Task Status"))
-        
+
         // Given: Create Alat and Task
         val alatId = createTestAlat()
         val uniqueDesc = "UPDATE-STATUS-${System.currentTimeMillis()}"
         val uniqueId = java.util.UUID.randomUUID().toString()
         val tugas = TestObjects.TUGAS_TODO.copy(
-            id = uniqueId, 
+            id = uniqueId,
             deskripsi = uniqueDesc,
             idTeknisi = teknisiId,
-            idAlat = alatId
+            idAlat = alatId,
         )
         val createResult = tugasRepository.createTask(tugas)
         if (createResult.isFailure) {
-             throw IllegalStateException("Failed to create task")
+            throw IllegalStateException("Failed to create task")
         }
-        
+
         // Get ID via list
         val tasks = tugasRepository.getTasksByTeknisi(teknisiId).getOrNull()
         val createdTask = tasks?.find { it.deskripsi == uniqueDesc }
@@ -179,34 +178,34 @@ class TugasRepositoryImplTest {
         val updatedTask = tugasRepository.getTaskDetail(id).getOrNull()
         assertTrue(updatedTask?.status == "IN_PROGRESS")
         println(logAssert.format("Task status updated successfully"))
-        
+
         println(logResult)
     }
 
     @Test
     fun get_tasks_by_alat_should_return_list() = runBlocking {
         println(logHeader.format("Integration: Get Tasks by Alat"))
-        
+
         // Given: Create Alat and Task
         val alatId = createTestAlat()
         val uniqueDesc = "ALAT-TASK-${System.currentTimeMillis()}"
         val uniqueId = java.util.UUID.randomUUID().toString()
         val tugas = TestObjects.TUGAS_TODO.copy(
-            id = uniqueId, 
+            id = uniqueId,
             deskripsi = uniqueDesc,
             idTeknisi = teknisiId,
-            idAlat = alatId
+            idAlat = alatId,
         )
         val createResult = tugasRepository.createTask(tugas)
         if (createResult.isFailure) {
-             throw IllegalStateException("Failed to create task")
+            throw IllegalStateException("Failed to create task")
         }
 
         // Check if synced
         val localTask = database.tugasDao().getTugasById(uniqueId)
         println("Local task isSynced: ${localTask?.isSynced}")
         if (localTask?.isSynced == false) {
-             println("WARNING: Task was not synced to remote. getTasksByAlat might fail if it relies on remote.")
+            println("WARNING: Task was not synced to remote. getTasksByAlat might fail if it relies on remote.")
         }
 
         // When
@@ -217,7 +216,7 @@ class TugasRepositoryImplTest {
         val tasks = result.getOrNull()
         assertTrue(tasks?.any { it.deskripsi == uniqueDesc } == true)
         println(logAssert.format("Tasks by alat retrieved successfully"))
-        
+
         println(logResult)
     }
 }

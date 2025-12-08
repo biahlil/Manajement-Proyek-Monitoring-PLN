@@ -16,5 +16,5 @@ data class TugasEntity(
     val status: String,
     val buktiFoto: String? = null,
     val kondisiAkhir: String? = null,
-    val isSynced: Boolean = true
+    val isSynced: Boolean = true,
 )

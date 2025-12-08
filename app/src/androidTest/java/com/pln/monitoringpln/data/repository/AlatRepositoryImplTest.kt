@@ -29,7 +29,7 @@ class AlatRepositoryImplTest {
         // Initialize real Supabase Client for Integration Test
         supabaseClient = createSupabaseClient(
             supabaseUrl = com.pln.monitoringpln.BuildConfig.SUPABASE_URL,
-            supabaseKey = com.pln.monitoringpln.BuildConfig.SUPABASE_KEY
+            supabaseKey = com.pln.monitoringpln.BuildConfig.SUPABASE_KEY,
         ) {
             install(Postgrest)
         }
@@ -38,7 +38,7 @@ class AlatRepositoryImplTest {
         val context = androidx.test.core.app.ApplicationProvider.getApplicationContext<android.content.Context>()
         database = androidx.room.Room.inMemoryDatabaseBuilder(
             context,
-            com.pln.monitoringpln.data.local.AppDatabase::class.java
+            com.pln.monitoringpln.data.local.AppDatabase::class.java,
         ).allowMainThreadQueries().build()
 
         // Initialize DataSources
@@ -56,7 +56,7 @@ class AlatRepositoryImplTest {
     @Test
     fun insert_and_get_alat_detail_should_succeed() = runBlocking {
         println(logHeader.format("Integration: Insert & Get Alat"))
-        
+
         // Given
         val uniqueCode = "TEST-${System.currentTimeMillis()}"
         val alat = TestObjects.ALAT_VALID.copy(kodeAlat = uniqueCode)
@@ -68,24 +68,24 @@ class AlatRepositoryImplTest {
         // Then
         assertTrue(insertResult.isSuccess)
         println(logAssert.format("Insert successful"))
-        
+
         println(logResult)
     }
 
     @Test
     fun archive_alat_should_update_status() = runBlocking {
         println(logHeader.format("Integration: Archive Alat"))
-        
+
         // Given: Insert first to get ID
         val uniqueCode = "ARCHIVE-TEST-${System.currentTimeMillis()}"
         val alat = TestObjects.ALAT_VALID.copy(kodeAlat = uniqueCode)
         alatRepository.insertAlat(alat)
-        
+
         // Fetch ID using the new repository method
         val fetchedAlatResult = alatRepository.getAlatByKode(uniqueCode)
         assertTrue(fetchedAlatResult.isSuccess)
         val id = fetchedAlatResult.getOrNull()?.id ?: throw IllegalStateException("Alat not found")
-            
+
         println(logAction.format("Archive alat: $id"))
 
         // When
@@ -93,24 +93,25 @@ class AlatRepositoryImplTest {
 
         // Then
         assertTrue(result.isSuccess)
-        
+
         // Verify
         val archivedAlat = alatRepository.getAlatDetail(id).getOrNull()
         assertEquals("ARCHIVED", archivedAlat?.status)
         assertTrue(archivedAlat?.isArchived == true)
         println(logAssert.format("Alat archived successfully"))
-        
+
         println(logResult)
     }
+
     @Test
     fun update_alat_info_should_succeed() = runBlocking {
         println(logHeader.format("Integration: Update Alat Info"))
-        
+
         // Given: Insert first
         val uniqueCode = "UPDATE-INFO-${System.currentTimeMillis()}"
         val alat = TestObjects.ALAT_VALID.copy(kodeAlat = uniqueCode)
         alatRepository.insertAlat(alat)
-        
+
         // Get ID
         val id = alatRepository.getAlatByKode(uniqueCode).getOrNull()?.id ?: throw IllegalStateException("Alat not found")
 
@@ -121,7 +122,7 @@ class AlatRepositoryImplTest {
             nama = updatedAlat.namaAlat,
             kode = updatedAlat.kodeAlat,
             lat = updatedAlat.latitude,
-            lng = updatedAlat.longitude
+            lng = updatedAlat.longitude,
         )
 
         // Then
@@ -131,19 +132,19 @@ class AlatRepositoryImplTest {
         assertEquals(1.0, fetchedAlat?.latitude)
         assertEquals(1.0, fetchedAlat?.longitude)
         println(logAssert.format("Alat info updated successfully"))
-        
+
         println(logResult)
     }
 
     @Test
     fun update_alat_condition_should_succeed() = runBlocking {
         println(logHeader.format("Integration: Update Alat Condition"))
-        
+
         // Given: Insert first
         val uniqueCode = "UPDATE-COND-${System.currentTimeMillis()}"
         val alat = TestObjects.ALAT_VALID.copy(kodeAlat = uniqueCode, kondisi = "Baik")
         alatRepository.insertAlat(alat)
-        
+
         // Get ID
         val id = alatRepository.getAlatByKode(uniqueCode).getOrNull()?.id ?: throw IllegalStateException("Alat not found")
 
@@ -155,7 +156,7 @@ class AlatRepositoryImplTest {
         val fetchedAlat = alatRepository.getAlatDetail(id).getOrNull()
         assertEquals("Rusak", fetchedAlat?.kondisi)
         println(logAssert.format("Alat condition updated successfully"))
-        
+
         println(logResult)
     }
 }

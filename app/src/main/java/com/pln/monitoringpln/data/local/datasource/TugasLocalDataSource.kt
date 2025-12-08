@@ -5,7 +5,7 @@ import com.pln.monitoringpln.data.local.entity.TugasEntity
 import kotlinx.coroutines.flow.Flow
 
 class TugasLocalDataSource(
-    private val tugasDao: TugasDao
+    private val tugasDao: TugasDao,
 ) {
     fun getAllTugas(): Flow<List<TugasEntity>> = tugasDao.getAllTugas()
 

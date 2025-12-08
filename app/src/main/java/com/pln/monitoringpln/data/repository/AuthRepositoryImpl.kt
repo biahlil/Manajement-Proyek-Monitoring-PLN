@@ -1,19 +1,18 @@
 package com.pln.monitoringpln.data.repository
 
+import com.pln.monitoringpln.data.model.ProfileDto
 import com.pln.monitoringpln.domain.repository.AuthRepository
 import io.github.jan.supabase.SupabaseClient
+import io.github.jan.supabase.functions.*
+import io.github.jan.supabase.gotrue.SessionStatus
 import io.github.jan.supabase.gotrue.auth
 import io.github.jan.supabase.gotrue.providers.builtin.Email
-import io.github.jan.supabase.gotrue.SessionStatus
+import io.github.jan.supabase.postgrest.postgrest
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-import com.pln.monitoringpln.data.model.ProfileDto
-import io.github.jan.supabase.postgrest.postgrest
-import io.github.jan.supabase.functions.*
-
 class AuthRepositoryImpl(
-    private val supabaseClient: SupabaseClient
+    private val supabaseClient: SupabaseClient,
 ) : AuthRepository {
 
     override suspend fun login(email: String, password: String): Result<Unit> {
@@ -59,12 +58,13 @@ class AuthRepositoryImpl(
             Result.failure(e)
         }
     }
+
     @kotlinx.serialization.Serializable
     data class CreateUserParams(
         val email: String,
         val password: String,
         val fullName: String,
-        val role: String
+        val role: String,
     )
 
     override suspend fun createUser(email: String, password: String, fullName: String, role: String): Result<Unit> {
@@ -73,7 +73,7 @@ class AuthRepositoryImpl(
                 email = email,
                 password = password,
                 fullName = fullName,
-                role = role
+                role = role,
             )
             supabaseClient.functions.invoke("create-user", params)
             Result.success(Unit)
