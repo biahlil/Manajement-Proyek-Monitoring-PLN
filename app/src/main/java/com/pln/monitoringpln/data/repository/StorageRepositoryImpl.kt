@@ -7,7 +7,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 class StorageRepositoryImpl(
-    private val supabaseClient: SupabaseClient
+    private val supabaseClient: SupabaseClient,
 ) : StorageRepository {
 
     override suspend fun uploadTechnicianPhoto(byteArray: ByteArray, fileName: String): Result<String> {

@@ -2,12 +2,10 @@ package com.pln.monitoringpln.data.repository
 
 import com.pln.monitoringpln.domain.model.DashboardSummary
 import com.pln.monitoringpln.domain.repository.DashboardRepository
-import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
 
 class DashboardRepositoryImpl(
     private val alatDao: com.pln.monitoringpln.data.local.dao.AlatDao,
-    private val tugasDao: com.pln.monitoringpln.data.local.dao.TugasDao
+    private val tugasDao: com.pln.monitoringpln.data.local.dao.TugasDao,
 ) : DashboardRepository {
 
     override fun getDashboardSummary(technicianId: String?): kotlinx.coroutines.flow.Flow<DashboardSummary> {
@@ -17,7 +15,7 @@ class DashboardRepositoryImpl(
                 alatDao.observeCountAll(),
                 alatDao.observeCountByCondition("Normal"),
                 alatDao.observeCountByCondition("Perlu Perhatian"),
-                alatDao.observeCountByCondition("Rusak")
+                alatDao.observeCountByCondition("Rusak"),
             ) { total, normal, warning, broken ->
                 Quad(total, normal, warning, broken)
             }
@@ -26,7 +24,7 @@ class DashboardRepositoryImpl(
                 tugasDao.observeCountAll(),
                 tugasDao.observeCountByStatus("To Do"),
                 tugasDao.observeCountByStatus("In Progress"),
-                tugasDao.observeCountByStatus("Done")
+                tugasDao.observeCountByStatus("Done"),
             ) { total, todo, progress, done ->
                 Quad(total, todo, progress, done)
             }
@@ -41,20 +39,20 @@ class DashboardRepositoryImpl(
                     totalTugas = tugas.first,
                     tugasToDo = tugas.second,
                     tugasInProgress = tugas.third,
-                    tugasDone = tugas.fourth
+                    tugasDone = tugas.fourth,
                 )
             }
         } else {
             // Technician Logic
             // Total Alat = Alat yang pernah dikerjakan (via tugas)
             val totalAlatFlow = tugasDao.observeDistinctEquipmentCountByTechnician(technicianId)
-            
+
             // Tugas Stats specific to technician
             val tugasFlow = kotlinx.coroutines.flow.combine(
                 tugasDao.observeCountByTechnician(technicianId),
                 tugasDao.observeCountByStatusAndTechnician("To Do", technicianId),
                 tugasDao.observeCountByStatusAndTechnician("In Progress", technicianId),
-                tugasDao.observeCountByStatusAndTechnician("Done", technicianId)
+                tugasDao.observeCountByStatusAndTechnician("Done", technicianId),
             ) { total, todo, progress, done ->
                 Quad(total, todo, progress, done)
             }
@@ -69,7 +67,7 @@ class DashboardRepositoryImpl(
                     totalTugas = tugas.first,
                     tugasToDo = tugas.second,
                     tugasInProgress = tugas.third,
-                    tugasDone = tugas.fourth
+                    tugasDone = tugas.fourth,
                 )
             }
         }

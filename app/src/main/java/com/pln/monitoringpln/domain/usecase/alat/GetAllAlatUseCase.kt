@@ -5,7 +5,7 @@ import com.pln.monitoringpln.domain.repository.AlatRepository
 import kotlinx.coroutines.flow.Flow
 
 class GetAllAlatUseCase(
-    private val alatRepository: AlatRepository
+    private val alatRepository: AlatRepository,
 ) {
     operator fun invoke(): Flow<List<Alat>> {
         return alatRepository.getAllAlat()

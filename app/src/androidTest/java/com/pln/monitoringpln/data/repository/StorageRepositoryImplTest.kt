@@ -4,14 +4,14 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.pln.monitoringpln.domain.repository.StorageRepository
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.createSupabaseClient
+import io.github.jan.supabase.gotrue.auth
+import io.github.jan.supabase.gotrue.providers.builtin.Email
 import io.github.jan.supabase.storage.Storage
 import io.github.jan.supabase.storage.storage
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import io.github.jan.supabase.gotrue.auth
-import io.github.jan.supabase.gotrue.providers.builtin.Email
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
@@ -31,14 +31,14 @@ class StorageRepositoryImplTest {
         // Initialize real Supabase Client for Integration Test
         supabaseClient = createSupabaseClient(
             supabaseUrl = com.pln.monitoringpln.BuildConfig.SUPABASE_URL,
-            supabaseKey = com.pln.monitoringpln.BuildConfig.SUPABASE_KEY
+            supabaseKey = com.pln.monitoringpln.BuildConfig.SUPABASE_KEY,
         ) {
             install(Storage)
             install(io.github.jan.supabase.gotrue.Auth)
         }
 
         storageRepository = StorageRepositoryImpl(supabaseClient)
-        
+
         // Sign in to bypass RLS
         runBlocking {
             try {
@@ -91,7 +91,7 @@ class StorageRepositoryImplTest {
             println("Error: ${result.exceptionOrNull()?.message}")
         }
         assertTrue("Upload failed: ${result.exceptionOrNull()?.message}", result.isSuccess)
-        
+
         val url = result.getOrNull()
         assertTrue("URL should not be null or empty", !url.isNullOrBlank())
         println(logAssert.format("Upload successful, URL: $url"))

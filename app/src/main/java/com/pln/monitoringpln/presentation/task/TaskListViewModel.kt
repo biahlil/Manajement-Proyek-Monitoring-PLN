@@ -5,23 +5,21 @@ import androidx.lifecycle.viewModelScope
 import com.pln.monitoringpln.domain.model.Tugas
 import com.pln.monitoringpln.domain.repository.AlatRepository
 import com.pln.monitoringpln.domain.repository.AuthRepository
+import com.pln.monitoringpln.domain.repository.UserRepository
 import com.pln.monitoringpln.domain.usecase.tugas.ObserveTasksUseCase
 import com.pln.monitoringpln.domain.usecase.tugas.SyncTasksUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-
-import com.pln.monitoringpln.domain.repository.UserRepository
 
 class TaskListViewModel(
     private val authRepository: AuthRepository,
     private val observeTasksUseCase: ObserveTasksUseCase,
     private val syncTasksUseCase: SyncTasksUseCase,
     private val alatRepository: AlatRepository,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(TaskListState(isLoading = true))
@@ -44,7 +42,7 @@ class TaskListViewModel(
             val role = roleResult.getOrDefault("technician")
             isUserAdmin = role.equals("admin", ignoreCase = true)
             currentUserId = authRepository.getCurrentUserId() ?: ""
-            
+
             android.util.Log.d("TaskListViewModel", "User: $currentUserId, Role: $role, IsAdmin: $isUserAdmin")
 
             // Trigger Sync
@@ -90,15 +88,15 @@ class TaskListViewModel(
 
     private fun applyFilters() {
         val query = _state.value.searchQuery
-        
+
         // Filter by Search
         val filtered = if (query.isBlank()) {
             allTasksCache
         } else {
             allTasksCache.filter {
                 it.judul.contains(query, ignoreCase = true) ||
-                it.deskripsi.contains(query, ignoreCase = true) ||
-                it.idAlat.contains(query, ignoreCase = true)
+                    it.deskripsi.contains(query, ignoreCase = true) ||
+                    it.idAlat.contains(query, ignoreCase = true)
             }
         }
 
@@ -107,7 +105,7 @@ class TaskListViewModel(
                 isLoading = false,
                 tasks = allTasksCache,
                 filteredTasks = filtered,
-                isAdmin = isUserAdmin
+                isAdmin = isUserAdmin,
             )
         }
     }
@@ -123,10 +121,10 @@ class TaskListViewModel(
                 // TODO: Implement Delete in Repository
                 // tugasRepository.deleteTask(taskToDelete.id)
                 // For now just hide dialog
-                _state.update { 
+                _state.update {
                     it.copy(
                         showDeleteConfirmation = false,
-                        taskToDelete = null
+                        taskToDelete = null,
                     )
                 }
             }

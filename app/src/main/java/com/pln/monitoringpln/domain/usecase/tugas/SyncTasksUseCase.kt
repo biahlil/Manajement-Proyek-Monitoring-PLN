@@ -1,6 +1,5 @@
 package com.pln.monitoringpln.domain.usecase.tugas
 
-import android.util.Log
 import com.pln.monitoringpln.domain.repository.TugasRepository
 
 class SyncTasksUseCase(private val repository: TugasRepository) {

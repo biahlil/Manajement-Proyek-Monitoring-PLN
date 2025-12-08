@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.map
 
 class TugasRepositoryImpl(
     private val localDataSource: TugasLocalDataSource,
-    private val remoteDataSource: TugasRemoteDataSource
+    private val remoteDataSource: TugasRemoteDataSource,
 ) : TugasRepository {
 
     override suspend fun createTask(tugas: Tugas): Result<Tugas?> {
@@ -40,14 +40,14 @@ class TugasRepositoryImpl(
             // 1. Fetch from Local
             val localEntities = localDataSource.getTugasByTeknisiSuspend(idTeknisi)
             val domainList = localEntities.map { it.toDomain() }
-            
+
             // 2. Filter by Search Query if needed (Universal Search)
             val filteredList = if (!searchQuery.isNullOrBlank()) {
                 domainList.filter { tugas ->
                     tugas.judul.contains(searchQuery, ignoreCase = true) ||
-                    tugas.deskripsi.contains(searchQuery, ignoreCase = true) ||
-                    tugas.status.contains(searchQuery, ignoreCase = true) ||
-                    tugas.idAlat.contains(searchQuery, ignoreCase = true)
+                        tugas.deskripsi.contains(searchQuery, ignoreCase = true) ||
+                        tugas.status.contains(searchQuery, ignoreCase = true) ||
+                        tugas.idAlat.contains(searchQuery, ignoreCase = true)
                 }
             } else {
                 domainList
@@ -83,10 +83,10 @@ class TugasRepositoryImpl(
             // 1. Update Local
             val existing = localDataSource.getTugasById(id) ?: return Result.failure(Exception("Tugas not found"))
             val updated = existing.copy(
-                status = "Done", 
-                buktiFoto = buktiFotoPath, 
+                status = "Done",
+                buktiFoto = buktiFotoPath,
                 kondisiAkhir = kondisiAkhir,
-                isSynced = false
+                isSynced = false,
             )
             localDataSource.updateTugas(updated)
 
@@ -110,7 +110,7 @@ class TugasRepositoryImpl(
                 // Try Insert first (if new)
                 val insertResult = remoteDataSource.insertTugas(entity.toDomain().toInsertDto(), upsert = false)
                 if (insertResult.isSuccess) {
-                     localDataSource.insertTugas(entity.copy(isSynced = true))
+                    localDataSource.insertTugas(entity.copy(isSynced = true))
                 } else {
                     // If Insert failed, try Update (if existing)
                     // Let's use upsert=true as fallback
@@ -206,7 +206,7 @@ class TugasRepositoryImpl(
         } catch (e: Exception) {
             Result.failure(e)
         }
-        }
+    }
 
     override suspend fun updateTask(tugas: Tugas): Result<Unit> {
         return try {
@@ -227,4 +227,3 @@ class TugasRepositoryImpl(
         }
     }
 }
-

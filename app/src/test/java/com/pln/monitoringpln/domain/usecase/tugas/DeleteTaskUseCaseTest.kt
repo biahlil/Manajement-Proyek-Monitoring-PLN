@@ -1,7 +1,6 @@
 package com.pln.monitoringpln.domain.usecase.tugas
 
 import com.pln.monitoringpln.domain.model.Tugas
-import com.pln.monitoringpln.domain.usecase.tugas.FakeTugasRepository
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue

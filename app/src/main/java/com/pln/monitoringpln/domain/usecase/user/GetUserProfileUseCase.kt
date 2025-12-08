@@ -6,7 +6,7 @@ import com.pln.monitoringpln.domain.repository.UserRepository
 
 class GetUserProfileUseCase(
     private val authRepository: AuthRepository,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
 ) {
     suspend operator fun invoke(): Result<User> {
         val userId = authRepository.getCurrentUserId()

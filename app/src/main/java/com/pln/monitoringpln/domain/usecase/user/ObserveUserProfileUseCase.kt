@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 
 class ObserveUserProfileUseCase(
     private val authRepository: AuthRepository,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
 ) {
     operator fun invoke(): Flow<User?> {
         return authRepository.isUserLoggedIn().flatMapLatest { isLoggedIn ->

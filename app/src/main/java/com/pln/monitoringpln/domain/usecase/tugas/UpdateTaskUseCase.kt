@@ -1,16 +1,14 @@
 package com.pln.monitoringpln.domain.usecase.tugas
 
-import com.pln.monitoringpln.domain.model.Tugas
 import com.pln.monitoringpln.domain.repository.AlatRepository
 import com.pln.monitoringpln.domain.repository.TugasRepository
 import com.pln.monitoringpln.domain.repository.UserRepository
-import java.util.Calendar
 import java.util.Date
 
 class UpdateTaskUseCase(
     private val tugasRepository: TugasRepository,
     private val alatRepository: AlatRepository,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
 ) {
     suspend operator fun invoke(
         taskId: String,
@@ -19,7 +17,7 @@ class UpdateTaskUseCase(
         idAlat: String,
         idTeknisi: String,
         tglJatuhTempo: Date,
-        status: String
+        status: String,
     ): Result<Unit> {
         // 1. Validasi Input Dasar
         if (taskId.isBlank()) return Result.failure(IllegalArgumentException("ID Tugas tidak valid."))
@@ -61,7 +59,7 @@ class UpdateTaskUseCase(
             idAlat = idAlat,
             idTeknisi = idTeknisi,
             tglJatuhTempo = tglJatuhTempo,
-            status = status
+            status = status,
             // tglDibuat tetap
             // buktiFoto tetap
             // kondisiAkhir tetap

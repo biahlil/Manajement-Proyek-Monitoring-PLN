@@ -1,22 +1,21 @@
 package com.pln.monitoringpln.presentation.equipment.list
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pln.monitoringpln.domain.model.Alat
-import com.pln.monitoringpln.domain.repository.AuthRepository
 import com.pln.monitoringpln.domain.repository.AlatRepository
+import com.pln.monitoringpln.domain.repository.AuthRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-import androidx.lifecycle.SavedStateHandle
-
 class EquipmentListViewModel(
     private val savedStateHandle: SavedStateHandle,
     private val authRepository: AuthRepository,
-    private val alatRepository: AlatRepository
+    private val alatRepository: AlatRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(EquipmentListState(isLoading = true))
@@ -24,7 +23,7 @@ class EquipmentListViewModel(
 
     private var allEquipmentsCache: List<Alat> = emptyList()
     private var currentFilterType: String = savedStateHandle.get<String>("filterType") ?: "all_equipment"
-    
+
     init {
         viewModelScope.launch {
             alatRepository.getAllAlat().collect { list ->
@@ -66,21 +65,21 @@ class EquipmentListViewModel(
             } else {
                 categoryFiltered.filter {
                     it.namaAlat.contains(query, ignoreCase = true) ||
-                    it.kodeAlat.contains(query, ignoreCase = true)
+                        it.kodeAlat.contains(query, ignoreCase = true)
                 }
             }
 
-            _state.update { 
+            _state.update {
                 it.copy(
                     isLoading = false,
                     equipmentList = categoryFiltered,
                     filteredEquipmentList = finalFiltered,
-                    isAdmin = isAdmin
-                ) 
+                    isAdmin = isAdmin,
+                )
             }
         }
     }
-    
+
     fun onDeleteEquipment(equipment: Alat) {
         _state.update { it.copy(showDeleteDialog = true, equipmentToDelete = equipment) }
     }
@@ -89,15 +88,15 @@ class EquipmentListViewModel(
         val equipment = _state.value.equipmentToDelete ?: return
         viewModelScope.launch {
             _state.update { it.copy(isDeleting = true) }
-            
+
             alatRepository.archiveAlat(equipment.id)
                 .onSuccess {
-                    _state.update { 
+                    _state.update {
                         it.copy(
                             isDeleting = false,
                             showDeleteDialog = false,
-                            equipmentToDelete = null
-                        ) 
+                            equipmentToDelete = null,
+                        )
                     }
                 }
                 .onFailure {

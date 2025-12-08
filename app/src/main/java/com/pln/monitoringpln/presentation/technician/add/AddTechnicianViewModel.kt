@@ -2,7 +2,6 @@ package com.pln.monitoringpln.presentation.technician.add
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -12,7 +11,7 @@ import kotlinx.coroutines.launch
 class AddTechnicianViewModel(
     private val createUserUseCase: com.pln.monitoringpln.domain.usecase.auth.CreateUserUseCase,
     private val uploadPhotoUseCase: com.pln.monitoringpln.domain.usecase.storage.UploadPhotoUseCase,
-    private val context: android.content.Context // Need context for ContentResolver
+    private val context: android.content.Context, // Need context for ContentResolver
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AddTechnicianState())
@@ -46,7 +45,7 @@ class AddTechnicianViewModel(
             }
 
             var photoUrl: String? = null
-            
+
             // Upload Photo if exists
             if (currentState.photoUri != null) {
                 try {
@@ -57,13 +56,13 @@ class AddTechnicianViewModel(
                     if (byteArray != null) {
                         val fileName = "technician_${System.currentTimeMillis()}.jpg"
                         val uploadResult = uploadPhotoUseCase(byteArray, fileName)
-                        
+
                         uploadResult.fold(
                             onSuccess = { url -> photoUrl = url },
                             onFailure = { error ->
                                 _state.update { it.copy(isSaving = false, error = "Gagal upload foto: ${error.message}") }
                                 return@launch
-                            }
+                            },
                         )
                     }
                 } catch (e: Exception) {
@@ -77,7 +76,7 @@ class AddTechnicianViewModel(
                 password = currentState.password,
                 fullName = currentState.namaLengkap,
                 role = "TEKNISI",
-                photoUrl = photoUrl
+                photoUrl = photoUrl,
             )
 
             result.fold(
@@ -86,7 +85,7 @@ class AddTechnicianViewModel(
                 },
                 onFailure = { error ->
                     _state.update { it.copy(isSaving = false, error = error.message ?: "Gagal menyimpan teknisi") }
-                }
+                },
             )
         }
     }

@@ -14,5 +14,5 @@ data class EditProfileState(
     val passwordError: String? = null,
     val role: String = "",
     val nameError: String? = null,
-    val emailError: String? = null
+    val emailError: String? = null,
 )

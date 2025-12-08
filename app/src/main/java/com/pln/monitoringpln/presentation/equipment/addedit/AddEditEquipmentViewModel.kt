@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pln.monitoringpln.domain.model.Alat
 import com.pln.monitoringpln.domain.repository.AlatRepository
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -13,7 +12,7 @@ import kotlinx.coroutines.launch
 import java.util.UUID
 
 class AddEditEquipmentViewModel(
-    private val alatRepository: AlatRepository
+    private val alatRepository: AlatRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AddEditEquipmentState())
@@ -27,12 +26,12 @@ class AddEditEquipmentViewModel(
 
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, isEditMode = true, equipmentId = id) }
-            
+
             val result = alatRepository.getAlatDetail(id)
-            
+
             if (result.isSuccess) {
                 val equipment = result.getOrThrow()
-                _state.update { 
+                _state.update {
                     it.copy(
                         isLoading = false,
                         namaAlat = equipment.namaAlat,
@@ -41,15 +40,15 @@ class AddEditEquipmentViewModel(
                         status = equipment.kondisi,
                         lokasi = equipment.locationName ?: "",
                         latitude = equipment.latitude,
-                        longitude = equipment.longitude
-                    ) 
+                        longitude = equipment.longitude,
+                    )
                 }
             } else {
-                _state.update { 
+                _state.update {
                     it.copy(
-                        isLoading = false, 
-                        error = "Alat tidak ditemukan: ${result.exceptionOrNull()?.message}" 
-                    ) 
+                        isLoading = false,
+                        error = "Alat tidak ditemukan: ${result.exceptionOrNull()?.message}",
+                    )
                 }
             }
         }
@@ -74,7 +73,7 @@ class AddEditEquipmentViewModel(
     fun onLokasiChange(value: String) {
         _state.update { it.copy(lokasi = value) }
     }
-    
+
     fun onLatitudeChange(value: String) {
         val doubleValue = value.toDoubleOrNull() ?: 0.0
         _state.update { it.copy(latitude = doubleValue) }
@@ -115,7 +114,7 @@ class AddEditEquipmentViewModel(
     fun onSaveEquipment() {
         viewModelScope.launch {
             val currentState = _state.value
-            
+
             // Basic Validation
             if (currentState.namaAlat.isBlank() || currentState.kodeAlat.isBlank()) {
                 _state.update { it.copy(error = "Nama dan Kode Alat wajib diisi") }
@@ -123,9 +122,9 @@ class AddEditEquipmentViewModel(
             }
 
             _state.update { it.copy(isSaving = true, error = null) }
-            
+
             val id = currentState.equipmentId ?: UUID.randomUUID().toString()
-            
+
             val alat = Alat(
                 id = id,
                 namaAlat = currentState.namaAlat,
@@ -136,19 +135,19 @@ class AddEditEquipmentViewModel(
                 tipe = currentState.tipePeralatan,
                 status = "ACTIVE",
                 isArchived = false,
-                locationName = currentState.lokasi.ifBlank { null }
+                locationName = currentState.lokasi.ifBlank { null },
             )
-            
+
             val result = alatRepository.insertAlat(alat)
-            
+
             if (result.isSuccess) {
                 _state.update { it.copy(isSaving = false, isSaved = true) }
             } else {
-                _state.update { 
+                _state.update {
                     it.copy(
-                        isSaving = false, 
-                        error = "Gagal menyimpan: ${result.exceptionOrNull()?.message}" 
-                    ) 
+                        isSaving = false,
+                        error = "Gagal menyimpan: ${result.exceptionOrNull()?.message}",
+                    )
                 }
             }
         }

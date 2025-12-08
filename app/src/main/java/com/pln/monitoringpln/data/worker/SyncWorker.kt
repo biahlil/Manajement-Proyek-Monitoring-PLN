@@ -12,7 +12,7 @@ import org.koin.core.component.inject
 
 class SyncWorker(
     context: Context,
-    params: WorkerParameters
+    params: WorkerParameters,
 ) : CoroutineWorker(context, params), KoinComponent {
 
     private val alatRepository: AlatRepository by inject()
@@ -23,7 +23,7 @@ class SyncWorker(
         try {
             // Sync Alat
             val alatResult = alatRepository.sync()
-            
+
             // Sync Tugas
             val tugasResult = tugasRepository.sync()
 
@@ -34,13 +34,13 @@ class SyncWorker(
                 scheduleNextWork()
                 Result.success()
             } else {
-                // If sync fails, we still schedule next work to keep the loop alive, 
+                // If sync fails, we still schedule next work to keep the loop alive,
                 // or we could return retry() which uses exponential backoff.
                 // Given the requirement for 5 min cycle, let's schedule next and return success/failure.
                 // If we return retry(), WorkManager controls the timing.
                 // Let's schedule next work and return success to enforce our 5 min timer.
                 scheduleNextWork()
-                Result.success() 
+                Result.success()
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -56,7 +56,7 @@ class SyncWorker(
             .setConstraints(
                 androidx.work.Constraints.Builder()
                     .setRequiredNetworkType(androidx.work.NetworkType.CONNECTED)
-                    .build()
+                    .build(),
             )
             .addTag("SyncWorker")
             .build()
@@ -64,7 +64,7 @@ class SyncWorker(
         workManager.enqueueUniqueWork(
             "SyncWorker",
             androidx.work.ExistingWorkPolicy.REPLACE, // Replace existing to reset timer
-            nextRequest
+            nextRequest,
         )
     }
 }

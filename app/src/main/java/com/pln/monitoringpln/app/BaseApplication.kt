@@ -9,7 +9,7 @@ import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
 
 class BaseApplication : Application() {
-    
+
     companion object {
         lateinit var instance: BaseApplication
             private set
@@ -30,7 +30,7 @@ class BaseApplication : Application() {
 
     private fun setupWorkManager() {
         val workManager = androidx.work.WorkManager.getInstance(this)
-        
+
         val syncRequest = androidx.work.OneTimeWorkRequestBuilder<com.pln.monitoringpln.data.worker.SyncWorker>()
             .setInitialDelay(5, java.util.concurrent.TimeUnit.MINUTES) // Initial delay or immediate? User wants every 5 mins.
             // Let's make it immediate for the first run, then it schedules next in 5 mins.
@@ -41,7 +41,7 @@ class BaseApplication : Application() {
             .setConstraints(
                 androidx.work.Constraints.Builder()
                     .setRequiredNetworkType(androidx.work.NetworkType.CONNECTED)
-                    .build()
+                    .build(),
             )
             .addTag("SyncWorker")
             .build()
@@ -49,7 +49,7 @@ class BaseApplication : Application() {
         workManager.enqueueUniqueWork(
             "SyncWorker",
             androidx.work.ExistingWorkPolicy.KEEP, // Keep existing if running
-            syncRequest
+            syncRequest,
         )
     }
 }

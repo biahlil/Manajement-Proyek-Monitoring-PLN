@@ -1,12 +1,11 @@
 package com.pln.monitoringpln.domain.usecase.dashboard
 
 import com.pln.monitoringpln.domain.model.DashboardSummary
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
-
-import kotlinx.coroutines.flow.first
 
 class GetDashboardSummaryUseCaseTest {
 
@@ -39,7 +38,7 @@ class GetDashboardSummaryUseCaseTest {
         fakeRepo.summaryToReturn = dummy
 
         val result = useCase().first()
-        
+
         assertEquals(10, result.totalTugas)
         assertEquals(50.0, result.getCompletionRate(), 0.01) // Delta 0.01 untuk toleransi float
         println(logResult)
@@ -147,7 +146,7 @@ class GetDashboardSummaryUseCaseTest {
         println(logHeader.format("Negative Case: Repo Failure"))
 
         fakeRepo.shouldFail = true
-        
+
         try {
             useCase().first()
             fail("Should have thrown exception")

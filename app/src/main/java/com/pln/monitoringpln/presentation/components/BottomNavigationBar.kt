@@ -40,7 +40,7 @@ fun BottomNavigationBar(navController: NavController) {
                         launchSingleTop = true
                         restoreState = true
                     }
-                }
+                },
             )
         }
     }
@@ -49,5 +49,5 @@ fun BottomNavigationBar(navController: NavController) {
 data class BottomNavItem(
     val title: String,
     val route: String,
-    val icon: ImageVector
+    val icon: ImageVector,
 )

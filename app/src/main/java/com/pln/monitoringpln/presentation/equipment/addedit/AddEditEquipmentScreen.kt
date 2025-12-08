@@ -1,21 +1,19 @@
 package com.pln.monitoringpln.presentation.equipment.addedit
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.border
-import androidx.compose.ui.draw.clip
-import androidx.compose.foundation.shape.RoundedCornerShape
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -30,7 +28,7 @@ fun AddEditEquipmentScreen(
     onLngChange: (String) -> Unit,
     onSave: () -> Unit,
     onBack: () -> Unit,
-    viewModel: androidx.lifecycle.ViewModel? = null // Optional for Geocoding access
+    viewModel: androidx.lifecycle.ViewModel? = null, // Optional for Geocoding access
 ) {
     val context = androidx.compose.ui.platform.LocalContext.current
     val scrollState = rememberScrollState()
@@ -40,11 +38,11 @@ fun AddEditEquipmentScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { 
+                title = {
                     Text(
-                        if (state.isEditMode) "Edit Alat" else "Tambah Alat", 
-                        fontWeight = FontWeight.Bold
-                    ) 
+                        if (state.isEditMode) "Edit Alat" else "Tambah Alat",
+                        fontWeight = FontWeight.Bold,
+                    )
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
@@ -53,10 +51,10 @@ fun AddEditEquipmentScreen(
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                )
+                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                ),
             )
-        }
+        },
     ) { paddingValues ->
         if (state.isLoading) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -69,7 +67,7 @@ fun AddEditEquipmentScreen(
                     .padding(paddingValues)
                     .padding(16.dp)
                     .verticalScroll(scrollState),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 // Nama Peralatan
                 OutlinedTextField(
@@ -77,7 +75,7 @@ fun AddEditEquipmentScreen(
                     onValueChange = onNamaChange,
                     label = { Text("Nama Peralatan *") },
                     modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
+                    singleLine = true,
                 )
 
                 // Kode Alat
@@ -86,7 +84,7 @@ fun AddEditEquipmentScreen(
                     onValueChange = onKodeChange,
                     label = { Text("Kode Alat *") },
                     modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
+                    singleLine = true,
                 )
 
                 // Tipe Peralatan
@@ -95,14 +93,14 @@ fun AddEditEquipmentScreen(
                     onValueChange = onTipeChange,
                     label = { Text("Tipe Peralatan") },
                     modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
+                    singleLine = true,
                 )
 
                 // Status Dropdown
                 ExposedDropdownMenuBox(
                     expanded = expandedStatus,
                     onExpandedChange = { expandedStatus = !expandedStatus },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
                 ) {
                     OutlinedTextField(
                         value = state.status,
@@ -111,11 +109,11 @@ fun AddEditEquipmentScreen(
                         label = { Text("Status") },
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedStatus) },
                         colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
-                        modifier = Modifier.menuAnchor().fillMaxWidth()
+                        modifier = Modifier.menuAnchor().fillMaxWidth(),
                     )
                     ExposedDropdownMenu(
                         expanded = expandedStatus,
-                        onDismissRequest = { expandedStatus = false }
+                        onDismissRequest = { expandedStatus = false },
                     ) {
                         statusOptions.forEach { option ->
                             DropdownMenuItem(
@@ -123,7 +121,7 @@ fun AddEditEquipmentScreen(
                                 onClick = {
                                     onStatusChange(option)
                                     expandedStatus = false
-                                }
+                                },
                             )
                         }
                     }
@@ -135,7 +133,7 @@ fun AddEditEquipmentScreen(
                     onValueChange = onLatChange,
                     label = { Text("Latitude") },
                     modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
+                    singleLine = true,
                 )
 
                 // Longitude
@@ -144,13 +142,13 @@ fun AddEditEquipmentScreen(
                     onValueChange = onLngChange,
                     label = { Text("Longitude") },
                     modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
+                    singleLine = true,
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
-                
+
                 Text("Pilih Lokasi di Peta:", style = MaterialTheme.typography.labelLarge)
-                
+
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -159,21 +157,23 @@ fun AddEditEquipmentScreen(
                         .border(
                             width = 1.dp,
                             color = MaterialTheme.colorScheme.outline,
-                            shape = RoundedCornerShape(4.dp)
+                            shape = RoundedCornerShape(4.dp),
                         )
-                        .clip(RoundedCornerShape(4.dp))
+                        .clip(RoundedCornerShape(4.dp)),
                 ) {
                     com.pln.monitoringpln.presentation.components.MapPicker(
                         modifier = Modifier.fillMaxSize(),
-                        initialLocation = if (state.latitude != 0.0 && state.longitude != 0.0) 
-                            org.osmdroid.util.GeoPoint(state.latitude, state.longitude) 
-                        else null,
+                        initialLocation = if (state.latitude != 0.0 && state.longitude != 0.0) {
+                            org.osmdroid.util.GeoPoint(state.latitude, state.longitude)
+                        } else {
+                            null
+                        },
                         onLocationSelected = { lat, lng ->
                             onLatChange(lat.toString())
                             onLngChange(lng.toString())
                             // Trigger Reverse Geocoding
                             (viewModel as? AddEditEquipmentViewModel)?.updateLocationName(context, lat, lng)
-                        }
+                        },
                     )
                 }
 
@@ -184,7 +184,7 @@ fun AddEditEquipmentScreen(
                     Text(
                         text = state.error,
                         color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.bodyMedium
+                        style = MaterialTheme.typography.bodyMedium,
                     )
                 }
 
@@ -192,12 +192,12 @@ fun AddEditEquipmentScreen(
                 Button(
                     onClick = onSave,
                     modifier = Modifier.fillMaxWidth().height(50.dp),
-                    enabled = !state.isSaving
+                    enabled = !state.isSaving,
                 ) {
                     if (state.isSaving) {
                         CircularProgressIndicator(
                             modifier = Modifier.size(24.dp),
-                            color = MaterialTheme.colorScheme.onPrimary
+                            color = MaterialTheme.colorScheme.onPrimary,
                         )
                     } else {
                         Text("Simpan")

@@ -6,5 +6,5 @@ data class User(
     val namaLengkap: String,
     val role: String, // "Admin" atau "Teknisi"
     val isActive: Boolean = true, // Default aktif
-    val photoUrl: String? = null
+    val photoUrl: String? = null,
 )

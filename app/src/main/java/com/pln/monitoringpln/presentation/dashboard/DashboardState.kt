@@ -13,5 +13,5 @@ data class DashboardState(
     val technicianTasks: List<Tugas> = emptyList(), // For "Tugas Hari Ini"
     val activeWarnings: List<Tugas> = emptyList(), // For "Peringatan Aktif"
     val isAdmin: Boolean = false, // Should be determined by auth
-    val isTechniciansLoading: Boolean = false
+    val isTechniciansLoading: Boolean = false,
 )

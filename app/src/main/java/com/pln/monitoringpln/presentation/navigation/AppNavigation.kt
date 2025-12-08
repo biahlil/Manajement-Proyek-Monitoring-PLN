@@ -1,67 +1,62 @@
 package com.pln.monitoringpln.presentation.navigation
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import androidx.navigation.NavType
 import com.pln.monitoringpln.presentation.auth.LoginScreen
 import com.pln.monitoringpln.presentation.auth.LoginViewModel
 import com.pln.monitoringpln.presentation.dashboard.DashboardScreen
 import com.pln.monitoringpln.presentation.dashboard.DashboardViewModel
+import com.pln.monitoringpln.presentation.equipment.addedit.AddEditEquipmentScreen
+import com.pln.monitoringpln.presentation.equipment.addedit.AddEditEquipmentViewModel
+import com.pln.monitoringpln.presentation.equipment.detail.EquipmentDetailScreen
+import com.pln.monitoringpln.presentation.equipment.detail.EquipmentDetailViewModel
+import com.pln.monitoringpln.presentation.equipment.list.EquipmentListScreen
+import com.pln.monitoringpln.presentation.equipment.list.EquipmentListViewModel
+import com.pln.monitoringpln.presentation.profile.edit.EditProfileScreen
+import com.pln.monitoringpln.presentation.profile.edit.EditProfileViewModel
+import com.pln.monitoringpln.presentation.search.SearchScreen
+import com.pln.monitoringpln.presentation.search.SearchViewModel
 import com.pln.monitoringpln.presentation.task.TaskListScreen
 import com.pln.monitoringpln.presentation.task.TaskListViewModel
 import com.pln.monitoringpln.presentation.task.addedit.AddEditTaskScreen
 import com.pln.monitoringpln.presentation.task.addedit.AddEditTaskViewModel
 import com.pln.monitoringpln.presentation.task.detail.TaskDetailScreen
 import com.pln.monitoringpln.presentation.task.detail.TaskDetailViewModel
-import com.pln.monitoringpln.presentation.equipment.list.EquipmentListScreen
-import com.pln.monitoringpln.presentation.equipment.list.EquipmentListViewModel
-import com.pln.monitoringpln.presentation.equipment.detail.EquipmentDetailScreen
-import com.pln.monitoringpln.presentation.equipment.detail.EquipmentDetailViewModel
-import com.pln.monitoringpln.presentation.equipment.addedit.AddEditEquipmentScreen
-import com.pln.monitoringpln.presentation.equipment.addedit.AddEditEquipmentViewModel
-import com.pln.monitoringpln.presentation.technician.list.TechnicianListScreen
-import com.pln.monitoringpln.presentation.technician.list.TechnicianListViewModel
 import com.pln.monitoringpln.presentation.technician.add.AddTechnicianScreen
 import com.pln.monitoringpln.presentation.technician.add.AddTechnicianViewModel
-import com.pln.monitoringpln.presentation.search.SearchScreen
-import com.pln.monitoringpln.presentation.search.SearchViewModel
-import com.pln.monitoringpln.presentation.profile.edit.EditProfileScreen
-import com.pln.monitoringpln.presentation.profile.edit.EditProfileViewModel
-import org.koin.androidx.compose.koinViewModel
-
-import androidx.compose.runtime.setValue
+import com.pln.monitoringpln.presentation.technician.list.TechnicianListScreen
+import com.pln.monitoringpln.presentation.technician.list.TechnicianListViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
-    
+
     val scope = androidx.compose.runtime.rememberCoroutineScope()
     var lastClickTime by androidx.compose.runtime.remember { androidx.compose.runtime.mutableLongStateOf(0L) }
 
     fun navigateWithDebounce(
-        route: String, 
-        popUpTo: String? = null, 
+        route: String,
+        popUpTo: String? = null,
         inclusive: Boolean = false,
         saveState: Boolean = false,
-        restoreState: Boolean = false
+        restoreState: Boolean = false,
     ) {
         val currentTime = System.currentTimeMillis()
         if (currentTime - lastClickTime > 150) {
@@ -70,7 +65,7 @@ fun AppNavigation() {
                 kotlinx.coroutines.delay(150)
                 navController.navigate(route) {
                     if (popUpTo != null) {
-                        popUpTo(popUpTo) { 
+                        popUpTo(popUpTo) {
                             this.inclusive = inclusive
                             this.saveState = saveState
                         }
@@ -84,14 +79,14 @@ fun AppNavigation() {
 
     Scaffold(
         topBar = {
-            val showHeader = currentRoute == Screen.Dashboard.route || 
-                             currentRoute == Screen.Search.route || 
-                             currentRoute == Screen.Profile.route
-            
+            val showHeader = currentRoute == Screen.Dashboard.route ||
+                currentRoute == Screen.Search.route ||
+                currentRoute == Screen.Profile.route
+
             androidx.compose.animation.AnimatedVisibility(
                 visible = showHeader,
                 enter = androidx.compose.animation.fadeIn(),
-                exit = androidx.compose.animation.fadeOut()
+                exit = androidx.compose.animation.fadeOut(),
             ) {
                 AppHeader()
             }
@@ -102,20 +97,20 @@ fun AppNavigation() {
                     navController = navController,
                     onItemClick = { item ->
                         navigateWithDebounce(
-                            route = item.route, 
+                            route = item.route,
                             popUpTo = Screen.Dashboard.route,
                             saveState = true,
-                            restoreState = true
+                            restoreState = true,
                         )
-                    }
+                    },
                 )
             }
-        }
+        },
     ) { paddingValues ->
         NavHost(
             navController = navController,
             startDestination = Screen.Splash.route,
-            modifier = Modifier.padding(paddingValues)
+            modifier = Modifier.padding(paddingValues),
         ) {
             // ... (Splash, Login, Dashboard, Search remain same)
 
@@ -128,7 +123,7 @@ fun AppNavigation() {
                     },
                     onNavigateToDashboard = {
                         navigateWithDebounce(Screen.Dashboard.route, popUpTo = Screen.Splash.route, inclusive = true)
-                    }
+                    },
                 )
             }
 
@@ -141,7 +136,7 @@ fun AppNavigation() {
                     onEvent = loginViewModel::onEvent,
                     onLoginSuccess = {
                         navigateWithDebounce(Screen.Dashboard.route, popUpTo = Screen.Login.route, inclusive = true)
-                    }
+                    },
                 )
             }
 
@@ -151,7 +146,7 @@ fun AppNavigation() {
 
                 DashboardScreen(
                     onNavigate = { route -> navigateWithDebounce(route) },
-                    viewModel = dashboardViewModel
+                    viewModel = dashboardViewModel,
                 )
             }
 
@@ -166,7 +161,7 @@ fun AppNavigation() {
                 SearchScreen(
                     navController = navController,
                     state = state,
-                    onQueryChange = viewModel::onQueryChange
+                    onQueryChange = viewModel::onQueryChange,
                 )
             }
 
@@ -183,25 +178,27 @@ fun AppNavigation() {
                     onSearchQueryChange = taskListViewModel::onSearchQueryChange,
                     onAddTask = { navigateWithDebounce(Screen.AddEditTask.createRoute(null)) },
                     onTaskClick = { taskId -> navigateWithDebounce(Screen.DetailTask.createRoute(taskId)) },
-                    onBack = { navigateWithDebounce(Screen.Dashboard.route, popUpTo = Screen.Dashboard.route) }
+                    onBack = { navigateWithDebounce(Screen.Dashboard.route, popUpTo = Screen.Dashboard.route) },
                 )
             }
 
             composable(
                 route = Screen.AddEditTask.route,
-                arguments = listOf(navArgument("taskId") {
-                    type = NavType.StringType
-                    nullable = true
-                })
+                arguments = listOf(
+                    navArgument("taskId") {
+                        type = NavType.StringType
+                        nullable = true
+                    },
+                ),
             ) { backStackEntry ->
                 val taskId = backStackEntry.arguments?.getString("taskId")
                 val viewModel: AddEditTaskViewModel = koinViewModel()
                 val state by viewModel.state.collectAsState()
-                
+
                 LaunchedEffect(taskId) {
                     viewModel.loadTask(taskId)
                 }
-                
+
                 androidx.activity.compose.BackHandler {
                     navigateWithDebounce(Screen.TaskList.route, popUpTo = Screen.TaskList.route)
                 }
@@ -226,13 +223,13 @@ fun AppNavigation() {
                     onDeadlineSelected = viewModel::onDeadlineSelected,
                     onTechnicianSelected = viewModel::onTechnicianSelected,
                     onSaveTask = viewModel::onSaveTask,
-                    onBack = { navigateWithDebounce(Screen.TaskList.route, popUpTo = Screen.TaskList.route) }
+                    onBack = { navigateWithDebounce(Screen.TaskList.route, popUpTo = Screen.TaskList.route) },
                 )
             }
 
             composable(
                 route = Screen.DetailTask.route,
-                arguments = listOf(navArgument("taskId") { type = NavType.StringType })
+                arguments = listOf(navArgument("taskId") { type = NavType.StringType }),
             ) { backStackEntry ->
                 val taskId = backStackEntry.arguments?.getString("taskId") ?: return@composable
                 val viewModel: TaskDetailViewModel = koinViewModel()
@@ -255,13 +252,13 @@ fun AppNavigation() {
                     onDelete = viewModel::onDeleteTask,
                     onConfirmDelete = viewModel::onConfirmDelete,
                     onDismissDelete = viewModel::onDismissDeleteDialog,
-                    onCompleteTask = { navigateWithDebounce(Screen.CompleteTask.createRoute(taskId)) }
+                    onCompleteTask = { navigateWithDebounce(Screen.CompleteTask.createRoute(taskId)) },
                 )
             }
 
             composable(
                 route = Screen.CompleteTask.route,
-                arguments = listOf(navArgument("taskId") { type = NavType.StringType })
+                arguments = listOf(navArgument("taskId") { type = NavType.StringType }),
             ) { backStackEntry ->
                 val taskId = backStackEntry.arguments?.getString("taskId") ?: return@composable
                 val viewModel: com.pln.monitoringpln.presentation.task.complete.CompleteTaskViewModel = koinViewModel()
@@ -277,13 +274,13 @@ fun AppNavigation() {
                     onConditionChange = viewModel::onConditionChange,
                     onEquipmentStatusChange = viewModel::onEquipmentStatusChange,
                     onProofSelected = viewModel::onProofSelected,
-                    onCompleteTask = viewModel::onCompleteTask
+                    onCompleteTask = viewModel::onCompleteTask,
                 )
             }
 
             composable(
                 route = Screen.EquipmentList.route,
-                arguments = listOf(navArgument("filterType") { type = NavType.StringType })
+                arguments = listOf(navArgument("filterType") { type = NavType.StringType }),
             ) { backStackEntry ->
                 val filterType = backStackEntry.arguments?.getString("filterType") ?: "all_equipment"
                 val viewModel: EquipmentListViewModel = koinViewModel()
@@ -305,13 +302,13 @@ fun AppNavigation() {
                     onDeleteEquipment = viewModel::onDeleteEquipment,
                     onConfirmDelete = viewModel::onConfirmDelete,
                     onDismissDelete = viewModel::onDismissDeleteDialog,
-                    onItemClick = { equipment -> navigateWithDebounce(Screen.DetailEquipment.createRoute(equipment.id)) }
+                    onItemClick = { equipment -> navigateWithDebounce(Screen.DetailEquipment.createRoute(equipment.id)) },
                 )
             }
 
             composable(
                 route = Screen.DetailEquipment.route,
-                arguments = listOf(navArgument("equipmentId") { type = NavType.StringType })
+                arguments = listOf(navArgument("equipmentId") { type = NavType.StringType }),
             ) { backStackEntry ->
                 val equipmentId = backStackEntry.arguments?.getString("equipmentId") ?: return@composable
                 val viewModel: EquipmentDetailViewModel = koinViewModel()
@@ -335,16 +332,18 @@ fun AppNavigation() {
                     onConfirmDelete = viewModel::onConfirmDelete,
                     onDismissDelete = viewModel::onDismissDeleteDialog,
                     onAddTask = { navigateWithDebounce(Screen.AddEditTask.route) },
-                    onTaskClick = { taskId -> navigateWithDebounce(Screen.DetailTask.createRoute(taskId)) }
+                    onTaskClick = { taskId -> navigateWithDebounce(Screen.DetailTask.createRoute(taskId)) },
                 )
             }
 
             composable(
                 route = Screen.AddEditEquipment.route,
-                arguments = listOf(navArgument("equipmentId") { 
-                    type = NavType.StringType 
-                    nullable = true
-                })
+                arguments = listOf(
+                    navArgument("equipmentId") {
+                        type = NavType.StringType
+                        nullable = true
+                    },
+                ),
             ) { backStackEntry ->
                 val equipmentId = backStackEntry.arguments?.getString("equipmentId")
                 val viewModel: AddEditEquipmentViewModel = koinViewModel()
@@ -383,7 +382,7 @@ fun AppNavigation() {
                     onLngChange = viewModel::onLongitudeChange,
                     onSave = viewModel::onSaveEquipment,
                     onBack = navigateBack,
-                    viewModel = viewModel
+                    viewModel = viewModel,
                 )
             }
 
@@ -403,7 +402,7 @@ fun AppNavigation() {
                     onDeleteTechnician = viewModel::onDeleteTechnician,
                     onConfirmDelete = viewModel::onConfirmDelete,
                     onDismissDelete = viewModel::onDismissDeleteDialog,
-                    onRefresh = viewModel::refreshTechnicians
+                    onRefresh = viewModel::refreshTechnicians,
                 )
             }
 
@@ -428,7 +427,7 @@ fun AppNavigation() {
                     onPasswordChange = viewModel::onPasswordChange,
                     onPhotoSelected = viewModel::onPhotoSelected,
                     onSave = viewModel::onSaveTechnician,
-                    onBack = { navigateWithDebounce(Screen.TechnicianList.route, popUpTo = Screen.TechnicianList.route) }
+                    onBack = { navigateWithDebounce(Screen.TechnicianList.route, popUpTo = Screen.TechnicianList.route) },
                 )
             }
 
@@ -448,7 +447,7 @@ fun AppNavigation() {
                     onExport = viewModel::onExport,
                     onBack = { navigateWithDebounce(Screen.Dashboard.route, popUpTo = Screen.Dashboard.route) },
                     onClearMessages = viewModel::clearMessages,
-                    onFullReportChange = viewModel::onFullReportChange
+                    onFullReportChange = viewModel::onFullReportChange,
                 )
             }
 
@@ -475,7 +474,7 @@ fun AppNavigation() {
                     onLogout = {
                         profileViewModel.onLogout()
                     },
-                    onEditProfile = { navController.navigate(Screen.EditProfile.route) }
+                    onEditProfile = { navController.navigate(Screen.EditProfile.route) },
                 )
             }
 
@@ -502,7 +501,7 @@ fun AppNavigation() {
                     onConfirmPasswordChange = viewModel::onConfirmPasswordChange,
                     onAvatarSelected = viewModel::onAvatarSelected,
                     onSave = viewModel::onSave,
-                    onBack = { navController.popBackStack() }
+                    onBack = { navController.popBackStack() },
                 )
             }
         }

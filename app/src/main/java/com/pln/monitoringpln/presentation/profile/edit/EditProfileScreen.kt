@@ -2,7 +2,6 @@ package com.pln.monitoringpln.presentation.profile.edit
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import coil.compose.AsyncImage
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
@@ -18,6 +17,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -30,7 +30,7 @@ fun EditProfileScreen(
     onConfirmPasswordChange: (String) -> Unit,
     onAvatarSelected: (ByteArray) -> Unit,
     onSave: () -> Unit,
-    onBack: () -> Unit
+    onBack: () -> Unit,
 ) {
     androidx.compose.runtime.LaunchedEffect(state.isSaved) {
         if (state.isSaved) {
@@ -50,20 +50,20 @@ fun EditProfileScreen(
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     titleContentColor = Color.White,
-                    navigationIconContentColor = Color.White
-                )
+                    navigationIconContentColor = Color.White,
+                ),
             )
         },
         snackbarHost = {
             if (state.error != null) {
                 Snackbar(
                     containerColor = MaterialTheme.colorScheme.error,
-                    contentColor = Color.White
+                    contentColor = Color.White,
                 ) {
                     Text(state.error)
                 }
             }
-        }
+        },
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -71,12 +71,12 @@ fun EditProfileScreen(
                 .padding(paddingValues)
                 .padding(16.dp)
                 .verticalScroll(rememberScrollState()),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             // Photo Upload Section
             val context = androidx.compose.ui.platform.LocalContext.current
             val pickMedia = androidx.activity.compose.rememberLauncherForActivityResult(
-                androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia()
+                androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia(),
             ) { uri ->
                 if (uri != null) {
                     val contentResolver = context.contentResolver
@@ -90,38 +90,38 @@ fun EditProfileScreen(
             }
 
             Box(
-                contentAlignment = Alignment.BottomEnd
+                contentAlignment = Alignment.BottomEnd,
             ) {
                 Box(
                     modifier = Modifier
                         .size(100.dp)
                         .clip(CircleShape)
                         .background(Color.LightGray),
-                    contentAlignment = Alignment.Center
+                    contentAlignment = Alignment.Center,
                 ) {
                     if (state.photoUrl != null) {
                         coil.compose.AsyncImage(
                             model = state.photoUrl,
                             contentDescription = "Avatar",
                             modifier = Modifier.fillMaxSize(),
-                            contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                            contentScale = androidx.compose.ui.layout.ContentScale.Crop,
                         )
                     } else {
                         Icon(
                             Icons.Default.Person,
                             contentDescription = null,
                             modifier = Modifier.size(60.dp),
-                            tint = Color.Gray
+                            tint = Color.Gray,
                         )
                     }
                 }
                 SmallFloatingActionButton(
-                    onClick = { 
+                    onClick = {
                         pickMedia.launch(androidx.activity.result.PickVisualMediaRequest(androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia.ImageOnly))
                     },
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = Color.White,
-                    modifier = Modifier.size(32.dp)
+                    modifier = Modifier.size(32.dp),
                 ) {
                     Icon(Icons.Default.Edit, contentDescription = "Ubah Foto", modifier = Modifier.size(16.dp))
                 }
@@ -141,9 +141,9 @@ fun EditProfileScreen(
                     if (state.nameError != null) {
                         Text(state.nameError, color = MaterialTheme.colorScheme.error)
                     }
-                }
+                },
             )
-            
+
             Spacer(modifier = Modifier.height(16.dp))
 
             OutlinedTextField(
@@ -152,7 +152,7 @@ fun EditProfileScreen(
                 label = { Text("ID (Tidak dapat diubah)") },
                 modifier = Modifier.fillMaxWidth(),
                 enabled = false,
-                singleLine = true
+                singleLine = true,
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -168,18 +168,18 @@ fun EditProfileScreen(
                     if (state.emailError != null) {
                         Text(state.emailError, color = MaterialTheme.colorScheme.error)
                     }
-                }
+                },
             )
 
             Spacer(modifier = Modifier.height(24.dp))
-            
+
             Text(
                 text = "Ubah Password (Opsional)",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.align(Alignment.Start)
+                modifier = Modifier.align(Alignment.Start),
             )
-            
+
             Spacer(modifier = Modifier.height(8.dp))
 
             OutlinedTextField(
@@ -188,7 +188,7 @@ fun EditProfileScreen(
                 label = { Text("Password Baru") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
-                isError = state.passwordError != null
+                isError = state.passwordError != null,
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -204,7 +204,7 @@ fun EditProfileScreen(
                     if (state.passwordError != null) {
                         Text(state.passwordError, color = MaterialTheme.colorScheme.error)
                     }
-                }
+                },
             )
 
             Spacer(modifier = Modifier.height(32.dp))
@@ -214,12 +214,12 @@ fun EditProfileScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp),
-                enabled = !state.isLoading
+                enabled = !state.isLoading,
             ) {
                 if (state.isLoading) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(24.dp),
-                        color = Color.White
+                        color = Color.White,
                     )
                 } else {
                     Text("Simpan Perubahan")

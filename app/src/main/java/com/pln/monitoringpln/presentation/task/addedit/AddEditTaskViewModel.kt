@@ -23,7 +23,7 @@ class AddEditTaskViewModel(
     private val updateTaskUseCase: UpdateTaskUseCase,
     private val getTaskDetailUseCase: GetTaskDetailUseCase,
     private val alatRepository: AlatRepository,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AddEditTaskState())
@@ -78,7 +78,7 @@ class AddEditTaskViewModel(
                     .atZone(ZoneId.systemDefault())
                     .toLocalDate()
 
-                _state.update { 
+                _state.update {
                     it.copy(
                         isLoading = false,
                         title = task.judul,
@@ -87,8 +87,8 @@ class AddEditTaskViewModel(
                         selectedEquipment = detail.equipment,
                         selectedTechnician = detail.technician,
                         equipmentSearchQuery = detail.equipment?.let { eq -> "${eq.namaAlat} - ${eq.kodeAlat}" } ?: "",
-                        status = task.status
-                    ) 
+                        status = task.status,
+                    )
                 }
             } else {
                 _state.update { it.copy(isLoading = false, error = "Gagal memuat detail tugas") }
@@ -105,27 +105,27 @@ class AddEditTaskViewModel(
     }
 
     fun onEquipmentSearchQueryChange(query: String) {
-        _state.update { 
+        _state.update {
             it.copy(
                 equipmentSearchQuery = query,
                 availableEquipments = if (query.isBlank()) {
                     allEquipmentsCache
                 } else {
-                    allEquipmentsCache.filter { eq -> 
-                        eq.namaAlat.contains(query, ignoreCase = true) || 
-                        eq.kodeAlat.contains(query, ignoreCase = true) 
+                    allEquipmentsCache.filter { eq ->
+                        eq.namaAlat.contains(query, ignoreCase = true) ||
+                            eq.kodeAlat.contains(query, ignoreCase = true)
                     }
-                }
-            ) 
+                },
+            )
         }
     }
 
     fun onEquipmentSelected(equipment: Alat) {
-        _state.update { 
+        _state.update {
             it.copy(
                 selectedEquipment = equipment,
                 equipmentSearchQuery = "${equipment.namaAlat} - ${equipment.kodeAlat}",
-            ) 
+            )
         }
     }
 
@@ -140,13 +140,13 @@ class AddEditTaskViewModel(
     fun onSaveTask() {
         viewModelScope.launch {
             _state.update { it.copy(isSaving = true, error = null) }
-            
+
             val currentState = _state.value
-            
+
             // Validation handled in UseCase, but basic UI check here
-            if (currentState.title.isBlank() || 
-                currentState.selectedEquipment == null || 
-                currentState.deadline == null || 
+            if (currentState.title.isBlank() ||
+                currentState.selectedEquipment == null ||
+                currentState.deadline == null ||
                 currentState.selectedTechnician == null
             ) {
                 _state.update { it.copy(isSaving = false, error = "Mohon lengkapi semua field bertanda *") }
@@ -164,9 +164,9 @@ class AddEditTaskViewModel(
                     idAlat = currentState.selectedEquipment!!.id,
                     idTeknisi = currentState.selectedTechnician!!.id,
                     tglJatuhTempo = deadlineDate,
-                    status = currentState.status
+                    status = currentState.status,
                 )
-                
+
                 if (result.isSuccess) {
                     _state.update { it.copy(isSaving = false, isTaskSaved = true, savedTaskId = currentState.taskId) }
                 } else {
@@ -179,9 +179,9 @@ class AddEditTaskViewModel(
                     deskripsi = currentState.description,
                     idAlat = currentState.selectedEquipment!!.id,
                     idTeknisi = currentState.selectedTechnician!!.id,
-                    tglJatuhTempo = deadlineDate
+                    tglJatuhTempo = deadlineDate,
                 )
-                
+
                 if (result.isSuccess) {
                     val newTaskId = result.getOrNull()
                     _state.update { it.copy(isSaving = false, isTaskSaved = true, savedTaskId = newTaskId) }

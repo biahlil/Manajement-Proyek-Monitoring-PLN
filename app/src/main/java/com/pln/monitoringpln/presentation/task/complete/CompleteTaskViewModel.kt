@@ -12,7 +12,7 @@ import kotlinx.coroutines.launch
 
 class CompleteTaskViewModel(
     private val getTaskDetailUseCase: GetTaskDetailUseCase,
-    private val completeTaskUseCase: CompleteTaskUseCase
+    private val completeTaskUseCase: CompleteTaskUseCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(CompleteTaskState())
@@ -23,7 +23,7 @@ class CompleteTaskViewModel(
             _state.update { it.copy(isLoading = true, error = null) }
             val result = getTaskDetailUseCase(taskId)
             result.onSuccess { (task, equipment, technician) ->
-                _state.update { 
+                _state.update {
                     it.copy(
                         isLoading = false,
                         task = task,
@@ -31,8 +31,8 @@ class CompleteTaskViewModel(
                         technician = technician,
                         condition = task.kondisiAkhir ?: "",
                         equipmentStatus = equipment?.kondisi ?: "Normal",
-                        proofUri = task.buktiFoto
-                    ) 
+                        proofUri = task.buktiFoto,
+                    )
                 }
             }.onFailure { error ->
                 _state.update { it.copy(isLoading = false, error = error.message) }
@@ -55,10 +55,10 @@ class CompleteTaskViewModel(
     fun onCompleteTask(photoBytes: ByteArray?) {
         viewModelScope.launch {
             _state.update { it.copy(isSaving = true) }
-            
+
             val currentState = _state.value
             val task = currentState.task ?: return@launch
-            
+
             if (photoBytes == null && currentState.proofUri.isNullOrBlank()) {
                 _state.update { it.copy(isSaving = false, error = "Foto bukti wajib diupload") }
                 return@launch
@@ -73,13 +73,13 @@ class CompleteTaskViewModel(
                 taskId = task.id,
                 photoBytes = photoBytes,
                 newCondition = currentState.condition,
-                currentProofUrl = if (photoBytes == null) currentState.proofUri else null
+                currentProofUrl = if (photoBytes == null) currentState.proofUri else null,
             )
-            
+
             if (result.isSuccess) {
-                 _state.update { it.copy(isSaving = false, isCompleted = true) }
+                _state.update { it.copy(isSaving = false, isCompleted = true) }
             } else {
-                 _state.update { it.copy(isSaving = false, error = result.exceptionOrNull()?.message ?: "Gagal menyimpan laporan") }
+                _state.update { it.copy(isSaving = false, error = result.exceptionOrNull()?.message ?: "Gagal menyimpan laporan") }
             }
         }
     }

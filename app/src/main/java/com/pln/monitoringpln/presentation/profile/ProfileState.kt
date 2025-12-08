@@ -10,5 +10,5 @@ data class ProfileState(
     val phone: String = "",
     val area: String = "", // "Area Tugas" for Technician
     val isLoggedOut: Boolean = false,
-    val photoUrl: String? = null
+    val photoUrl: String? = null,
 )

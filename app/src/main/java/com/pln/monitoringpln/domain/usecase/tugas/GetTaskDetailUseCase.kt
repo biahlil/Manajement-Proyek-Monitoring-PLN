@@ -12,12 +12,12 @@ import kotlinx.coroutines.coroutineScope
 class GetTaskDetailUseCase(
     private val tugasRepository: TugasRepository,
     private val alatRepository: AlatRepository,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
 ) {
     data class TaskDetail(
         val task: Tugas,
         val equipment: Alat?,
-        val technician: User?
+        val technician: User?,
     )
 
     suspend operator fun invoke(taskId: String): Result<TaskDetail> = coroutineScope {
@@ -38,8 +38,8 @@ class GetTaskDetailUseCase(
                 TaskDetail(
                     task = task,
                     equipment = equipmentResult.getOrNull(),
-                    technician = technicianResult.getOrNull()
-                )
+                    technician = technicianResult.getOrNull(),
+                ),
             )
         } catch (e: Exception) {
             Result.failure(e)

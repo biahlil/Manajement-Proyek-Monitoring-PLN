@@ -11,6 +11,6 @@ interface ReportRepository {
     ): Result<String>
 
     suspend fun exportFullDatabaseReport(
-        format: ExportFormat
+        format: ExportFormat,
     ): Result<String>
 }

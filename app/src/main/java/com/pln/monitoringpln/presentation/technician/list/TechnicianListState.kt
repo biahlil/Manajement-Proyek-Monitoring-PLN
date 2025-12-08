@@ -12,5 +12,5 @@ data class TechnicianListState(
     val technicianToDelete: User? = null,
     val isDeleting: Boolean = false,
     val technicianTaskCounts: Map<String, Int> = emptyMap(),
-    val technicianEquipment: Map<String, String> = emptyMap() // idTeknisi -> Nama Alat
+    val technicianEquipment: Map<String, String> = emptyMap(), // idTeknisi -> Nama Alat
 )

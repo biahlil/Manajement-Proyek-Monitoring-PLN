@@ -33,7 +33,7 @@ class ReportRepositoryImplTest {
         context = ApplicationProvider.getApplicationContext()
         database = androidx.room.Room.inMemoryDatabaseBuilder(
             context,
-            com.pln.monitoringpln.data.local.AppDatabase::class.java
+            com.pln.monitoringpln.data.local.AppDatabase::class.java,
         ).build()
 
         reportRepository = ReportRepositoryImpl(database.tugasDao(), database.userDao(), database.alatDao(), context)
@@ -42,7 +42,7 @@ class ReportRepositoryImplTest {
     @org.junit.After
     fun tearDown() {
         database.close()
-        
+
         // Cleanup created files
         createdFiles.forEach { path ->
             try {
@@ -60,15 +60,15 @@ class ReportRepositoryImplTest {
     @Test
     fun export_report_to_PDF_should_succeed() = runBlocking {
         println(logHeader.format("Integration: Export PDF"))
-        
+
         // Given
         val startDate = Date(System.currentTimeMillis() - 86400000 * 7) // 7 days ago
         val endDate = Date(System.currentTimeMillis() + 86400000 * 7) // 7 days ahead
-        
+
         // Insert dummy data
         val task1 = com.pln.monitoringpln.data.local.entity.TugasEntity(
             id = "task-1", judul = "Task for Report", deskripsi = "Task for Report", idAlat = "alat-1", idTeknisi = "tech-1",
-            tglDibuat = Date(), tglJatuhTempo = Date(), status = "Done", isSynced = true
+            tglDibuat = Date(), tglJatuhTempo = Date(), status = "Done", isSynced = true,
         )
         database.tugasDao().insertTugas(task1)
 
@@ -84,11 +84,11 @@ class ReportRepositoryImplTest {
             error?.printStackTrace()
             throw AssertionError("Export PDF failed: ${error?.message}", error)
         }
-        
+
         val path = result.getOrNull()
         path?.let { createdFiles.add(it) }
         println(logAssert.format("File created at: $path"))
-        
+
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
             // Verify via MediaStore
             val fileName = path?.substringAfterLast("/")
@@ -100,7 +100,7 @@ class ReportRepositoryImplTest {
                 projection,
                 selection,
                 selectionArgs,
-                null
+                null,
             )
             val exists = cursor?.use { it.count > 0 } ?: false
             assertTrue("File $fileName not found in MediaStore", exists)
@@ -109,22 +109,22 @@ class ReportRepositoryImplTest {
             assertTrue("File does not exist", file.exists())
             assertTrue("File is empty", file.length() > 0)
         }
-        
+
         println(logResult)
     }
 
     @Test
     fun export_report_to_CSV_should_succeed() = runBlocking {
         println(logHeader.format("Integration: Export CSV"))
-        
+
         // Given
         val startDate = Date(System.currentTimeMillis() - 86400000 * 7) // 7 days ago
         val endDate = Date(System.currentTimeMillis() + 86400000 * 7) // 7 days ahead
-        
+
         // Insert dummy data
         val task1 = com.pln.monitoringpln.data.local.entity.TugasEntity(
             id = "task-1", judul = "Task for Report CSV", deskripsi = "Task for Report CSV", idAlat = "alat-1", idTeknisi = "tech-1",
-            tglDibuat = Date(), tglJatuhTempo = Date(), status = "Done", isSynced = true
+            tglDibuat = Date(), tglJatuhTempo = Date(), status = "Done", isSynced = true,
         )
         database.tugasDao().insertTugas(task1)
 
@@ -137,12 +137,12 @@ class ReportRepositoryImplTest {
         if (result.isFailure) {
             println("Error: ${result.exceptionOrNull()?.message}")
         }
-        
+
         if (result.isSuccess) {
             val path = result.getOrNull()
             path?.let { createdFiles.add(it) }
             println(logAssert.format("File created at: $path"))
-            
+
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
                 // Verify via MediaStore
                 val fileName = path?.substringAfterLast("/")
@@ -154,7 +154,7 @@ class ReportRepositoryImplTest {
                     projection,
                     selection,
                     selectionArgs,
-                    null
+                    null,
                 )
                 val exists = cursor?.use { it.count > 0 } ?: false
                 assertTrue("File $fileName not found in MediaStore", exists)
@@ -167,7 +167,7 @@ class ReportRepositoryImplTest {
         } else {
             println(logAssert.format("Failed (likely no data): ${result.exceptionOrNull()?.message}"))
         }
-        
+
         println(logResult)
     }
 }

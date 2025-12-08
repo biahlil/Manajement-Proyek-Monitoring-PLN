@@ -3,8 +3,8 @@ package com.pln.monitoringpln.presentation.report
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pln.monitoringpln.domain.model.ExportFormat
-import com.pln.monitoringpln.domain.usecase.report.ExportReportUseCase
 import com.pln.monitoringpln.domain.usecase.report.ExportFullReportUseCase
+import com.pln.monitoringpln.domain.usecase.report.ExportReportUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,12 +19,12 @@ data class ReportState(
     val isFullReport: Boolean = false,
     val isLoading: Boolean = false,
     val successMessage: String? = null,
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
 )
 
 class ReportViewModel(
     private val exportReportUseCase: ExportReportUseCase,
-    private val exportFullReportUseCase: ExportFullReportUseCase
+    private val exportFullReportUseCase: ExportFullReportUseCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(ReportState())
@@ -49,35 +49,35 @@ class ReportViewModel(
     fun onExport() {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, successMessage = null, errorMessage = null) }
-            
+
             val result = if (_state.value.isFullReport) {
                 exportFullReportUseCase(_state.value.format)
             } else {
                 exportReportUseCase(
                     startDate = _state.value.startDate,
                     endDate = _state.value.endDate,
-                    format = _state.value.format
+                    format = _state.value.format,
                 )
             }
 
             if (result.isSuccess) {
-                _state.update { 
+                _state.update {
                     it.copy(
-                        isLoading = false, 
-                        successMessage = "Laporan berhasil disimpan di: ${result.getOrNull()}"
-                    ) 
+                        isLoading = false,
+                        successMessage = "Laporan berhasil disimpan di: ${result.getOrNull()}",
+                    )
                 }
             } else {
-                _state.update { 
+                _state.update {
                     it.copy(
-                        isLoading = false, 
-                        errorMessage = result.exceptionOrNull()?.message ?: "Gagal membuat laporan"
-                    ) 
+                        isLoading = false,
+                        errorMessage = result.exceptionOrNull()?.message ?: "Gagal membuat laporan",
+                    )
                 }
             }
         }
     }
-    
+
     fun clearMessages() {
         _state.update { it.copy(successMessage = null, errorMessage = null) }
     }

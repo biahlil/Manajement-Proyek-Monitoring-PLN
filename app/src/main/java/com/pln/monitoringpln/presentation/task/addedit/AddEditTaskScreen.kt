@@ -1,6 +1,5 @@
 package com.pln.monitoringpln.presentation.task.addedit
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -9,20 +8,16 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-
 import com.pln.monitoringpln.domain.model.Alat
 import com.pln.monitoringpln.domain.model.User
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -35,7 +30,7 @@ fun AddEditTaskScreen(
     onDeadlineSelected: (LocalDate) -> Unit,
     onTechnicianSelected: (User) -> Unit,
     onSaveTask: () -> Unit,
-    onBack: () -> Unit
+    onBack: () -> Unit,
 ) {
     var showDatePicker by remember { mutableStateOf(false) }
     var showTechnicianDropdown by remember { mutableStateOf(false) }
@@ -62,7 +57,7 @@ fun AddEditTaskScreen(
                 TextButton(onClick = { showDatePicker = false }) {
                     Text("Cancel")
                 }
-            }
+            },
         ) {
             DatePicker(state = datePickerState)
         }
@@ -79,8 +74,8 @@ fun AddEditTaskScreen(
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                )
+                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                ),
             )
         },
         bottomBar = {
@@ -88,14 +83,14 @@ fun AddEditTaskScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 OutlinedButton(
                     onClick = onBack,
                     modifier = Modifier
                         .weight(1f)
                         .height(50.dp),
-                    shape = RoundedCornerShape(8.dp)
+                    shape = RoundedCornerShape(8.dp),
                 ) {
                     Text("Batal", fontWeight = FontWeight.Bold)
                 }
@@ -106,7 +101,7 @@ fun AddEditTaskScreen(
                         .weight(1f)
                         .height(50.dp),
                     enabled = !state.isSaving,
-                    shape = RoundedCornerShape(8.dp)
+                    shape = RoundedCornerShape(8.dp),
                 ) {
                     if (state.isSaving) {
                         CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
@@ -115,7 +110,7 @@ fun AddEditTaskScreen(
                     }
                 }
             }
-        }
+        },
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -123,14 +118,14 @@ fun AddEditTaskScreen(
                 .padding(paddingValues)
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             // Error Message
             if (state.error != null) {
                 Text(
                     text = state.error,
                     color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodyMedium
+                    style = MaterialTheme.typography.bodyMedium,
                 )
             }
 
@@ -140,28 +135,28 @@ fun AddEditTaskScreen(
                 onValueChange = onTitleChange,
                 label = { Text("Judul Tugas *") },
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(8.dp)
+                shape = RoundedCornerShape(8.dp),
             )
 
             // Equipment (Searchable Dropdown)
             ExposedDropdownMenuBox(
                 expanded = showEquipmentDropdown,
-                onExpandedChange = { showEquipmentDropdown = !showEquipmentDropdown }
+                onExpandedChange = { showEquipmentDropdown = !showEquipmentDropdown },
             ) {
                 OutlinedTextField(
                     value = state.equipmentSearchQuery,
-                    onValueChange = { 
+                    onValueChange = {
                         onEquipmentSearchQueryChange(it)
                         showEquipmentDropdown = true
                     },
                     label = { Text("Pilih Peralatan *") },
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = showEquipmentDropdown) },
                     modifier = Modifier.fillMaxWidth().menuAnchor(),
-                    shape = RoundedCornerShape(8.dp)
+                    shape = RoundedCornerShape(8.dp),
                 )
                 ExposedDropdownMenu(
                     expanded = showEquipmentDropdown,
-                    onDismissRequest = { showEquipmentDropdown = false }
+                    onDismissRequest = { showEquipmentDropdown = false },
                 ) {
                     state.availableEquipments.forEach { equipment ->
                         DropdownMenuItem(
@@ -174,7 +169,7 @@ fun AddEditTaskScreen(
                             onClick = {
                                 onEquipmentSelected(equipment)
                                 showEquipmentDropdown = false
-                            }
+                            },
                         )
                     }
                 }
@@ -189,7 +184,7 @@ fun AddEditTaskScreen(
                     .fillMaxWidth()
                     .height(120.dp),
                 shape = RoundedCornerShape(8.dp),
-                maxLines = 5
+                maxLines = 5,
             )
 
             // Deadline
@@ -211,14 +206,14 @@ fun AddEditTaskScreen(
                 colors = OutlinedTextFieldDefaults.colors(
                     disabledTextColor = MaterialTheme.colorScheme.onSurface,
                     disabledBorderColor = MaterialTheme.colorScheme.outline,
-                    disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                    disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                ),
             )
 
             // Technician
             ExposedDropdownMenuBox(
                 expanded = showTechnicianDropdown,
-                onExpandedChange = { showTechnicianDropdown = !showTechnicianDropdown }
+                onExpandedChange = { showTechnicianDropdown = !showTechnicianDropdown },
             ) {
                 OutlinedTextField(
                     value = state.selectedTechnician?.namaLengkap ?: "",
@@ -227,11 +222,11 @@ fun AddEditTaskScreen(
                     label = { Text("Pilih Teknisi *") },
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = showTechnicianDropdown) },
                     modifier = Modifier.fillMaxWidth().menuAnchor(),
-                    shape = RoundedCornerShape(8.dp)
+                    shape = RoundedCornerShape(8.dp),
                 )
                 ExposedDropdownMenu(
                     expanded = showTechnicianDropdown,
-                    onDismissRequest = { showTechnicianDropdown = false }
+                    onDismissRequest = { showTechnicianDropdown = false },
                 ) {
                     state.availableTechnicians.forEach { technician ->
                         DropdownMenuItem(
@@ -239,7 +234,7 @@ fun AddEditTaskScreen(
                             onClick = {
                                 onTechnicianSelected(technician)
                                 showTechnicianDropdown = false
-                            }
+                            },
                         )
                     }
                 }

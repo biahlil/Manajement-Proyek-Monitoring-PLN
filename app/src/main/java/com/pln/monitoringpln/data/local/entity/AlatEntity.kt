@@ -17,5 +17,5 @@ data class AlatEntity(
     val lastModifiedById: String?,
     val isArchived: Boolean = false, // Soft Delete
     val isSynced: Boolean = true, // Offline Sync
-    val locationName: String? = null
+    val locationName: String? = null,
 )

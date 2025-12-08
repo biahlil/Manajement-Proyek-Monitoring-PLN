@@ -3,14 +3,14 @@ package com.pln.monitoringpln.domain.usecase.auth
 import com.pln.monitoringpln.domain.repository.AuthRepository
 
 class CreateUserUseCase(
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
 ) {
     suspend operator fun invoke(
         email: String,
         password: String,
         fullName: String,
         role: String,
-        photoUrl: String? = null
+        photoUrl: String? = null,
     ): Result<Unit> {
         if (email.isBlank() || password.isBlank() || fullName.isBlank()) {
             return Result.failure(IllegalArgumentException("All fields must be filled"))

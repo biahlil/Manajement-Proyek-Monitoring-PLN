@@ -11,5 +11,5 @@ data class UserEntity(
     val namaLengkap: String,
     val role: String,
     val isActive: Boolean = true,
-    val photoUrl: String? = null
+    val photoUrl: String? = null,
 )

@@ -1,6 +1,5 @@
 package com.pln.monitoringpln.presentation.equipment.list
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -9,7 +8,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
@@ -31,30 +29,30 @@ fun EquipmentListScreen(
     onDeleteEquipment: (Alat) -> Unit,
     onConfirmDelete: () -> Unit,
     onDismissDelete: () -> Unit,
-    onItemClick: (Alat) -> Unit
+    onItemClick: (Alat) -> Unit,
 ) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { 
+                title = {
                     Text(
-                        "Daftar Peralatan", 
+                        "Daftar Peralatan",
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary
-                    ) 
+                        color = MaterialTheme.colorScheme.primary,
+                    )
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
-                            Icons.Default.ArrowBack, 
+                            Icons.Default.ArrowBack,
                             contentDescription = "Back",
-                            tint = MaterialTheme.colorScheme.onSurface
+                            tint = MaterialTheme.colorScheme.onSurface,
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surface,
-                )
+                ),
             )
         },
         floatingActionButton = {
@@ -63,18 +61,18 @@ fun EquipmentListScreen(
                     onClick = onAddEquipment,
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = Color.White,
-                    shape = RoundedCornerShape(16.dp)
+                    shape = RoundedCornerShape(16.dp),
                 ) {
                     Icon(Icons.Default.Add, contentDescription = "Add Equipment")
                 }
             }
-        }
+        },
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(horizontal = 16.dp)
+                .padding(horizontal = 16.dp),
         ) {
             // Search Bar
             OutlinedTextField(
@@ -87,8 +85,8 @@ fun EquipmentListScreen(
                 singleLine = true,
                 colors = OutlinedTextFieldDefaults.colors(
                     unfocusedContainerColor = Color.White,
-                    focusedContainerColor = Color.White
-                )
+                    focusedContainerColor = Color.White,
+                ),
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -96,14 +94,14 @@ fun EquipmentListScreen(
             // Total Chip
             Surface(
                 color = MaterialTheme.colorScheme.primaryContainer,
-                shape = RoundedCornerShape(16.dp)
+                shape = RoundedCornerShape(16.dp),
             ) {
                 Text(
                     text = "Total Peralatan: ${state.equipmentList.size}",
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onPrimaryContainer,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                 )
             }
 
@@ -117,14 +115,14 @@ fun EquipmentListScreen(
             } else {
                 LazyColumn(
                     verticalArrangement = Arrangement.spacedBy(16.dp),
-                    contentPadding = PaddingValues(bottom = 80.dp) // Space for FAB
+                    contentPadding = PaddingValues(bottom = 80.dp), // Space for FAB
                 ) {
                     items(state.filteredEquipmentList) { equipment ->
                         EquipmentCard(
                             equipment = equipment,
                             isAdmin = state.isAdmin,
                             onDeleteClick = { onDeleteEquipment(equipment) },
-                            onClick = { onItemClick(equipment) }
+                            onClick = { onItemClick(equipment) },
                         )
                     }
                 }
@@ -138,7 +136,7 @@ fun EquipmentCard(
     equipment: Alat,
     isAdmin: Boolean,
     onDeleteClick: () -> Unit,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
     Card(
         modifier = Modifier
@@ -147,28 +145,28 @@ fun EquipmentCard(
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)),
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             // Header: Name and Badge
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Top
+                verticalAlignment = Alignment.Top,
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = equipment.namaAlat,
                         style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
                     )
                     Text(
                         text = equipment.kodeAlat,
                         style = MaterialTheme.typography.bodySmall,
-                        color = Color.Gray
+                        color = Color.Gray,
                     )
                 }
-                
+
                 Surface(
                     shape = RoundedCornerShape(8.dp),
                     color = when (equipment.kondisi) {
@@ -180,13 +178,13 @@ fun EquipmentCard(
                         "Normal" -> Color(0xFF1B5E20)
                         "Rusak" -> Color(0xFFB71C1C)
                         else -> Color(0xFFE65100)
-                    }
+                    },
                 ) {
                     Text(
                         text = equipment.kondisi,
                         style = MaterialTheme.typography.labelSmall,
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
                     )
                 }
             }
@@ -199,17 +197,15 @@ fun EquipmentCard(
                     Icons.Default.LocationOn,
                     contentDescription = null,
                     tint = Color.Gray,
-                    modifier = Modifier.size(16.dp)
+                    modifier = Modifier.size(16.dp),
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
                     text = equipment.locationName ?: "Lokasi belum tersedia",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = Color.Gray
+                    color = Color.Gray,
                 )
             }
-
-
         }
     }
 }
