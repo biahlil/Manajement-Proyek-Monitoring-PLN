@@ -9,4 +9,8 @@ interface ReportRepository {
         endDate: Date,
         format: ExportFormat,
     ): Result<String>
+
+    suspend fun exportFullDatabaseReport(
+        format: ExportFormat,
+    ): Result<String>
 }

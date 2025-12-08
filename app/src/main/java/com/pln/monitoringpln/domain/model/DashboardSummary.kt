@@ -2,6 +2,9 @@ package com.pln.monitoringpln.domain.model
 
 data class DashboardSummary(
     val totalAlat: Int = 0,
+    val totalAlatNormal: Int = 0,
+    val totalAlatPerluPerhatian: Int = 0,
+    val totalAlatRusak: Int = 0,
     val totalTeknisi: Int = 0,
     val totalTugas: Int = 0,
     val tugasToDo: Int = 0,

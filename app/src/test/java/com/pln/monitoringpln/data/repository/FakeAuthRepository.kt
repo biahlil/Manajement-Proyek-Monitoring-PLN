@@ -55,9 +55,26 @@ class FakeAuthRepository : AuthRepository {
 
     var shouldFailCreateUser = false
 
-    override suspend fun createUser(email: String, password: String, fullName: String, role: String): Result<Unit> {
+    override suspend fun getCurrentUserId(): String? {
+        return if (_isLoggedIn.value) "user-123" else null
+    }
+
+    override suspend fun createUser(email: String, password: String, fullName: String, role: String, photoUrl: String?): Result<Unit> {
         if (shouldFailCreateUser) {
             return Result.failure(Exception("Failed to create user"))
+        }
+        return Result.success(Unit)
+    }
+
+    override suspend fun loadSession() {
+        // No-op for fake
+    }
+
+    var shouldFailUpdatePassword = false
+
+    override suspend fun updatePassword(password: String): Result<Unit> {
+        if (shouldFailUpdatePassword) {
+            return Result.failure(Exception("Failed to update password"))
         }
         return Result.success(Unit)
     }

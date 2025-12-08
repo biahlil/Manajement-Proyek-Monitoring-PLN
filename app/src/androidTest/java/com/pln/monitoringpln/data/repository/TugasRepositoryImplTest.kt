@@ -9,6 +9,7 @@ import io.github.jan.supabase.gotrue.Auth
 import io.github.jan.supabase.gotrue.auth
 import io.github.jan.supabase.gotrue.providers.builtin.Email
 import io.github.jan.supabase.postgrest.Postgrest
+import io.github.jan.supabase.postgrest.postgrest
 import io.github.jan.supabase.storage.Storage
 import junit.framework.Assert.assertNotNull
 import kotlinx.coroutines.runBlocking
@@ -82,9 +83,43 @@ class TugasRepositoryImplTest {
         tugasRepository = TugasRepositoryImpl(tugasLocalDataSource, tugasRemoteDataSource)
     }
 
+    private val createdTugasIds = mutableListOf<String>()
+    private val createdAlatIds = mutableListOf<String>()
+
     @org.junit.After
     fun tearDown() {
         database.close()
+
+        // Cleanup Remote Data
+        runBlocking {
+            // Delete Tugas first (FK constraint)
+            if (createdTugasIds.isNotEmpty()) {
+                try {
+                    createdTugasIds.forEach { id ->
+                        supabaseClient.postgrest["tugas"].delete {
+                            filter { eq("id", id) }
+                        }
+                        println("Cleaned up tugas: $id")
+                    }
+                } catch (e: Exception) {
+                    println("Failed to cleanup tugas: ${e.message}")
+                }
+            }
+
+            // Delete Alat
+            if (createdAlatIds.isNotEmpty()) {
+                try {
+                    createdAlatIds.forEach { id ->
+                        supabaseClient.postgrest["alat"].delete {
+                            filter { eq("id", id) }
+                        }
+                        println("Cleaned up alat: $id")
+                    }
+                } catch (e: Exception) {
+                    println("Failed to cleanup alat: ${e.message}")
+                }
+            }
+        }
     }
 
     private suspend fun createTestAlat(): String {
@@ -99,6 +134,8 @@ class TugasRepositoryImplTest {
         if (result.isFailure) {
             throw IllegalStateException("Failed to create test alat: ${result.exceptionOrNull()?.message}")
         }
+        createdAlatIds.add(uniqueId)
+
         // Check if Alat is synced
         val localAlat = database.alatDao().getAlatDetail(uniqueId)
         println("Local Alat isSynced: ${localAlat?.isSynced}")
@@ -128,6 +165,7 @@ class TugasRepositoryImplTest {
         // When
         val createResult = tugasRepository.createTask(tugas)
         val createdTugas = createResult.getOrNull()
+        createdTugas?.id?.let { createdTugasIds.add(it) }
         println(logAssert.format(createdTugas?.deskripsi))
 
         // Then

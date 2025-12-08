@@ -56,6 +56,10 @@ class AlatRepositoryImpl(
         }
     }
 
+    override fun observeAlat(id: String): Flow<Alat?> {
+        return localDataSource.observeAlatDetail(id).map { it?.toDomain() }
+    }
+
     override suspend fun getAlatByKode(kode: String): Result<Alat> {
         return try {
             val local = localDataSource.getAlatByKode(kode)
@@ -82,6 +86,7 @@ class AlatRepositoryImpl(
         kode: String,
         lat: Double,
         lng: Double,
+        locationName: String?,
     ): Result<Unit> {
         return try {
             val existing = localDataSource.getAlatDetail(id) ?: return Result.failure(Exception("Alat not found locally"))
@@ -91,6 +96,7 @@ class AlatRepositoryImpl(
                 kodeAlat = kode,
                 latitude = lat,
                 longitude = lng,
+                locationName = locationName,
                 isSynced = false,
             )
             localDataSource.updateAlat(updated)

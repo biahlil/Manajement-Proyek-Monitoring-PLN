@@ -7,7 +7,9 @@ import com.pln.monitoringpln.data.mapper.toInsertDto
 import com.pln.monitoringpln.data.remote.TugasRemoteDataSource
 import com.pln.monitoringpln.domain.model.Tugas
 import com.pln.monitoringpln.domain.repository.TugasRepository
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 
 class TugasRepositoryImpl(
     private val localDataSource: TugasLocalDataSource,
@@ -42,7 +44,8 @@ class TugasRepositoryImpl(
             // 2. Filter by Search Query if needed (Universal Search)
             val filteredList = if (!searchQuery.isNullOrBlank()) {
                 domainList.filter { tugas ->
-                    tugas.deskripsi.contains(searchQuery, ignoreCase = true) ||
+                    tugas.judul.contains(searchQuery, ignoreCase = true) ||
+                        tugas.deskripsi.contains(searchQuery, ignoreCase = true) ||
                         tugas.status.contains(searchQuery, ignoreCase = true) ||
                         tugas.idAlat.contains(searchQuery, ignoreCase = true)
                 }
@@ -76,9 +79,27 @@ class TugasRepositoryImpl(
     }
 
     override suspend fun completeTugas(id: String, buktiFotoPath: String, kondisiAkhir: String): Result<Unit> {
-        // TODO: Implement Complete Tugas with Image Upload
-        // For now, just update status
-        return updateTaskStatus(id, "Done")
+        return try {
+            // 1. Update Local
+            val existing = localDataSource.getTugasById(id) ?: return Result.failure(Exception("Tugas not found"))
+            val updated = existing.copy(
+                status = "Done",
+                buktiFoto = buktiFotoPath,
+                kondisiAkhir = kondisiAkhir,
+                isSynced = false,
+            )
+            localDataSource.updateTugas(updated)
+
+            // 2. Push to Remote
+            val remoteResult = remoteDataSource.completeTaskRemote(id, "Done", buktiFotoPath, kondisiAkhir)
+            if (remoteResult.isSuccess) {
+                localDataSource.updateTugas(updated.copy(isSynced = true))
+            }
+
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 
     override suspend fun sync(): Result<Unit> {
@@ -102,8 +123,12 @@ class TugasRepositoryImpl(
 
             // 2. Pull Latest
             val remoteData = remoteDataSource.fetchAllTugas()
-            remoteData.getOrNull()?.let { dtos ->
+            if (remoteData.isSuccess) {
+                val dtos = remoteData.getOrNull() ?: emptyList()
                 localDataSource.insertAll(dtos.map { it.toEntity(isSynced = true) })
+                android.util.Log.d("TugasRepositoryImpl", "Synced ${dtos.size} tasks from remote")
+            } else {
+                android.util.Log.e("TugasRepositoryImpl", "Failed to fetch tasks from remote", remoteData.exceptionOrNull())
             }
 
             Result.success(Unit)
@@ -137,6 +162,12 @@ class TugasRepositoryImpl(
         }
     }
 
+    override fun observeTasksByAlat(idAlat: String): Flow<List<Tugas>> {
+        return localDataSource.getTugasByAlat(idAlat).map { entities ->
+            entities.map { it.toDomain() }
+        }
+    }
+
     override suspend fun getTaskDetail(taskId: String): Result<Tugas> {
         return try {
             val local = localDataSource.getTugasById(taskId)
@@ -145,6 +176,52 @@ class TugasRepositoryImpl(
             } else {
                 Result.failure(Exception("Tugas not found locally"))
             }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+    override fun observeAllTasks(): kotlinx.coroutines.flow.Flow<List<Tugas>> {
+        return localDataSource.getAllTugas().map { entities ->
+            entities.map { it.toDomain() }
+        }
+    }
+
+    override fun observeTasksByTeknisi(idTeknisi: String): kotlinx.coroutines.flow.Flow<List<Tugas>> {
+        return localDataSource.getTugasByTeknisi(idTeknisi).map { entities ->
+            entities.map { it.toDomain() }
+        }
+    }
+
+    override suspend fun deleteTask(taskId: String): Result<Unit> {
+        return try {
+            // 1. Delete Remote
+            val remoteResult = remoteDataSource.deleteTaskRemote(taskId)
+            if (remoteResult.isFailure) {
+                return Result.failure(remoteResult.exceptionOrNull() ?: Exception("Failed to delete remote task"))
+            }
+
+            // 2. Delete Local
+            localDataSource.deleteTask(taskId)
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun updateTask(tugas: Tugas): Result<Unit> {
+        return try {
+            // 1. Update Local
+            val existing = localDataSource.getTugasById(tugas.id) ?: return Result.failure(Exception("Tugas not found locally"))
+            val updatedEntity = tugas.toEntity(isSynced = false)
+            localDataSource.updateTugas(updatedEntity)
+
+            // 2. Try Update Remote
+            val remoteResult = remoteDataSource.updateTugas(tugas.id, tugas.toInsertDto())
+            if (remoteResult.isSuccess) {
+                localDataSource.updateTugas(updatedEntity.copy(isSynced = true))
+            }
+
+            Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
         }

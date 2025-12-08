@@ -18,19 +18,22 @@ interface TugasDao {
     @androidx.room.Update
     suspend fun updateTugas(tugas: TugasEntity)
 
-    @Query("SELECT * FROM tugas")
+    @Query("SELECT * FROM tugas WHERE isArchived = 0")
     fun getAllTugas(): Flow<List<TugasEntity>>
+
+    @Query("SELECT * FROM tugas WHERE isArchived = 0")
+    suspend fun getAllTasksSync(): List<TugasEntity>
 
     @Query("SELECT * FROM tugas WHERE isSynced = 0")
     suspend fun getUnsyncedTugas(): List<TugasEntity>
 
-    @Query("SELECT * FROM tugas WHERE idTeknisi = :teknisiId")
+    @Query("SELECT * FROM tugas WHERE idTeknisi = :teknisiId AND isArchived = 0")
     fun getTugasByTeknisi(teknisiId: String): Flow<List<TugasEntity>>
 
-    @Query("SELECT * FROM tugas WHERE idTeknisi = :teknisiId")
+    @Query("SELECT * FROM tugas WHERE idTeknisi = :teknisiId AND isArchived = 0")
     suspend fun getTugasByTeknisiSuspend(teknisiId: String): List<TugasEntity>
 
-    @Query("SELECT * FROM tugas WHERE idAlat = :alatId")
+    @Query("SELECT * FROM tugas WHERE idAlat = :alatId AND isArchived = 0")
     fun getTugasByAlat(alatId: String): Flow<List<TugasEntity>>
 
     @Query("SELECT * FROM tugas WHERE id = :id")
@@ -45,12 +48,30 @@ interface TugasDao {
     @Query("UPDATE tugas SET isSynced = 1 WHERE id = :id")
     suspend fun markAsSynced(id: String)
 
-    @Query("SELECT COUNT(*) FROM tugas")
+    @Query("SELECT COUNT(*) FROM tugas WHERE isArchived = 0")
     suspend fun countAll(): Int
 
-    @Query("SELECT COUNT(*) FROM tugas WHERE status = :status")
+    @Query("SELECT COUNT(*) FROM tugas WHERE status = :status AND isArchived = 0")
     suspend fun countByStatus(status: String): Int
 
-    @Query("SELECT * FROM tugas WHERE tglJatuhTempo BETWEEN :startDate AND :endDate")
+    @Query("SELECT * FROM tugas WHERE tglJatuhTempo BETWEEN :startDate AND :endDate AND isArchived = 0")
     suspend fun getTasksByDateRange(startDate: Long, endDate: Long): List<TugasEntity>
+
+    @Query("SELECT COUNT(*) FROM tugas WHERE isArchived = 0")
+    fun observeCountAll(): Flow<Int>
+
+    @Query("SELECT COUNT(*) FROM tugas WHERE status = :status AND isArchived = 0")
+    fun observeCountByStatus(status: String): Flow<Int>
+
+    @Query("DELETE FROM tugas WHERE id = :id")
+    suspend fun deleteTask(id: String)
+
+    @Query("SELECT COUNT(*) FROM tugas WHERE idTeknisi = :teknisiId AND isArchived = 0")
+    fun observeCountByTechnician(teknisiId: String): Flow<Int>
+
+    @Query("SELECT COUNT(DISTINCT idAlat) FROM tugas WHERE idTeknisi = :teknisiId AND isArchived = 0")
+    fun observeDistinctEquipmentCountByTechnician(teknisiId: String): Flow<Int>
+
+    @Query("SELECT COUNT(*) FROM tugas WHERE status = :status AND idTeknisi = :teknisiId AND isArchived = 0")
+    fun observeCountByStatusAndTechnician(status: String, teknisiId: String): Flow<Int>
 }

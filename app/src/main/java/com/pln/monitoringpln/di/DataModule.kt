@@ -48,6 +48,7 @@ val dataModule = module {
     // DAOs
     single { get<com.pln.monitoringpln.data.local.AppDatabase>().alatDao() }
     single { get<com.pln.monitoringpln.data.local.AppDatabase>().tugasDao() }
+    single { get<com.pln.monitoringpln.data.local.AppDatabase>().userDao() }
 
     // Data Sources
     single { AlatLocalDataSource(get()) }
@@ -59,5 +60,6 @@ val dataModule = module {
     single<AlatRepository> { AlatRepositoryImpl(get(), get()) }
     single<TugasRepository> { TugasRepositoryImpl(get(), get()) }
     single<DashboardRepository> { DashboardRepositoryImpl(get(), get()) }
-    single<ReportRepository> { ReportRepositoryImpl(get(), androidContext()) }
+    single<ReportRepository> { ReportRepositoryImpl(get(), get(), get(), androidContext()) }
+    single<com.pln.monitoringpln.domain.repository.UserRepository> { com.pln.monitoringpln.data.repository.UserRepositoryImpl(get(), get()) }
 }

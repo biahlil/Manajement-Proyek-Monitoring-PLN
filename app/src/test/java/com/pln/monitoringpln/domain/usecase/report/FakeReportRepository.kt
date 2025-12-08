@@ -37,4 +37,11 @@ class FakeReportRepository : ReportRepository {
         println("     ✅ Sukses: File tersimpan di $dummyPath")
         return Result.success(dummyPath)
     }
+
+    override suspend fun exportFullDatabaseReport(format: ExportFormat): Result<String> {
+        if (shouldFail) {
+            return Result.failure(Exception("Gagal export full database"))
+        }
+        return Result.success("/dummy/full_report.csv")
+    }
 }

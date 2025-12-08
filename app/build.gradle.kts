@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
     id("com.google.devtools.ksp") version "2.0.0-1.0.21"
+    id("com.google.gms.google-services") version "4.4.2"
 }
 
 
@@ -13,6 +14,10 @@ val localProperties = Properties()
 val localPropertiesFile = rootProject.file("local.properties")
 if (localPropertiesFile.exists()) {
     localProperties.load(localPropertiesFile.inputStream())
+}
+
+fun getApiKey(propertyKey: String): String {
+    return System.getenv(propertyKey) ?: localProperties.getProperty(propertyKey) ?: ""
 }
 
 android {
@@ -28,11 +33,14 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        buildConfigField("String", "SUPABASE_URL", "\"${localProperties.getProperty("SUPABASE_URL") ?: ""}\"")
-        buildConfigField("String", "SUPABASE_KEY", "\"${localProperties.getProperty("SUPABASE_KEY") ?: ""}\"")
+        buildConfigField("String", "SUPABASE_URL", "\"${getApiKey("SUPABASE_URL")}\"")
+        buildConfigField("String", "SUPABASE_KEY", "\"${getApiKey("SUPABASE_KEY")}\"")
     }
 
     buildTypes {
+        debug {
+            applicationIdSuffix = ".debug"
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(
@@ -42,11 +50,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "21"
     }
     buildFeatures {
         compose = true
@@ -79,6 +87,9 @@ dependencies {
     implementation(libs.ktor.client.android)
     implementation(libs.ktor.client.core)
 
+    
+
+
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(libs.androidx.junit)
@@ -105,4 +116,10 @@ dependencies {
 
     // WorkManager
     implementation("androidx.work:work-runtime-ktx:2.9.0")
+
+    // Coil
+    implementation(libs.coil.compose)
+
+    // Firebase
+    implementation(platform("com.google.firebase:firebase-bom:34.6.0"))
 }

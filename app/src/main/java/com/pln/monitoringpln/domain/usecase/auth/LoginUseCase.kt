@@ -16,4 +16,12 @@ class LoginUseCase(
         // 2. Panggil Repository (Supabase Auth)
         return authRepository.login(email, password)
     }
+
+    fun isUserLoggedIn(): kotlinx.coroutines.flow.Flow<Boolean> {
+        return authRepository.isUserLoggedIn()
+    }
+
+    suspend fun loadSession() {
+        authRepository.loadSession()
+    }
 }

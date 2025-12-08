@@ -10,6 +10,7 @@ class CreateUserUseCase(
         password: String,
         fullName: String,
         role: String,
+        photoUrl: String? = null,
     ): Result<Unit> {
         if (email.isBlank() || password.isBlank() || fullName.isBlank()) {
             return Result.failure(IllegalArgumentException("All fields must be filled"))
@@ -21,6 +22,6 @@ class CreateUserUseCase(
             return Result.failure(IllegalArgumentException("Password must be at least 6 characters"))
         }
 
-        return authRepository.createUser(email, password, fullName, role)
+        return authRepository.createUser(email, password, fullName, role, photoUrl)
     }
 }

@@ -47,6 +47,7 @@ object TestObjects {
     // Menggunakan data dari user & alat yang valid di atas
     val TUGAS_TODO = Tugas(
         id = "task-1",
+        judul = "Cek Kabel A",
         deskripsi = "Cek Kabel A",
         idAlat = ALAT_VALID.id,
         idTeknisi = TEKNISI_VALID.id, // tech-1
@@ -56,6 +57,7 @@ object TestObjects {
 
     val TUGAS_IN_PROGRESS = Tugas(
         id = "task-2",
+        judul = "Perbaikan Trafo B",
         deskripsi = "Perbaikan Trafo B",
         idAlat = ALAT_VALID.id,
         idTeknisi = TEKNISI_VALID.id, // tech-1
@@ -65,6 +67,7 @@ object TestObjects {
 
     val TUGAS_OTHER_TECH = Tugas(
         id = "task-3",
+        judul = "Inspeksi Rutin",
         deskripsi = "Inspeksi Rutin",
         idAlat = ALAT_VALID.id,
         idTeknisi = "tech-2", // Teknisi Beda

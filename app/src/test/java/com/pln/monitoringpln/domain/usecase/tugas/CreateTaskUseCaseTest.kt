@@ -32,8 +32,8 @@ class CreateTaskUseCaseTest {
 
         // Setup Data Awal Menggunakan Object Helper
         fakeAlatRepo.addDummy(TestObjects.ALAT_VALID)
-        fakeUserRepo.addDummyUser(TestObjects.TEKNISI_VALID)
-        fakeUserRepo.addDummyUser(TestObjects.ADMIN_USER)
+        fakeUserRepo.addDummy(TestObjects.TEKNISI_VALID)
+        fakeUserRepo.addDummy(TestObjects.ADMIN_USER)
     }
 
     // --- HAPPY PATH ---
@@ -46,6 +46,7 @@ class CreateTaskUseCaseTest {
 
         println(logAct.format("Membuat tugas untuk ${TestObjects.ALAT_VALID.namaAlat} oleh ${TestObjects.TEKNISI_VALID.namaLengkap}"))
         val result = useCase(
+            judul = "Cek Rutin Bulanan",
             deskripsi = "Cek Rutin Bulanan",
             idAlat = TestObjects.ALAT_VALID.id,
             idTeknisi = TestObjects.TEKNISI_VALID.id,
@@ -67,6 +68,7 @@ class CreateTaskUseCaseTest {
 
         println(logAct.format("Membuat tugas dengan ID Alat 'gaib'"))
         val result = useCase(
+            judul = "Cek",
             deskripsi = "Cek",
             idAlat = "id-alat-gaib",
             idTeknisi = TestObjects.TEKNISI_VALID.id,
@@ -86,6 +88,7 @@ class CreateTaskUseCaseTest {
 
         println(logAct.format("Membuat tugas dengan ID Teknisi 'gaib'"))
         val result = useCase(
+            judul = "Cek",
             deskripsi = "Cek",
             idAlat = TestObjects.ALAT_VALID.id,
             idTeknisi = "id-tech-gaib",
@@ -105,6 +108,7 @@ class CreateTaskUseCaseTest {
 
         println(logAct.format("Assign tugas ke ${TestObjects.ADMIN_USER.namaLengkap} (Role: ${TestObjects.ADMIN_USER.role})"))
         val result = useCase(
+            judul = "Cek",
             deskripsi = "Cek",
             idAlat = TestObjects.ALAT_VALID.id,
             idTeknisi = TestObjects.ADMIN_USER.id,
@@ -123,6 +127,7 @@ class CreateTaskUseCaseTest {
         println(logTestStart.format("Empty Description"))
 
         val result = useCase(
+            judul = "Judul",
             deskripsi = "",
             idAlat = TestObjects.ALAT_VALID.id,
             idTeknisi = TestObjects.TEKNISI_VALID.id,
@@ -142,6 +147,7 @@ class CreateTaskUseCaseTest {
         val kemarin = Date(System.currentTimeMillis() - 86400000)
 
         val result = useCase(
+            judul = "Desc",
             deskripsi = "Desc",
             idAlat = TestObjects.ALAT_VALID.id,
             idTeknisi = TestObjects.TEKNISI_VALID.id,

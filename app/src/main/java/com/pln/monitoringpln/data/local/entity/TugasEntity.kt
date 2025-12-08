@@ -8,6 +8,7 @@ import java.util.Date
 data class TugasEntity(
     @PrimaryKey
     val id: String,
+    val judul: String,
     val deskripsi: String,
     val idAlat: String,
     val idTeknisi: String,
@@ -17,4 +18,5 @@ data class TugasEntity(
     val buktiFoto: String? = null,
     val kondisiAkhir: String? = null,
     val isSynced: Boolean = true,
+    val isArchived: Boolean = false,
 )

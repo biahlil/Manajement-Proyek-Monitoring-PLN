@@ -16,6 +16,7 @@ class TugasRemoteDataSource(
                 .decodeList<TugasDto>()
             Result.success(result)
         } catch (e: Exception) {
+            android.util.Log.e("TugasRemoteDataSource", "fetchAllTugas failed", e)
             Result.failure(e)
         }
     }
@@ -63,6 +64,25 @@ class TugasRemoteDataSource(
         }
     }
 
+    suspend fun completeTaskRemote(id: String, status: String, proofUrl: String, condition: String): Result<Unit> {
+        return try {
+            supabaseClient.postgrest["tugas"].update(
+                mapOf(
+                    "status" to status,
+                    "bukti_foto" to proofUrl,
+                    "kondisi_akhir" to condition,
+                ),
+            ) {
+                filter {
+                    eq("id", id)
+                }
+            }
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     suspend fun uploadTaskProof(taskId: String, photoBytes: ByteArray): Result<String> {
         return try {
             val bucket = supabaseClient.storage.from("task-proofs")
@@ -85,6 +105,32 @@ class TugasRemoteDataSource(
                 }
                 .decodeList<TugasDto>()
             Result.success(result)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun deleteTaskRemote(id: String): Result<Unit> {
+        return try {
+            supabaseClient.postgrest["tugas"].delete {
+                filter {
+                    eq("id", id)
+                }
+            }
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun updateTugas(id: String, dto: TugasInsertDto): Result<Unit> {
+        return try {
+            supabaseClient.postgrest["tugas"].update(dto) {
+                filter {
+                    eq("id", id)
+                }
+            }
+            Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
         }
