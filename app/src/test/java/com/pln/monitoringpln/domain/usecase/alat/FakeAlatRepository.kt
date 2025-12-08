@@ -39,7 +39,6 @@ class FakeAlatRepository : AlatRepository {
         }
     }
 
-
     override suspend fun updateAlatInfo(id: String, nama: String, kode: String, lat: Double, lng: Double, locationName: String?): Result<Unit> {
         println("  ➡️ [FakeRepo] updateAlatInfo() dipanggil. ID: $id, Nama Baru: $nama")
         val existing = database[id]
@@ -94,7 +93,6 @@ class FakeAlatRepository : AlatRepository {
         println("  ➡️ [FakeRepo] Sync triggered")
         return Result.success(Unit)
     }
-
 
     fun addDummy(alat: Alat) {
         println("  🔧 [Setup] Menambahkan dummy data: ${alat.namaAlat} (ID: ${alat.id})")

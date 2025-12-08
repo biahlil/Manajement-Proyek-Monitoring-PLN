@@ -35,5 +35,4 @@ interface AlatRepository {
 
     // Sync Data
     suspend fun sync(): Result<Unit>
-
 }
