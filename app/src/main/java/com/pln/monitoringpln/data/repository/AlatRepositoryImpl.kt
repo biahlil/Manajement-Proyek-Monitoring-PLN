@@ -89,7 +89,8 @@ class AlatRepositoryImpl(
         locationName: String?,
     ): Result<Unit> {
         return try {
-            val existing = localDataSource.getAlatDetail(id) ?: return Result.failure(Exception("Alat not found locally"))
+            val existing =
+                localDataSource.getAlatDetail(id) ?: return Result.failure(Exception("Alat not found locally"))
 
             val updated = existing.copy(
                 namaAlat = nama,
@@ -98,6 +99,7 @@ class AlatRepositoryImpl(
                 longitude = lng,
                 locationName = locationName,
                 isSynced = false,
+                updatedAt = java.util.Date(),
             )
             localDataSource.updateAlat(updated)
 
@@ -127,15 +129,32 @@ class AlatRepositoryImpl(
         }
     }
 
-    override suspend fun updateAlatCondition(id: String, kondisi: String): Result<Unit> {
+    override suspend fun updateAlatStatusAndCondition(id: String, status: String, kondisi: String): Result<Unit> {
         return try {
-            val existing = localDataSource.getAlatDetail(id) ?: return Result.failure(Exception("Alat not found locally"))
+            val existing =
+                localDataSource.getAlatDetail(id) ?: return Result.failure(Exception("Alat not found locally"))
 
             val updated = existing.copy(
+                status = status,
                 kondisi = kondisi,
                 isSynced = false,
+                updatedAt = java.util.Date(),
             )
             localDataSource.updateAlat(updated)
+
+            // Try Push to Remote (Optional optimization: push immediately)
+            // For now relying on SyncWorker or manual sync, but we can try:
+            val remoteResult = remoteDataSource.updateAlat(
+                id,
+                mapOf(
+                    "status" to status,
+                    "kondisi" to kondisi,
+                    "updated_at" to java.util.Date()
+                )
+            )
+            if (remoteResult.isSuccess) {
+                localDataSource.updateAlat(updated.copy(isSynced = true))
+            }
 
             Result.success(Unit)
         } catch (e: Exception) {

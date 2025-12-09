@@ -92,10 +92,8 @@ fun TechnicianListScreen(
                     leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search") },
                     shape = RoundedCornerShape(12.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedContainerColor = Color.White,
-                        unfocusedContainerColor = Color.White,
-                        unfocusedBorderColor = Color.Transparent,
-                        focusedBorderColor = MaterialTheme.colorScheme.primary,
+                        focusedContainerColor = MaterialTheme.colorScheme.surface,
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surface,
                     ),
                     singleLine = true,
                 )
@@ -186,8 +184,12 @@ fun TechnicianCard(
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        border = androidx.compose.foundation.BorderStroke(
+            2.dp,
+            MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
+        ),
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             // Header: Name and Badge
@@ -264,14 +266,14 @@ fun TechnicianCard(
                 Icon(
                     Icons.Default.Settings,
                     contentDescription = null,
-                    tint = Color.Gray,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(16.dp),
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
                     text = equipmentName,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = Color.Gray,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
 

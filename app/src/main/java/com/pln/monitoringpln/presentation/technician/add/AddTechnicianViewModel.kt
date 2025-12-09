@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class AddTechnicianViewModel(
-    private val createUserUseCase: com.pln.monitoringpln.domain.usecase.auth.CreateUserUseCase,
+    private val addTeknisiUseCase: com.pln.monitoringpln.domain.usecase.user.AddTeknisiUseCase,
     private val uploadPhotoUseCase: com.pln.monitoringpln.domain.usecase.storage.UploadPhotoUseCase,
     private val context: android.content.Context, // Need context for ContentResolver
 ) : ViewModel() {
@@ -18,11 +18,11 @@ class AddTechnicianViewModel(
     val state: StateFlow<AddTechnicianState> = _state.asStateFlow()
 
     fun onNamaChange(value: String) {
-        _state.update { it.copy(namaLengkap = value) }
+        _state.update { it.copy(namaLengkap = value, namaError = null) }
     }
 
     fun onEmailChange(value: String) {
-        _state.update { it.copy(email = value) }
+        _state.update { it.copy(email = value, emailError = null) }
     }
 
     fun onPasswordChange(value: String) {
@@ -60,7 +60,12 @@ class AddTechnicianViewModel(
                         uploadResult.fold(
                             onSuccess = { url -> photoUrl = url },
                             onFailure = { error ->
-                                _state.update { it.copy(isSaving = false, error = "Gagal upload foto: ${error.message}") }
+                                _state.update {
+                                    it.copy(
+                                        isSaving = false,
+                                        error = "Gagal upload foto: ${error.message}"
+                                    )
+                                }
                                 return@launch
                             },
                         )
@@ -71,11 +76,10 @@ class AddTechnicianViewModel(
                 }
             }
 
-            val result = createUserUseCase(
+            val result = addTeknisiUseCase(
                 email = currentState.email,
                 password = currentState.password,
-                fullName = currentState.namaLengkap,
-                role = "TEKNISI",
+                namaLengkap = currentState.namaLengkap,
                 photoUrl = photoUrl,
             )
 
@@ -84,7 +88,22 @@ class AddTechnicianViewModel(
                     _state.update { it.copy(isSaving = false, isSaved = true) }
                 },
                 onFailure = { error ->
-                    _state.update { it.copy(isSaving = false, error = error.message ?: "Gagal menyimpan teknisi") }
+                    val exception = error
+                    if (exception is IllegalArgumentException) {
+                        _state.update {
+                            it.copy(
+                                isSaving = false,
+                                namaError = if (exception.message?.contains("Nama") == true) exception.message else null,
+                                emailError = if (exception.message?.contains("Email") == true) exception.message else null,
+                                error = if (exception.message?.contains("Nama") == false && exception.message?.contains(
+                                        "Email"
+                                    ) == false
+                                ) exception.message else null
+                            )
+                        }
+                    } else {
+                        _state.update { it.copy(isSaving = false, error = error.message ?: "Gagal menyimpan teknisi") }
+                    }
                 },
             )
         }

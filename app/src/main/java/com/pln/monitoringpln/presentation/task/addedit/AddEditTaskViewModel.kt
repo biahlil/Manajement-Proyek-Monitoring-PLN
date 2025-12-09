@@ -97,11 +97,11 @@ class AddEditTaskViewModel(
     }
 
     fun onTitleChange(title: String) {
-        _state.update { it.copy(title = title) }
+        _state.update { it.copy(title = title, titleError = null) }
     }
 
     fun onDescriptionChange(description: String) {
-        _state.update { it.copy(description = description) }
+        _state.update { it.copy(description = description, descriptionError = null) }
     }
 
     fun onEquipmentSearchQueryChange(query: String) {
@@ -113,7 +113,7 @@ class AddEditTaskViewModel(
                 } else {
                     allEquipmentsCache.filter { eq ->
                         eq.namaAlat.contains(query, ignoreCase = true) ||
-                            eq.kodeAlat.contains(query, ignoreCase = true)
+                                eq.kodeAlat.contains(query, ignoreCase = true)
                     }
                 },
             )
@@ -170,7 +170,27 @@ class AddEditTaskViewModel(
                 if (result.isSuccess) {
                     _state.update { it.copy(isSaving = false, isTaskSaved = true, savedTaskId = currentState.taskId) }
                 } else {
-                    _state.update { it.copy(isSaving = false, error = result.exceptionOrNull()?.message ?: "Gagal menyimpan tugas") }
+                    val exception = result.exceptionOrNull()
+                    if (exception is IllegalArgumentException) {
+                        _state.update {
+                            it.copy(
+                                isSaving = false,
+                                titleError = if (exception.message?.contains("Judul") == true) exception.message else null,
+                                descriptionError = if (exception.message?.contains("Deskripsi") == true) exception.message else null,
+                                error = if (exception.message?.contains("Judul") == false && exception.message?.contains(
+                                        "Deskripsi"
+                                    ) == false
+                                ) exception.message else null
+                            )
+                        }
+                    } else {
+                        _state.update {
+                            it.copy(
+                                isSaving = false,
+                                error = exception?.message ?: "Gagal menyimpan tugas"
+                            )
+                        }
+                    }
                 }
             } else {
                 // Create
@@ -186,7 +206,27 @@ class AddEditTaskViewModel(
                     val newTaskId = result.getOrNull()
                     _state.update { it.copy(isSaving = false, isTaskSaved = true, savedTaskId = newTaskId) }
                 } else {
-                    _state.update { it.copy(isSaving = false, error = result.exceptionOrNull()?.message ?: "Gagal menyimpan tugas") }
+                    val exception = result.exceptionOrNull()
+                    if (exception is IllegalArgumentException) {
+                        _state.update {
+                            it.copy(
+                                isSaving = false,
+                                titleError = if (exception.message?.contains("Judul") == true) exception.message else null,
+                                descriptionError = if (exception.message?.contains("Deskripsi") == true) exception.message else null,
+                                error = if (exception.message?.contains("Judul") == false && exception.message?.contains(
+                                        "Deskripsi"
+                                    ) == false
+                                ) exception.message else null
+                            )
+                        }
+                    } else {
+                        _state.update {
+                            it.copy(
+                                isSaving = false,
+                                error = exception?.message ?: "Gagal menyimpan tugas"
+                            )
+                        }
+                    }
                 }
             }
         }

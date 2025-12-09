@@ -20,9 +20,10 @@ import androidx.compose.ui.unit.dp
 fun AddEditEquipmentScreen(
     state: AddEditEquipmentState,
     onNamaChange: (String) -> Unit,
-    onKodeChange: (String) -> Unit,
+    // onKodeChange removed
     onTipeChange: (String) -> Unit,
     onStatusChange: (String) -> Unit,
+    onDescriptionChange: (String) -> Unit,
     onLokasiChange: (String) -> Unit,
     onLatChange: (String) -> Unit,
     onLngChange: (String) -> Unit,
@@ -76,16 +77,24 @@ fun AddEditEquipmentScreen(
                     label = { Text("Nama Peralatan *") },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
+                    isError = state.namaAlatError != null,
+                    supportingText = {
+                        if (state.namaAlatError != null) {
+                            Text(
+                                text = state.namaAlatError,
+                                color = MaterialTheme.colorScheme.error,
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
+                    },
+                    colors = OutlinedTextFieldDefaults.colors(
+                        errorBorderColor = MaterialTheme.colorScheme.error,
+                        errorLabelColor = MaterialTheme.colorScheme.error,
+                        errorSupportingTextColor = MaterialTheme.colorScheme.error,
+                    )
                 )
 
-                // Kode Alat
-                OutlinedTextField(
-                    value = state.kodeAlat,
-                    onValueChange = onKodeChange,
-                    label = { Text("Kode Alat *") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                )
+                // Kode Alat removed (Auto-generated)
 
                 // Tipe Peralatan
                 OutlinedTextField(
@@ -94,6 +103,21 @@ fun AddEditEquipmentScreen(
                     label = { Text("Tipe Peralatan") },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
+                    isError = state.tipeError != null,
+                    supportingText = {
+                        if (state.tipeError != null) {
+                            Text(
+                                text = state.tipeError,
+                                color = MaterialTheme.colorScheme.error,
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
+                    },
+                    colors = OutlinedTextFieldDefaults.colors(
+                        errorBorderColor = MaterialTheme.colorScheme.error,
+                        errorLabelColor = MaterialTheme.colorScheme.error,
+                        errorSupportingTextColor = MaterialTheme.colorScheme.error,
+                    )
                 )
 
                 // Status Dropdown
@@ -127,22 +151,29 @@ fun AddEditEquipmentScreen(
                     }
                 }
 
-                // Latitude
+                // Kondisi (Description)
                 OutlinedTextField(
-                    value = state.latitude.toString(),
-                    onValueChange = onLatChange,
-                    label = { Text("Latitude") },
+                    value = state.description,
+                    onValueChange = onDescriptionChange,
+                    label = { Text("Kondisi (Deskripsi)") },
                     modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
+                    minLines = 3,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedContainerColor = MaterialTheme.colorScheme.surface,
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                    ),
                 )
 
-                // Longitude
-                OutlinedTextField(
-                    value = state.longitude.toString(),
-                    onValueChange = onLngChange,
-                    label = { Text("Longitude") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
+                // Selected Location Display
+                Text(
+                    text = if (state.latitude != 0.0 && state.longitude != 0.0) {
+                        "Lokasi Terpilih: ${state.latitude}, ${state.longitude}"
+                    } else {
+                        "Belum ada lokasi yang dipilih"
+                    },
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))

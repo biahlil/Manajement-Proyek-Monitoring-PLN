@@ -14,4 +14,5 @@ data class Alat(
     val lastModifiedById: String? = null, // ID Teknisi terakhir yang update
     val isArchived: Boolean = false, // Soft Delete flag
     val locationName: String? = null, // Reverse Geocoded Address
+    val updatedAt: java.util.Date? = null,
 )

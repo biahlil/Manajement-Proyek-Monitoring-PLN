@@ -112,7 +112,7 @@ fun EquipmentDetailScreen(
                 }
 
                 // Warning (Conditional)
-                if (equipment.kondisi != "Normal") {
+                if (equipment.status != "Normal") {
                     item {
                         WarningCard(equipment)
                     }
@@ -123,20 +123,26 @@ fun EquipmentDetailScreen(
                     SpecificationsCard(
                         equipment = equipment,
                         onMapClick = {
-                            val uri = Uri.parse("geo:${equipment.latitude},${equipment.longitude}?q=${equipment.latitude},${equipment.longitude}(${equipment.namaAlat})")
+                            val uri =
+                                Uri.parse("geo:${equipment.latitude},${equipment.longitude}?q=${equipment.latitude},${equipment.longitude}(${equipment.namaAlat})")
                             val mapIntent = Intent(Intent.ACTION_VIEW, uri)
 
                             try {
                                 context.startActivity(mapIntent)
                             } catch (e: android.content.ActivityNotFoundException) {
                                 // Fallback to browser if no map app is installed
-                                val browserUri = Uri.parse("https://www.google.com/maps/search/?api=1&query=${equipment.latitude},${equipment.longitude}")
+                                val browserUri =
+                                    Uri.parse("https://www.google.com/maps/search/?api=1&query=${equipment.latitude},${equipment.longitude}")
                                 val browserIntent = Intent(Intent.ACTION_VIEW, browserUri)
                                 try {
                                     context.startActivity(browserIntent)
                                 } catch (e2: Exception) {
                                     // Fallback if even browser fails (very unlikely)
-                                    android.widget.Toast.makeText(context, "Tidak ada aplikasi untuk membuka peta", android.widget.Toast.LENGTH_SHORT).show()
+                                    android.widget.Toast.makeText(
+                                        context,
+                                        "Tidak ada aplikasi untuk membuka peta",
+                                        android.widget.Toast.LENGTH_SHORT
+                                    ).show()
                                 }
                             }
                         },
@@ -244,19 +250,19 @@ fun DetailHeader(equipment: Alat, lastMaintenance: Tugas?) {
                 // Status Badge
                 Surface(
                     shape = RoundedCornerShape(16.dp),
-                    color = when (equipment.kondisi) {
+                    color = when (equipment.status) {
                         "Normal" -> Color(0xFFE8F5E9)
                         "Rusak" -> Color(0xFFFFEBEE)
                         else -> Color(0xFFFFF3E0)
                     },
-                    contentColor = when (equipment.kondisi) {
+                    contentColor = when (equipment.status) {
                         "Normal" -> Color(0xFF1B5E20)
                         "Rusak" -> Color(0xFFB71C1C)
                         else -> Color(0xFFE65100)
                     },
                 ) {
                     Text(
-                        text = equipment.kondisi,
+                        text = equipment.status,
                         style = MaterialTheme.typography.labelMedium,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),

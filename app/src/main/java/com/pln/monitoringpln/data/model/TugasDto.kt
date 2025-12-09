@@ -15,8 +15,9 @@ data class TugasDto(
     @SerialName("alat_id") val alatId: String,
     @SerialName("teknisi_id") val teknisiId: String,
     @SerialName("created_at") @Serializable(with = DateSerializer::class) val createdAt: Date,
-    @SerialName("bukti_foto") val buktiFoto: String? = null,
+    @SerialName("url_bukti") val buktiFoto: String? = null,
     @SerialName("kondisi_akhir") val kondisiAkhir: String? = null,
+    @SerialName("updated_at") @Serializable(with = DateSerializer::class) val updatedAt: Date? = null,
 )
 
 fun TugasDto.toDomain(): Tugas {
@@ -58,7 +59,7 @@ data class TugasInsertDto(
     @SerialName("due_date") @Serializable(with = DateSerializer::class) val dueDate: Date,
     @SerialName("alat_id") val alatId: String,
     @SerialName("teknisi_id") val teknisiId: String,
-    @SerialName("bukti_foto") val buktiFoto: String? = null,
+    @SerialName("url_bukti") val buktiFoto: String? = null,
     @SerialName("kondisi_akhir") val kondisiAkhir: String? = null,
 )
 

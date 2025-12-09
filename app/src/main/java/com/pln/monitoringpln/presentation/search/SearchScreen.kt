@@ -56,7 +56,7 @@ fun SearchScreen(
             }
         } else if (state.results.isEmpty() && state.query.isNotEmpty()) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("Tidak ada hasil ditemukan", color = Color.Gray)
+                Text("Tidak ada hasil ditemukan", color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         } else if (state.results.isEmpty()) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -65,10 +65,10 @@ fun SearchScreen(
                         Icons.Default.Search,
                         contentDescription = null,
                         modifier = Modifier.size(64.dp),
-                        tint = Color.LightGray,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     Spacer(modifier = Modifier.height(16.dp))
-                    Text("Mulai pencarian...", color = Color.Gray)
+                    Text("Mulai pencarian...", color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
         } else {
@@ -79,8 +79,14 @@ fun SearchScreen(
                     SearchResultItem(result) {
                         when (result.type) {
                             SearchResultType.TASK -> navController.navigate(Screen.DetailTask.createRoute(result.id))
-                            SearchResultType.EQUIPMENT -> navController.navigate(Screen.DetailEquipment.createRoute(result.id))
-                            SearchResultType.TECHNICIAN -> { /* Navigate to Technician Detail if exists, or List */ }
+                            SearchResultType.EQUIPMENT -> navController.navigate(
+                                Screen.DetailEquipment.createRoute(
+                                    result.id
+                                )
+                            )
+
+                            SearchResultType.TECHNICIAN -> { /* Navigate to Technician Detail if exists, or List */
+                            }
                         }
                     }
                 }
@@ -94,8 +100,12 @@ fun SearchResultItem(result: SearchResult, onClick: () -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth().clickable { onClick() },
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        border = androidx.compose.foundation.BorderStroke(
+            2.dp,
+            MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
+        ),
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
@@ -120,20 +130,24 @@ fun SearchResultItem(result: SearchResult, onClick: () -> Unit) {
 
             Spacer(modifier = Modifier.width(16.dp))
 
-            Column {
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = result.title,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
                 )
                 Text(
                     text = result.subtitle,
                     style = MaterialTheme.typography.bodySmall,
-                    color = Color.Gray,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
                 )
             }
 
-            Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.width(8.dp))
 
             // Type Label
             Text(
@@ -143,7 +157,7 @@ fun SearchResultItem(result: SearchResult, onClick: () -> Unit) {
                     SearchResultType.TECHNICIAN -> "TEKNISI"
                 },
                 style = MaterialTheme.typography.labelSmall,
-                color = Color.Gray,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
     }

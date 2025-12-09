@@ -16,6 +16,7 @@ fun AlatEntity.toDomain(): Alat {
         lastModifiedById = lastModifiedById,
         isArchived = isArchived,
         locationName = locationName,
+        updatedAt = updatedAt,
     )
 }
 
@@ -33,6 +34,7 @@ fun Alat.toEntity(isSynced: Boolean = true): AlatEntity {
         isSynced = isSynced,
         isArchived = false, // Default to false when converting from domain
         locationName = locationName,
+        updatedAt = updatedAt,
     )
 }
 
@@ -48,5 +50,6 @@ fun com.pln.monitoringpln.data.model.AlatDto.toDomain(): Alat {
         tipe = tipe ?: "Umum",
         lastModifiedById = lastModifiedById,
         locationName = locationName,
+        updatedAt = updatedAt,
     )
 }

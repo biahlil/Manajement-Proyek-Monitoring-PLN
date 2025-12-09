@@ -10,6 +10,8 @@ fun UserEntity.toDomain(): User {
         namaLengkap = namaLengkap,
         role = role,
         photoUrl = photoUrl,
+        createdAt = createdAt,
+        updatedAt = updatedAt,
     )
 }
 
@@ -21,5 +23,7 @@ fun User.toEntity(): UserEntity {
         role = role,
         isActive = true,
         photoUrl = photoUrl,
+        createdAt = createdAt,
+        updatedAt = updatedAt,
     )
 }

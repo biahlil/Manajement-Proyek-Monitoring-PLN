@@ -19,4 +19,5 @@ data class TugasEntity(
     val kondisiAkhir: String? = null,
     val isSynced: Boolean = true,
     val isArchived: Boolean = false,
+    val updatedAt: Date? = null,
 )

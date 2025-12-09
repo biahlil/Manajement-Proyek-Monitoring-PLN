@@ -4,8 +4,8 @@ import com.pln.monitoringpln.domain.repository.TugasRepository
 
 class UpdateTaskStatusUseCase(private val repository: TugasRepository) {
 
-    // Daftar status yang diizinkan sistem
-    private val validStatuses = listOf("To Do", "In Progress", "Done")
+    // Daftar status yang diizinkan sistem (Database Constaint: UPPERCASE)
+    private val validStatuses = listOf("TODO", "IN_PROGRESS", "DONE")
 
     suspend operator fun invoke(taskId: String, newStatus: String): Result<Unit> {
         if (taskId.isBlank()) {
@@ -13,7 +13,7 @@ class UpdateTaskStatusUseCase(private val repository: TugasRepository) {
         }
 
         if (newStatus !in validStatuses) {
-            return Result.failure(IllegalArgumentException("Status tidak valid. Gunakan: To Do, In Progress, atau Done."))
+            return Result.failure(IllegalArgumentException("Status tidak valid. Gunakan: TODO, IN_PROGRESS, atau DONE."))
         }
 
         return repository.updateTaskStatus(taskId, newStatus)

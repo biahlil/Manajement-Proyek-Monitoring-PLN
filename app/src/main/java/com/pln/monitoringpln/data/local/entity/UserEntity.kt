@@ -12,4 +12,6 @@ data class UserEntity(
     val role: String,
     val isActive: Boolean = true,
     val photoUrl: String? = null,
+    val createdAt: java.util.Date? = null,
+    val updatedAt: java.util.Date? = null,
 )

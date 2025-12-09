@@ -65,23 +65,41 @@ class TugasRemoteDataSource(
     }
 
     suspend fun completeTaskRemote(id: String, status: String, proofUrl: String, condition: String): Result<Unit> {
+
         return try {
-            supabaseClient.postgrest["tugas"].update(
+            // Use XXX for timezone with colon (e.g. +07:00) which Postgres prefers
+            val outputFormat = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX", java.util.Locale.US)
+            val dateString = outputFormat.format(java.util.Date())
+
+            val result = supabaseClient.postgrest["tugas"].update(
                 mapOf(
                     "status" to status,
-                    "bukti_foto" to proofUrl,
+                    "url_bukti" to proofUrl,
                     "kondisi_akhir" to condition,
+                    "updated_at" to dateString
                 ),
             ) {
                 filter {
                     eq("id", id)
                 }
+                select() // Select to verify update success
+            }.decodeList<TugasDto>()
+
+            if (result.isNotEmpty()) {
+                Result.success(Unit)
+            } else {
+                Result.failure(Exception("Gagal update: ID tidak ditemukan atau akses ditolak (RLS)."))
             }
-            Result.success(Unit)
+        } catch (e: io.github.jan.supabase.exceptions.RestException) {
+            // Parse Supabase specific error
+            Result.failure(Exception("Remote Error: ${e.error} (Status: ${e.statusCode})"))
+        } catch (e: io.github.jan.supabase.exceptions.HttpRequestException) {
+            Result.failure(Exception("Network Error: ${e.message}"))
         } catch (e: Exception) {
-            Result.failure(e)
+            Result.failure(Exception("Error: ${e.message}"))
         }
     }
+
 
     suspend fun uploadTaskProof(taskId: String, photoBytes: ByteArray): Result<String> {
         return try {

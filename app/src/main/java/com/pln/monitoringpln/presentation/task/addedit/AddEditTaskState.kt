@@ -13,7 +13,9 @@ data class AddEditTaskState(
 
     // Form Fields
     val title: String = "",
+    val titleError: String? = null,
     val description: String = "", // Formerly Catatan Tambahan
+    val descriptionError: String? = null,
     val selectedEquipment: Alat? = null,
     val deadline: LocalDate? = null, // Formerly Jadwal
     val selectedTechnician: User? = null,

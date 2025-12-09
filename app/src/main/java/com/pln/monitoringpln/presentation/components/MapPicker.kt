@@ -22,7 +22,8 @@ fun MapPicker(
 
     // Initialize OSMDroid configuration
     LaunchedEffect(Unit) {
-        Configuration.getInstance().load(context, android.preference.PreferenceManager.getDefaultSharedPreferences(context))
+        Configuration.getInstance()
+            .load(context, android.preference.PreferenceManager.getDefaultSharedPreferences(context))
     }
 
     val mapView = remember {
@@ -38,7 +39,16 @@ fun MapPicker(
     AndroidView(
         factory = {
             mapView.apply {
-                val startPoint = initialLocation ?: GeoPoint(-3.316694, 114.590111) // Default to Banjarmasin
+                // Banjarmasin Bounds
+                // North: -3.20, South: -3.45, East: 114.70, West: 114.50
+                val banjarBounds = org.osmdroid.util.BoundingBox(
+                    -3.20, 114.70, // North, East
+                    -3.45, 114.50  // South, West
+                )
+                setScrollableAreaLimitDouble(banjarBounds)
+                setMinZoomLevel(13.0) // Restrict zoom out
+
+                val startPoint = initialLocation ?: GeoPoint(-3.31, 114.59) // Center of Banjarmasin
                 controller.setCenter(startPoint)
 
                 // Add initial marker if location exists

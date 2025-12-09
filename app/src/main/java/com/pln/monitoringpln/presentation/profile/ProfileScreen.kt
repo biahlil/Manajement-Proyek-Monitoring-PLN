@@ -29,7 +29,7 @@ fun ProfileScreen(
             FloatingActionButton(
                 onClick = onEditProfile,
                 containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = Color.White,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
             ) {
                 Icon(Icons.Default.Edit, contentDescription = "Edit Profil")
             }
@@ -38,7 +38,6 @@ fun ProfileScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFFF5F5F5)) // Light gray background
                 .padding(paddingValues)
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -58,11 +57,14 @@ fun ProfileScreen(
                 onClick = onLogout,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(48.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
+                    .height(50.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.error,
+                    contentColor = MaterialTheme.colorScheme.onError
+                ),
                 shape = RoundedCornerShape(8.dp),
             ) {
-                Text("Keluar", color = Color.White, fontWeight = FontWeight.Bold)
+                Text("Keluar", fontWeight = FontWeight.Bold)
             }
         }
     }
@@ -72,8 +74,12 @@ fun ProfileScreen(
 fun ProfileAvatar(state: ProfileState) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        border = androidx.compose.foundation.BorderStroke(
+            2.dp,
+            MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
+        ),
     ) {
         Column(
             modifier = Modifier
@@ -101,7 +107,7 @@ fun ProfileAvatar(state: ProfileState) {
                         imageVector = Icons.Default.Person,
                         contentDescription = null,
                         modifier = Modifier.size(60.dp),
-                        tint = Color.Gray,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
             }
@@ -126,8 +132,12 @@ fun ProfileAvatar(state: ProfileState) {
 fun ProfileDetailsCard(state: ProfileState) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        border = androidx.compose.foundation.BorderStroke(
+            2.dp,
+            MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
+        ),
     ) {
         Column(
             modifier = Modifier
@@ -147,7 +157,7 @@ fun ProfileDetailItem(label: String, value: String) {
         Text(
             text = label,
             style = MaterialTheme.typography.labelMedium,
-            color = Color.Gray,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Text(
             text = value,

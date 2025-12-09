@@ -12,7 +12,9 @@ import kotlinx.coroutines.launch
 import java.util.UUID
 
 class AddEditEquipmentViewModel(
-    private val alatRepository: AlatRepository,
+    private val alatRepository: AlatRepository, // Keep for getting detail
+    private val addAlatUseCase: com.pln.monitoringpln.domain.usecase.alat.AddAlatUseCase,
+    private val updateAlatInfoUseCase: com.pln.monitoringpln.domain.usecase.alat.UpdateAlatInfoUseCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AddEditEquipmentState())
@@ -37,7 +39,8 @@ class AddEditEquipmentViewModel(
                         namaAlat = equipment.namaAlat,
                         kodeAlat = equipment.kodeAlat,
                         tipePeralatan = equipment.tipe,
-                        status = equipment.kondisi,
+                        status = equipment.status, // Health
+                        description = equipment.kondisi, // Description
                         lokasi = equipment.locationName ?: "",
                         latitude = equipment.latitude,
                         longitude = equipment.longitude,
@@ -55,19 +58,21 @@ class AddEditEquipmentViewModel(
     }
 
     fun onNamaChange(value: String) {
-        _state.update { it.copy(namaAlat = value) }
+        _state.update { it.copy(namaAlat = value, namaAlatError = null) }
     }
 
-    fun onKodeChange(value: String) {
-        _state.update { it.copy(kodeAlat = value) }
-    }
+    // onKodeChange removed (Auto-generated)
 
     fun onTipeChange(value: String) {
-        _state.update { it.copy(tipePeralatan = value) }
+        _state.update { it.copy(tipePeralatan = value, tipeError = null) }
     }
 
     fun onStatusChange(value: String) {
         _state.update { it.copy(status = value) }
+    }
+
+    fun onDescriptionChange(value: String) {
+        _state.update { it.copy(description = value) }
     }
 
     fun onLokasiChange(value: String) {
@@ -92,7 +97,8 @@ class AddEditEquipmentViewModel(
                     geocoder.getFromLocation(lat, lon, 1) { addresses ->
                         if (addresses.isNotEmpty()) {
                             val address = addresses[0]
-                            val locationName = "${address.locality ?: ""}, ${address.subAdminArea ?: ""}".trim(',').trim()
+                            val locationName =
+                                "${address.locality ?: ""}, ${address.subAdminArea ?: ""}".trim(',').trim()
                             _state.update { it.copy(lokasi = locationName) }
                         }
                     }
@@ -116,8 +122,8 @@ class AddEditEquipmentViewModel(
             val currentState = _state.value
 
             // Basic Validation
-            if (currentState.namaAlat.isBlank() || currentState.kodeAlat.isBlank()) {
-                _state.update { it.copy(error = "Nama dan Kode Alat wajib diisi") }
+            if (currentState.namaAlat.isBlank()) {
+                _state.update { it.copy(error = "Nama Alat wajib diisi") }
                 return@launch
             }
 
@@ -125,29 +131,59 @@ class AddEditEquipmentViewModel(
 
             val id = currentState.equipmentId ?: UUID.randomUUID().toString()
 
-            val alat = Alat(
-                id = id,
-                namaAlat = currentState.namaAlat,
-                kodeAlat = currentState.kodeAlat,
-                latitude = currentState.latitude,
-                longitude = currentState.longitude,
-                kondisi = currentState.status,
-                tipe = currentState.tipePeralatan,
-                status = "ACTIVE",
-                isArchived = false,
-                locationName = currentState.lokasi.ifBlank { null },
-            )
+            val result = if (currentState.isEditMode && currentState.equipmentId != null) {
+                updateAlatInfoUseCase(
+                    id = currentState.equipmentId,
+                    namaAlat = currentState.namaAlat,
+                    kodeAlat = currentState.kodeAlat, // Use existing code
+                    latitude = currentState.latitude,
+                    longitude = currentState.longitude,
+                    locationName = currentState.lokasi.ifBlank { null },
+                    tipe = currentState.tipePeralatan,
+                    status = currentState.status, // Health
+                    kondisi = currentState.description, // Description
+                )
+            } else {
+                // Auto-generate Kode Alat
+                val randomNum = (0..1000).random()
+                val safeName = currentState.namaAlat.replace(" ", "-").uppercase()
+                val generatedKode = "$safeName-$randomNum"
 
-            val result = alatRepository.insertAlat(alat)
+                addAlatUseCase(
+                    id = id,
+                    namaAlat = currentState.namaAlat,
+                    kodeAlat = generatedKode,
+                    latitude = currentState.latitude,
+                    longitude = currentState.longitude,
+                    locationName = currentState.lokasi.ifBlank { null },
+                    tipe = currentState.tipePeralatan,
+                    status = currentState.status, // Health
+                    kondisi = currentState.description, // Description
+                )
+            }
 
             if (result.isSuccess) {
-                _state.update { it.copy(isSaving = false, isSaved = true) }
+                _state.update { it.copy(isSaving = false, isSaved = true, savedCondition = currentState.status) }
             } else {
-                _state.update {
-                    it.copy(
-                        isSaving = false,
-                        error = "Gagal menyimpan: ${result.exceptionOrNull()?.message}",
-                    )
+                val exception = result.exceptionOrNull()
+                if (exception is IllegalArgumentException) {
+                    when {
+                        exception.message?.contains("Nama alat") == true ->
+                            _state.update { it.copy(isSaving = false, namaAlatError = exception.message) }
+
+                        exception.message?.contains("Tipe alat") == true ->
+                            _state.update { it.copy(isSaving = false, tipeError = exception.message) }
+
+                        else ->
+                            _state.update { it.copy(isSaving = false, error = exception.message) }
+                    }
+                } else {
+                    _state.update {
+                        it.copy(
+                            isSaving = false,
+                            error = "Gagal menyimpan: ${exception?.message}",
+                        )
+                    }
                 }
             }
         }

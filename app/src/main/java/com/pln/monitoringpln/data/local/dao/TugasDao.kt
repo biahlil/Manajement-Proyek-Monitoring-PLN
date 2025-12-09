@@ -18,22 +18,22 @@ interface TugasDao {
     @androidx.room.Update
     suspend fun updateTugas(tugas: TugasEntity)
 
-    @Query("SELECT * FROM tugas WHERE isArchived = 0")
+    @Query("SELECT * FROM tugas WHERE isArchived = 0 ORDER BY updatedAt DESC")
     fun getAllTugas(): Flow<List<TugasEntity>>
 
-    @Query("SELECT * FROM tugas WHERE isArchived = 0")
+    @Query("SELECT * FROM tugas WHERE isArchived = 0 ORDER BY updatedAt DESC")
     suspend fun getAllTasksSync(): List<TugasEntity>
 
     @Query("SELECT * FROM tugas WHERE isSynced = 0")
     suspend fun getUnsyncedTugas(): List<TugasEntity>
 
-    @Query("SELECT * FROM tugas WHERE idTeknisi = :teknisiId AND isArchived = 0")
+    @Query("SELECT * FROM tugas WHERE idTeknisi = :teknisiId AND isArchived = 0 ORDER BY updatedAt DESC")
     fun getTugasByTeknisi(teknisiId: String): Flow<List<TugasEntity>>
 
-    @Query("SELECT * FROM tugas WHERE idTeknisi = :teknisiId AND isArchived = 0")
+    @Query("SELECT * FROM tugas WHERE idTeknisi = :teknisiId AND isArchived = 0 ORDER BY updatedAt DESC")
     suspend fun getTugasByTeknisiSuspend(teknisiId: String): List<TugasEntity>
 
-    @Query("SELECT * FROM tugas WHERE idAlat = :alatId AND isArchived = 0")
+    @Query("SELECT * FROM tugas WHERE idAlat = :alatId AND isArchived = 0 ORDER BY updatedAt DESC")
     fun getTugasByAlat(alatId: String): Flow<List<TugasEntity>>
 
     @Query("SELECT * FROM tugas WHERE id = :id")
@@ -54,7 +54,7 @@ interface TugasDao {
     @Query("SELECT COUNT(*) FROM tugas WHERE status = :status AND isArchived = 0")
     suspend fun countByStatus(status: String): Int
 
-    @Query("SELECT * FROM tugas WHERE tglJatuhTempo BETWEEN :startDate AND :endDate AND isArchived = 0")
+    @Query("SELECT * FROM tugas WHERE tglJatuhTempo BETWEEN :startDate AND :endDate AND isArchived = 0 ORDER BY updatedAt DESC")
     suspend fun getTasksByDateRange(startDate: Long, endDate: Long): List<TugasEntity>
 
     @Query("SELECT COUNT(*) FROM tugas WHERE isArchived = 0")

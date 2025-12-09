@@ -45,9 +45,9 @@ class TugasRepositoryImpl(
             val filteredList = if (!searchQuery.isNullOrBlank()) {
                 domainList.filter { tugas ->
                     tugas.judul.contains(searchQuery, ignoreCase = true) ||
-                        tugas.deskripsi.contains(searchQuery, ignoreCase = true) ||
-                        tugas.status.contains(searchQuery, ignoreCase = true) ||
-                        tugas.idAlat.contains(searchQuery, ignoreCase = true)
+                            tugas.deskripsi.contains(searchQuery, ignoreCase = true) ||
+                            tugas.status.contains(searchQuery, ignoreCase = true) ||
+                            tugas.idAlat.contains(searchQuery, ignoreCase = true)
                 }
             } else {
                 domainList
@@ -63,7 +63,7 @@ class TugasRepositoryImpl(
         return try {
             // 1. Update Local
             val existing = localDataSource.getTugasById(taskId) ?: return Result.failure(Exception("Tugas not found"))
-            val updated = existing.copy(status = newStatus, isSynced = false)
+            val updated = existing.copy(status = newStatus, isSynced = false, updatedAt = java.util.Date())
             localDataSource.updateTugas(updated)
 
             // 2. Try Push to Remote
@@ -83,17 +83,21 @@ class TugasRepositoryImpl(
             // 1. Update Local
             val existing = localDataSource.getTugasById(id) ?: return Result.failure(Exception("Tugas not found"))
             val updated = existing.copy(
-                status = "Done",
+                status = "DONE",
                 buktiFoto = buktiFotoPath,
                 kondisiAkhir = kondisiAkhir,
                 isSynced = false,
+                updatedAt = java.util.Date(),
             )
             localDataSource.updateTugas(updated)
 
             // 2. Push to Remote
-            val remoteResult = remoteDataSource.completeTaskRemote(id, "Done", buktiFotoPath, kondisiAkhir)
+            val remoteResult = remoteDataSource.completeTaskRemote(id, "DONE", buktiFotoPath, kondisiAkhir)
             if (remoteResult.isSuccess) {
                 localDataSource.updateTugas(updated.copy(isSynced = true))
+            } else {
+                 // Propagate error to UI for debugging/feedback
+                 return Result.failure(remoteResult.exceptionOrNull() ?: Exception("Failed to sync task completion to remote"))
             }
 
             Result.success(Unit)
@@ -128,7 +132,11 @@ class TugasRepositoryImpl(
                 localDataSource.insertAll(dtos.map { it.toEntity(isSynced = true) })
                 android.util.Log.d("TugasRepositoryImpl", "Synced ${dtos.size} tasks from remote")
             } else {
-                android.util.Log.e("TugasRepositoryImpl", "Failed to fetch tasks from remote", remoteData.exceptionOrNull())
+                android.util.Log.e(
+                    "TugasRepositoryImpl",
+                    "Failed to fetch tasks from remote",
+                    remoteData.exceptionOrNull()
+                )
             }
 
             Result.success(Unit)
@@ -180,6 +188,7 @@ class TugasRepositoryImpl(
             Result.failure(e)
         }
     }
+
     override fun observeAllTasks(): kotlinx.coroutines.flow.Flow<List<Tugas>> {
         return localDataSource.getAllTugas().map { entities ->
             entities.map { it.toDomain() }
@@ -211,8 +220,9 @@ class TugasRepositoryImpl(
     override suspend fun updateTask(tugas: Tugas): Result<Unit> {
         return try {
             // 1. Update Local
-            val existing = localDataSource.getTugasById(tugas.id) ?: return Result.failure(Exception("Tugas not found locally"))
-            val updatedEntity = tugas.toEntity(isSynced = false)
+            val existing =
+                localDataSource.getTugasById(tugas.id) ?: return Result.failure(Exception("Tugas not found locally"))
+            val updatedEntity = tugas.copy(updatedAt = java.util.Date()).toEntity(isSynced = false)
             localDataSource.updateTugas(updatedEntity)
 
             // 2. Try Update Remote

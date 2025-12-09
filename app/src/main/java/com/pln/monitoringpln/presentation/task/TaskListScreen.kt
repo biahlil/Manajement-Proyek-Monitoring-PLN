@@ -60,7 +60,7 @@ fun TaskListScreen(
                 FloatingActionButton(
                     onClick = onAddTask,
                     containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = Color.White,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
                 ) {
                     Icon(imageVector = Icons.Default.Add, contentDescription = "Add Task")
                 }
@@ -84,10 +84,8 @@ fun TaskListScreen(
                 leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search") },
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedContainerColor = Color.White,
-                    unfocusedContainerColor = Color.White,
-                    unfocusedBorderColor = Color.Transparent,
-                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    focusedContainerColor = MaterialTheme.colorScheme.surface,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
                 ),
             )
 
@@ -140,9 +138,13 @@ fun TaskItem(
 ) {
     Card(
         onClick = onClick,
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         shape = RoundedCornerShape(12.dp),
+        border = androidx.compose.foundation.BorderStroke(
+            2.dp,
+            MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
+        )
     ) {
         Column(
             modifier = Modifier
@@ -180,7 +182,13 @@ fun TaskItem(
                     shape = RoundedCornerShape(4.dp),
                 ) {
                     Text(
-                        text = status.lowercase().replaceFirstChar { if (it.isLowerCase()) it.titlecase(java.util.Locale.ROOT) else it.toString() }.split(" ").joinToString(" ") { it.replaceFirstChar { char -> if (char.isLowerCase()) char.titlecase(java.util.Locale.ROOT) else char.toString() } },
+                        text = status.lowercase()
+                            .replaceFirstChar { if (it.isLowerCase()) it.titlecase(java.util.Locale.ROOT) else it.toString() }
+                            .split(" ").joinToString(" ") {
+                                it.replaceFirstChar { char ->
+                                    if (char.isLowerCase()) char.titlecase(java.util.Locale.ROOT) else char.toString()
+                                }
+                            },
                         style = MaterialTheme.typography.labelSmall,
                         color = when {
                             status.equals("Done", ignoreCase = true) -> Color(0xFF137333)
@@ -198,7 +206,7 @@ fun TaskItem(
                 Icon(
                     imageVector = Icons.Default.LocationOn,
                     contentDescription = "Location",
-                    tint = Color.Gray,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(16.dp),
                 )
                 Spacer(modifier = Modifier.width(4.dp))
@@ -206,7 +214,7 @@ fun TaskItem(
                 Text(
                     text = "Alat: $equipmentName",
                     style = MaterialTheme.typography.bodySmall,
-                    color = Color.Gray,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Spacer(modifier = Modifier.weight(1f))
 
@@ -221,7 +229,7 @@ fun TaskItem(
                 Text(
                     text = dateString,
                     style = MaterialTheme.typography.bodySmall,
-                    color = Color.Gray,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
         }

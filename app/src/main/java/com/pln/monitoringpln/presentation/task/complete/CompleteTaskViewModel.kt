@@ -49,7 +49,7 @@ class CompleteTaskViewModel(
     }
 
     fun onProofSelected(uri: String) {
-        _state.update { it.copy(proofUri = uri) }
+        _state.update { it.copy(proofUri = if (uri.isBlank()) null else uri) }
     }
 
     fun onCompleteTask(photoBytes: ByteArray?) {
@@ -72,14 +72,20 @@ class CompleteTaskViewModel(
             val result = completeTaskUseCase(
                 taskId = task.id,
                 photoBytes = photoBytes,
-                newCondition = currentState.condition,
+                newCondition = currentState.condition, // Text Description
+                equipmentStatus = currentState.equipmentStatus, // "Normal" / "Rusak"
                 currentProofUrl = if (photoBytes == null) currentState.proofUri else null,
             )
 
             if (result.isSuccess) {
                 _state.update { it.copy(isSaving = false, isCompleted = true) }
             } else {
-                _state.update { it.copy(isSaving = false, error = result.exceptionOrNull()?.message ?: "Gagal menyimpan laporan") }
+                _state.update {
+                    it.copy(
+                        isSaving = false,
+                        error = result.exceptionOrNull()?.message ?: "Gagal menyimpan laporan"
+                    )
+                }
             }
         }
     }

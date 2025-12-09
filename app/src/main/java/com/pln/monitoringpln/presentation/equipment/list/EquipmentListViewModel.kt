@@ -16,9 +16,11 @@ class EquipmentListViewModel(
     private val savedStateHandle: SavedStateHandle,
     private val authRepository: AuthRepository,
     private val alatRepository: AlatRepository,
+    private val tugasRepository: com.pln.monitoringpln.domain.repository.TugasRepository,
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(EquipmentListState(isLoading = true))
+    private val savedSearchQuery: String = savedStateHandle.get<String>("searchQuery") ?: ""
+    private val _state = MutableStateFlow(EquipmentListState(isLoading = true, searchQuery = savedSearchQuery))
     val state: StateFlow<EquipmentListState> = _state.asStateFlow()
 
     private var allEquipmentsCache: List<Alat> = emptyList()
@@ -34,14 +36,14 @@ class EquipmentListViewModel(
     }
 
     fun setFilter(filterType: String) {
-        if (currentFilterType != filterType) {
-            currentFilterType = filterType
-            applyFilters()
-        }
+        savedStateHandle["filterType"] = filterType
+        // Always apply filter to handle back navigation or re-attachment
+        applyFilters()
     }
 
     fun onSearchQueryChange(query: String) {
         _state.update { it.copy(searchQuery = query) }
+        savedStateHandle["searchQuery"] = query // Persist search
         applyFilters()
     }
 
@@ -52,10 +54,23 @@ class EquipmentListViewModel(
             val isAdmin = roleResult.getOrNull()?.equals("admin", ignoreCase = true) == true
 
             // 1. Filter by Category
+            // 1. Filter by Category
             val categoryFiltered = when (currentFilterType) {
                 "normal_equipment" -> allEquipmentsCache.filter { it.kondisi == "Normal" }
                 "warning_equipment" -> allEquipmentsCache.filter { it.kondisi == "Perlu Perhatian" }
                 "broken_equipment" -> allEquipmentsCache.filter { it.kondisi == "Rusak" }
+                "my_equipment" -> {
+                    // Filter: Equipment that has tasks assigned to this technician
+                    val currentUserId = authRepository.getCurrentUserId()
+                    if (currentUserId != null) {
+                        val technicianTasks = tugasRepository.getTasksByTeknisi(currentUserId).getOrDefault(emptyList())
+                        val technicianEquipmentIds = technicianTasks.map { it.idAlat }.distinct()
+                        allEquipmentsCache.filter { it.id in technicianEquipmentIds }
+                    } else {
+                        emptyList()
+                    }
+                }
+
                 else -> allEquipmentsCache
             }
 
@@ -65,7 +80,7 @@ class EquipmentListViewModel(
             } else {
                 categoryFiltered.filter {
                     it.namaAlat.contains(query, ignoreCase = true) ||
-                        it.kodeAlat.contains(query, ignoreCase = true)
+                            it.kodeAlat.contains(query, ignoreCase = true)
                 }
             }
 

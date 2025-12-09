@@ -15,8 +15,11 @@ val domainModule = module {
     factory { com.pln.monitoringpln.domain.usecase.tugas.ObserveTasksUseCase(get()) }
     factory { com.pln.monitoringpln.domain.usecase.technician.GetTechniciansUseCase(get()) }
     factory { com.pln.monitoringpln.domain.usecase.alat.GetAllAlatUseCase(get()) }
+    factory { com.pln.monitoringpln.domain.usecase.alat.AddAlatUseCase(get()) }
+    factory { com.pln.monitoringpln.domain.usecase.alat.UpdateAlatInfoUseCase(get()) }
     factory { com.pln.monitoringpln.domain.usecase.dashboard.GetDashboardTechniciansUseCase(get()) }
     factory { com.pln.monitoringpln.domain.usecase.user.DeleteUserUseCase(get()) }
+    factory { com.pln.monitoringpln.domain.usecase.user.AddTeknisiUseCase(get()) }
     factory { com.pln.monitoringpln.domain.usecase.report.ExportReportUseCase(get()) }
     factory { com.pln.monitoringpln.domain.usecase.report.ExportFullReportUseCase(get()) }
     factory { com.pln.monitoringpln.domain.usecase.tugas.CompleteTaskUseCase(get(), get()) }

@@ -34,26 +34,32 @@ val appModule = module {
 
     // Use Cases (Profile)
     factory { com.pln.monitoringpln.domain.usecase.user.GetUserProfileUseCase(get(), get()) }
-    single<com.pln.monitoringpln.domain.repository.StorageRepository> { com.pln.monitoringpln.data.repository.StorageRepositoryImpl(get()) }
+    single<com.pln.monitoringpln.domain.repository.StorageRepository> {
+        com.pln.monitoringpln.data.repository.StorageRepositoryImpl(
+            get()
+        )
+    }
     factory { com.pln.monitoringpln.domain.usecase.storage.UploadPhotoUseCase(get()) }
 
     factory { com.pln.monitoringpln.domain.usecase.user.UpdateUserProfileUseCase(get()) }
     factory { com.pln.monitoringpln.domain.usecase.user.ObserveUserProfileUseCase(get(), get()) }
+    factory { com.pln.monitoringpln.domain.usecase.user.ObserveUserProfileUseCase(get(), get()) }
     factory { com.pln.monitoringpln.domain.usecase.user.UploadAvatarUseCase(get()) }
+    factory { com.pln.monitoringpln.domain.usecase.user.SyncUserProfileUseCase(get()) }
     factory { com.pln.monitoringpln.domain.usecase.auth.UpdatePasswordUseCase(get()) }
     factory { com.pln.monitoringpln.domain.usecase.dashboard.GetDashboardSummaryUseCase(get()) }
     factory { com.pln.monitoringpln.domain.usecase.dashboard.GetDashboardTechniciansUseCase(get()) }
     factory { com.pln.monitoringpln.domain.usecase.auth.LogoutUseCase(get()) }
 
-    viewModel { ProfileViewModel(get(), get(), get()) }
+    viewModel { ProfileViewModel(get(), get(), get(), get()) }
     viewModel { DashboardViewModel(get(), get(), get(), get(), get(), get()) }
     viewModel { TaskListViewModel(get(), get(), get(), get(), get()) }
     viewModel { AddEditTaskViewModel(get(), get(), get(), get(), get()) }
     viewModel { TaskDetailViewModel(get(), get(), get(), get()) }
     viewModel { CompleteTaskViewModel(get(), get()) }
-    viewModel { EquipmentListViewModel(get(), get(), get()) }
+    viewModel { EquipmentListViewModel(get(), get(), get(), get()) }
     viewModel { EquipmentDetailViewModel(get(), get(), get()) }
-    viewModel { AddEditEquipmentViewModel(get()) }
+    viewModel { AddEditEquipmentViewModel(get(), get(), get()) }
     viewModel { TechnicianListViewModel(get(), get(), get(), get(), get()) }
     viewModel { AddTechnicianViewModel(get(), get(), androidContext()) }
     viewModel { SearchViewModel(get(), get(), get()) }

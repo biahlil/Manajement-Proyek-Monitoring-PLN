@@ -13,9 +13,9 @@ class DashboardRepositoryImpl(
             // Admin Logic (Existing)
             val alatFlow = kotlinx.coroutines.flow.combine(
                 alatDao.observeCountAll(),
-                alatDao.observeCountByCondition("Normal"),
-                alatDao.observeCountByCondition("Perlu Perhatian"),
-                alatDao.observeCountByCondition("Rusak"),
+                alatDao.observeCountByStatus("Normal"),
+                alatDao.observeCountByStatus("Perlu Perhatian"),
+                alatDao.observeCountByStatus("Rusak"),
             ) { total, normal, warning, broken ->
                 Quad(total, normal, warning, broken)
             }
