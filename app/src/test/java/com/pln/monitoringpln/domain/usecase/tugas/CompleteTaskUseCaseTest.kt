@@ -42,7 +42,7 @@ class CompleteTaskUseCaseTest {
         val newCondition = "Rusak Ringan"
 
         println(logAction.format("Selesaikan tugas dengan data valid"))
-        val result = useCase(TestObjects.TUGAS_IN_PROGRESS.id, photoBytes, newCondition)
+        val result = useCase(TestObjects.TUGAS_IN_PROGRESS.id, photoBytes, newCondition, "Rusak Ringan")
 
         println(logAssert.format("Sukses"))
         assertTrue("UseCase harus sukses", result.isSuccess)
@@ -54,6 +54,7 @@ class CompleteTaskUseCaseTest {
         // Verifikasi Kondisi Alat -> Rusak Ringan
         val updatedAlat = fakeAlatRepo.getAlatDetail(TestObjects.ALAT_VALID.id).getOrNull()
         assertEquals("Rusak Ringan", updatedAlat?.kondisi)
+        assertEquals("Rusak Ringan", updatedAlat?.status)
 
         println(logResult)
     }
@@ -66,7 +67,7 @@ class CompleteTaskUseCaseTest {
     fun `input empty Task ID, should fail fast`() = runTest {
         println(logHeader.format("Validation: Empty Task ID"))
         // Foto dan kondisi valid, tapi ID kosong
-        val result = useCase("", ByteArray(10), "Baik")
+        val result = useCase("", ByteArray(10), "Baik", "Normal")
 
         assertTrue(result.isFailure)
         assertEquals("ID Tugas tidak valid.", result.exceptionOrNull()?.message)
@@ -76,7 +77,7 @@ class CompleteTaskUseCaseTest {
     @Test
     fun `input whitespace Task ID, should fail fast`() = runTest {
         println(logHeader.format("Validation: Whitespace Task ID"))
-        val result = useCase("   ", ByteArray(10), "Baik")
+        val result = useCase("   ", ByteArray(10), "Baik", "Normal")
 
         assertTrue(result.isFailure)
         assertEquals("ID Tugas tidak valid.", result.exceptionOrNull()?.message)
@@ -87,7 +88,7 @@ class CompleteTaskUseCaseTest {
     fun `input empty Photo (0 bytes), should fail validation`() = runTest {
         println(logHeader.format("Validation: Empty Photo"))
         // ID valid, Kondisi valid, Foto 0 bytes
-        val result = useCase(TestObjects.TUGAS_IN_PROGRESS.id, ByteArray(0), "Baik")
+        val result = useCase(TestObjects.TUGAS_IN_PROGRESS.id, ByteArray(0), "Baik", "Normal")
 
         assertTrue(result.isFailure)
         assertEquals("Foto bukti wajib diunggah.", result.exceptionOrNull()?.message)
@@ -97,7 +98,7 @@ class CompleteTaskUseCaseTest {
     @Test
     fun `input empty Condition string, should fail validation`() = runTest {
         println(logHeader.format("Validation: Empty Condition"))
-        val result = useCase(TestObjects.TUGAS_IN_PROGRESS.id, ByteArray(10), "")
+        val result = useCase(TestObjects.TUGAS_IN_PROGRESS.id, ByteArray(10), "", "Normal")
 
         assertTrue(result.isFailure)
         assertEquals("Kondisi alat wajib diisi.", result.exceptionOrNull()?.message)
@@ -107,7 +108,7 @@ class CompleteTaskUseCaseTest {
     @Test
     fun `input whitespace Condition string, should fail validation`() = runTest {
         println(logHeader.format("Validation: Whitespace Condition"))
-        val result = useCase(TestObjects.TUGAS_IN_PROGRESS.id, ByteArray(10), "   ")
+        val result = useCase(TestObjects.TUGAS_IN_PROGRESS.id, ByteArray(10), "   ", "Normal")
 
         assertTrue(result.isFailure)
         assertEquals("Kondisi alat wajib diisi.", result.exceptionOrNull()?.message)
@@ -122,7 +123,7 @@ class CompleteTaskUseCaseTest {
     fun `task not found in DB, should return specific error`() = runTest {
         println(logHeader.format("Edge Case: Task ID Not Found"))
 
-        val result = useCase("id-tugas-gaib", ByteArray(10), "Baik")
+        val result = useCase("id-tugas-gaib", ByteArray(10), "Baik", "Normal")
 
         assertTrue(result.isFailure)
         assertEquals("Task not found", result.exceptionOrNull()?.message)
@@ -136,7 +137,7 @@ class CompleteTaskUseCaseTest {
         // Hapus data alat, tapi biarkan tugasnya
         fakeAlatRepo.clear()
 
-        val result = useCase(TestObjects.TUGAS_IN_PROGRESS.id, ByteArray(10), "Baik")
+        val result = useCase(TestObjects.TUGAS_IN_PROGRESS.id, ByteArray(10), "Baik", "Normal")
 
         // Harus gagal saat mencoba update kondisi alat
         assertTrue(result.isFailure)
@@ -149,7 +150,7 @@ class CompleteTaskUseCaseTest {
         println(logHeader.format("Edge Case: Special Char Condition"))
 
         val weirdCondition = "Rusak @!#$%^&*() Parah"
-        val result = useCase(TestObjects.TUGAS_IN_PROGRESS.id, ByteArray(10), weirdCondition)
+        val result = useCase(TestObjects.TUGAS_IN_PROGRESS.id, ByteArray(10), weirdCondition, "Normal")
 
         // Asumsi: Sistem membolehkan deskripsi bebas
         assertTrue(result.isSuccess)

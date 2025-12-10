@@ -165,12 +165,12 @@ class AlatRepositoryImplTest {
     }
 
     @Test
-    fun update_alat_condition_should_succeed() = runBlocking {
-        println(logHeader.format("Integration: Update Alat Condition"))
+    fun update_alat_status_and_condition_should_succeed() = runBlocking {
+        println(logHeader.format("Integration: Update Alat Status & Condition"))
 
         // Given: Insert first
         val uniqueCode = "UPDATE-COND-${System.currentTimeMillis()}"
-        val alat = TestObjects.ALAT_VALID.copy(kodeAlat = uniqueCode, kondisi = "Baik")
+        val alat = TestObjects.ALAT_VALID.copy(kodeAlat = uniqueCode, kondisi = "Baik", status = "Normal")
         alatRepository.insertAlat(alat)
 
         // Get ID
@@ -178,13 +178,14 @@ class AlatRepositoryImplTest {
         createdAlatIds.add(id)
 
         // When
-        val result = alatRepository.updateAlatCondition(id, "Rusak")
+        val result = alatRepository.updateAlatStatusAndCondition(id, "Rusak", "Kondisi Parah")
 
         // Then
         assertTrue(result.isSuccess)
         val fetchedAlat = alatRepository.getAlatDetail(id).getOrNull()
-        assertEquals("Rusak", fetchedAlat?.kondisi)
-        println(logAssert.format("Alat condition updated successfully"))
+        assertEquals("Rusak", fetchedAlat?.status)
+        assertEquals("Kondisi Parah", fetchedAlat?.kondisi)
+        println(logAssert.format("Alat status & condition updated successfully"))
 
         println(logResult)
     }

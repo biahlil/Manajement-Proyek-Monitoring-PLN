@@ -4,10 +4,11 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
+import com.pln.monitoringpln.domain.model.User
 
 class AddTeknisiUseCaseTest {
 
-    private lateinit var fakeRepo: FakeUserRepository
+    private lateinit var fakeRepo: com.pln.monitoringpln.data.repository.FakeAuthRepository
     private lateinit var useCase: AddTeknisiUseCase
 
     private val logTestStart = "\n--- 🔴 TEST START: %s ---"
@@ -17,23 +18,22 @@ class AddTeknisiUseCaseTest {
 
     @Before
     fun setUp() {
-        fakeRepo = FakeUserRepository()
+        fakeRepo = com.pln.monitoringpln.data.repository.FakeAuthRepository()
         useCase = AddTeknisiUseCase(fakeRepo)
     }
 
     @Test
-    fun `add valid teknisi, should return User object`() = runTest {
+    fun `add valid teknisi, should return Success`() = runTest {
         println(logTestStart.format("Add Valid Teknisi"))
         println(logAct.format("Menambah teknisi baru"))
 
         val result = useCase("Sari Teknisi", "sari@pln.co.id", "password123")
 
-        println(logAssert.format("Sukses dan data benar"))
+        println(logAssert.format("Sukses"))
         assertTrue(result.isSuccess)
-        val user = result.getOrNull()
-        assertEquals("Sari Teknisi", user?.namaLengkap)
-        assertEquals("Teknisi", user?.role)
-        assertTrue(user?.isActive == true)
+        // Note: useCase returns Result<Unit>, so we just verify success.
+        // We can verify repo state if needed.
+        assertTrue(fakeRepo.users.contains("sari@pln.co.id"))
         println(logSuccess)
     }
 
@@ -67,7 +67,7 @@ class AddTeknisiUseCaseTest {
         println(logTestStart.format("Add Teknisi Email Invalid"))
         val result = useCase("Budi", "bukan-email", "123456")
         assertTrue(result.isFailure)
-        assertEquals("Format email tidak valid.", result.exceptionOrNull()?.message)
+        assertEquals("Email harus pln.co.id atau gmail.com", result.exceptionOrNull()?.message)
         println(logSuccess)
     }
 

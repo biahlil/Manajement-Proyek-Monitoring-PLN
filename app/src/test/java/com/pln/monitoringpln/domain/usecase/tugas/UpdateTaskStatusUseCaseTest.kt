@@ -31,12 +31,12 @@ class UpdateTaskStatusUseCaseTest {
         val targetTask = TestObjects.TUGAS_TODO
 
         println(logAction.format("Ubah status tugas ke 'In Progress'"))
-        val result = useCase(targetTask.id, "In Progress")
+        val result = useCase(targetTask.id, "IN_PROGRESS")
 
         println(logAssert.format("Sukses"))
         assertTrue(result.isSuccess)
         val updatedTask = fakeRepo.getTasksByTeknisi(targetTask.idTeknisi).getOrNull()?.find { it.id == targetTask.id }
-        assertEquals("In Progress", updatedTask?.status)
+        assertEquals("IN_PROGRESS", updatedTask?.status)
         println(logResult)
     }
 
@@ -46,12 +46,12 @@ class UpdateTaskStatusUseCaseTest {
         val targetTask = TestObjects.TUGAS_TODO
 
         println(logAction.format("Ubah status tugas ke 'Done'"))
-        val result = useCase(targetTask.id, "Done")
+        val result = useCase(targetTask.id, "DONE")
 
         println(logAssert.format("Sukses"))
         assertTrue(result.isSuccess)
         val updatedTask = fakeRepo.getTasksByTeknisi(targetTask.idTeknisi).getOrNull()?.find { it.id == targetTask.id }
-        assertEquals("Done", updatedTask?.status)
+        assertEquals("DONE", updatedTask?.status)
         println(logResult)
     }
 
@@ -61,12 +61,12 @@ class UpdateTaskStatusUseCaseTest {
         val targetTask = TestObjects.TUGAS_TODO // Awalnya "To Do"
 
         println(logAction.format("Ubah status tugas ke 'To Do' (Sama dengan sebelumnya)"))
-        val result = useCase(targetTask.id, "To Do")
+        val result = useCase(targetTask.id, "TODO")
 
         println(logAssert.format("Sukses"))
         assertTrue(result.isSuccess)
         val updatedTask = fakeRepo.getTasksByTeknisi(targetTask.idTeknisi).getOrNull()?.find { it.id == targetTask.id }
-        assertEquals("To Do", updatedTask?.status)
+        assertEquals("TODO", updatedTask?.status)
         println(logResult)
     }
 
@@ -128,7 +128,7 @@ class UpdateTaskStatusUseCaseTest {
     @Test
     fun `update non-existent task, should fail from repo`() = runTest {
         println(logHeader.format("Update ID Hantu"))
-        val result = useCase("task-gaib", "Done")
+        val result = useCase("task-gaib", "DONE")
 
         assertTrue(result.isFailure)
         assertEquals("Tugas tidak ditemukan", result.exceptionOrNull()?.message)
