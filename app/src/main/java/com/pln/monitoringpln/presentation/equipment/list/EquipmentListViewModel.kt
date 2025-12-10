@@ -56,9 +56,9 @@ class EquipmentListViewModel(
             // 1. Filter by Category
             // 1. Filter by Category
             val categoryFiltered = when (currentFilterType) {
-                "normal_equipment" -> allEquipmentsCache.filter { it.kondisi == "Normal" }
-                "warning_equipment" -> allEquipmentsCache.filter { it.kondisi == "Perlu Perhatian" }
-                "broken_equipment" -> allEquipmentsCache.filter { it.kondisi == "Rusak" }
+                "normal_equipment" -> allEquipmentsCache.filter { it.status == "Normal" }
+                "warning_equipment" -> allEquipmentsCache.filter { it.status == "Perlu Perhatian" }
+                "broken_equipment" -> allEquipmentsCache.filter { it.status == "Rusak" }
                 "my_equipment" -> {
                     // Filter: Equipment that has tasks assigned to this technician
                     val currentUserId = authRepository.getCurrentUserId()

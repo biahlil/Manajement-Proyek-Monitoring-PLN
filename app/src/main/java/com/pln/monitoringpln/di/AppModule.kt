@@ -19,11 +19,6 @@ import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
 val appModule = module {
-    viewModel { com.pln.monitoringpln.presentation.splash.SplashViewModel(get()) }
-    viewModel { LoginViewModel(get()) }
-    viewModel { DashboardViewModel(get(), get(), get(), get(), get(), get()) }
-
-    // Use Cases (Task)
     // Use Cases (Task)
     factory { com.pln.monitoringpln.domain.usecase.tugas.CreateTaskUseCase(get(), get(), get()) }
     factory { com.pln.monitoringpln.domain.usecase.tugas.SyncTasksUseCase(get()) }
@@ -40,7 +35,6 @@ val appModule = module {
         )
     }
     factory { com.pln.monitoringpln.domain.usecase.storage.UploadPhotoUseCase(get()) }
-
     factory { com.pln.monitoringpln.domain.usecase.user.UpdateUserProfileUseCase(get()) }
     factory { com.pln.monitoringpln.domain.usecase.user.ObserveUserProfileUseCase(get(), get()) }
     factory { com.pln.monitoringpln.domain.usecase.user.ObserveUserProfileUseCase(get(), get()) }
@@ -51,6 +45,9 @@ val appModule = module {
     factory { com.pln.monitoringpln.domain.usecase.dashboard.GetDashboardTechniciansUseCase(get()) }
     factory { com.pln.monitoringpln.domain.usecase.auth.LogoutUseCase(get()) }
 
+    viewModel { com.pln.monitoringpln.presentation.splash.SplashViewModel(get()) }
+    viewModel { LoginViewModel(get()) }
+    viewModel { DashboardViewModel(get(), get(), get(), get(), get(), get()) }
     viewModel { ProfileViewModel(get(), get(), get(), get()) }
     viewModel { DashboardViewModel(get(), get(), get(), get(), get(), get()) }
     viewModel { TaskListViewModel(get(), get(), get(), get(), get()) }
