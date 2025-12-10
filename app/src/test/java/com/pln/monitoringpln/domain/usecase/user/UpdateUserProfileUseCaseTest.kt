@@ -47,6 +47,6 @@ class UpdateUserProfileUseCaseTest {
         val user = User("1", "invalid-email", "Test", "Teknisi", true)
         val result = useCase(user)
         assertTrue(result.isFailure)
-        assertEquals("Format email tidak valid", result.exceptionOrNull()?.message)
+        assertEquals("Email harus pln.co.id atau gmail.com", result.exceptionOrNull()?.message)
     }
 }

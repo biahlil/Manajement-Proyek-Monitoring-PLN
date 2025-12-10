@@ -24,7 +24,8 @@ class AddAlatUseCaseTest {
 
         println("  [Assert] Cek sukses dan kondisi default...")
         assertTrue(result.isSuccess)
-        assertEquals("Normal", fakeRepo.lastSavedAlat?.kondisi)
+        assertEquals("Normal", fakeRepo.lastSavedAlat?.status)
+        assertEquals("", fakeRepo.lastSavedAlat?.kondisi)
 
         println("--- ✅ LULUS ---")
         println("--- ✅ LULUS ---")

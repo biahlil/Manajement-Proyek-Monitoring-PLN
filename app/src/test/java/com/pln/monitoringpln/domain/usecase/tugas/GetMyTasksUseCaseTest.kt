@@ -180,7 +180,7 @@ class GetMyTasksUseCaseTest {
         val list = result.getOrNull()!!
 
         assertEquals(1, list.size)
-        assertEquals("In Progress", list.first().status)
+        assertEquals("IN_PROGRESS", list.first().status)
         println(logResult)
     }
 
