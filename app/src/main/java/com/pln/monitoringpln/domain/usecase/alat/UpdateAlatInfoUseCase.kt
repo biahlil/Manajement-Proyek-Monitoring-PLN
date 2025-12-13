@@ -20,16 +20,8 @@ class UpdateAlatInfoUseCase(private val repository: AlatRepository) {
     ): Result<Unit> {
         if (id.isBlank()) return Result.failure(IllegalArgumentException("ID tidak valid"))
         if (namaAlat.isBlank()) return Result.failure(IllegalArgumentException("Nama alat tidak boleh kosong."))
-        val nameRegex = "^[a-zA-Z0-9 ]+$".toRegex()
-        if (!nameRegex.matches(namaAlat)) {
-            return Result.failure(IllegalArgumentException("Nama alat tidak boleh mengandung simbol."))
-        }
-        if (kodeAlat.isBlank()) return Result.failure(IllegalArgumentException("Kode alat tidak boleh kosong."))
 
-        // nameRegex reused
-        if (tipe.isNotBlank() && !nameRegex.matches(tipe)) {
-            return Result.failure(IllegalArgumentException("Tipe alat tidak boleh mengandung simbol."))
-        }
+        if (kodeAlat.isBlank()) return Result.failure(IllegalArgumentException("Kode alat tidak boleh kosong."))
 
         if (latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) {
             return Result.failure(IllegalArgumentException("Koordinat tidak valid."))
@@ -46,7 +38,7 @@ class UpdateAlatInfoUseCase(private val repository: AlatRepository) {
         // Logic: if parameter is default, keep existing. Exception: we want to allow updating to empty?
         // For this UseCase, commonly used for editing Info (Name, Loc), not Status.
         // Assuming strict update of passed fields.
-        
+
         val updatedAlat = existingAlat.copy(
             namaAlat = namaAlat,
             kodeAlat = kodeAlat,
@@ -56,14 +48,14 @@ class UpdateAlatInfoUseCase(private val repository: AlatRepository) {
             // If tipe is not empty, update it. Else keep existing? 
             // Or just update strict? The validaton logic above checked 'tipe'.
             tipe = if (tipe.isNotBlank()) tipe else existingAlat.tipe,
-            
+
             // Preserve Status & Condition unless this UseCase is specifically used for them (which is likely not, given UpdateAlatStatusUseCase exists)
             // But if params are passed, maybe update? 
             // The Test "update info should NOT change existing condition" passes default "" condition.
             // So we must fallback to existingAlat.kondisi if argument is empty.
             kondisi = if (kondisi.isNotBlank()) kondisi else existingAlat.kondisi,
             status = if (status != "Normal") status else existingAlat.status, // "Normal" is default param
-            
+
             updatedAt = java.util.Date()
         )
 

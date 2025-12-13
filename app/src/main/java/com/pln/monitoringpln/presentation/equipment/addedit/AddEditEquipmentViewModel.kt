@@ -11,10 +11,13 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.UUID
 
+import com.pln.monitoringpln.domain.usecase.validation.ValidateInputUseCase
+
 class AddEditEquipmentViewModel(
     private val alatRepository: AlatRepository, // Keep for getting detail
     private val addAlatUseCase: com.pln.monitoringpln.domain.usecase.alat.AddAlatUseCase,
     private val updateAlatInfoUseCase: com.pln.monitoringpln.domain.usecase.alat.UpdateAlatInfoUseCase,
+    private val validateInputUseCase: ValidateInputUseCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AddEditEquipmentState())
@@ -72,7 +75,7 @@ class AddEditEquipmentViewModel(
     }
 
     fun onDescriptionChange(value: String) {
-        _state.update { it.copy(description = value) }
+        _state.update { it.copy(description = value, descriptionError = null) }
     }
 
     fun onLokasiChange(value: String) {
@@ -120,14 +123,43 @@ class AddEditEquipmentViewModel(
     fun onSaveEquipment() {
         viewModelScope.launch {
             val currentState = _state.value
+            _state.update { it.copy(isSaving = true, error = null) }
+
+            // Validate Input Symbols
+            val nameValidation = validateInputUseCase(
+                currentState.namaAlat,
+                com.pln.monitoringpln.domain.usecase.validation.ValidationType.STRICT
+            )
+            val typeValidation = validateInputUseCase(
+                currentState.tipePeralatan,
+                com.pln.monitoringpln.domain.usecase.validation.ValidationType.STRICT
+            )
+            val descValidation = validateInputUseCase(
+                currentState.description,
+                com.pln.monitoringpln.domain.usecase.validation.ValidationType.TEXT
+            )
+
+            var hasError = false
+            if (!nameValidation.successful) {
+                _state.update { it.copy(isSaving = false, namaAlatError = nameValidation.errorMessage) }
+                hasError = true
+            }
+            if (!typeValidation.successful) {
+                _state.update { it.copy(isSaving = false, tipeError = typeValidation.errorMessage) }
+                hasError = true
+            }
+            if (!descValidation.successful) {
+                _state.update { it.copy(isSaving = false, descriptionError = descValidation.errorMessage) }
+                hasError = true
+            }
+
+            if (hasError) return@launch
 
             // Basic Validation
             if (currentState.namaAlat.isBlank()) {
-                _state.update { it.copy(error = "Nama Alat wajib diisi") }
+                _state.update { it.copy(isSaving = false, error = "Nama Alat wajib diisi") }
                 return@launch
             }
-
-            _state.update { it.copy(isSaving = true, error = null) }
 
             val id = currentState.equipmentId ?: UUID.randomUUID().toString()
 

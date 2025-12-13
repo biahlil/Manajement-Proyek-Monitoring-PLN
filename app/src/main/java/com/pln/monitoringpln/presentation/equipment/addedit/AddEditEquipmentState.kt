@@ -14,6 +14,7 @@ data class AddEditEquipmentState(
     val kodeAlat: String = "",
     val tipePeralatan: String = "",
     val description: String = "", // Description (Kondisi)
+    val descriptionError: String? = null,
     val status: String = "Normal", // Normal, Rusak, Perlu Perhatian
     val lokasi: String = "",
     val latitude: Double = 0.0,

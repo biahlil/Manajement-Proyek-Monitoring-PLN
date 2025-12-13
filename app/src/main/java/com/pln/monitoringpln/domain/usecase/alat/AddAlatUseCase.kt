@@ -23,15 +23,9 @@ class AddAlatUseCase(
         if (namaAlat.isBlank()) {
             return Result.failure(IllegalArgumentException("Nama alat tidak boleh kosong."))
         }
-        val nameRegex = "^[a-zA-Z0-9 ]+$".toRegex()
-        if (!nameRegex.matches(namaAlat)) {
-            return Result.failure(IllegalArgumentException("Nama alat tidak boleh mengandung simbol."))
-        }
+
         if (kodeAlat.isBlank()) {
             return Result.failure(IllegalArgumentException("Kode alat tidak boleh kosong."))
-        }
-        if (tipe.isNotBlank() && !nameRegex.matches(tipe)) {
-            return Result.failure(IllegalArgumentException("Tipe alat tidak boleh mengandung simbol."))
         }
 
         // 2. Validasi Geospasial (Koordinat Valid Bumi)

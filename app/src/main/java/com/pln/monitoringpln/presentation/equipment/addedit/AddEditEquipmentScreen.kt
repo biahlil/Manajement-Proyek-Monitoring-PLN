@@ -158,9 +158,22 @@ fun AddEditEquipmentScreen(
                     label = { Text("Kondisi (Deskripsi)") },
                     modifier = Modifier.fillMaxWidth(),
                     minLines = 3,
+                    isError = state.descriptionError != null,
+                    supportingText = {
+                        if (state.descriptionError != null) {
+                            Text(
+                                text = state.descriptionError,
+                                color = MaterialTheme.colorScheme.error,
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
+                    },
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedContainerColor = MaterialTheme.colorScheme.surface,
                         unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                        errorBorderColor = MaterialTheme.colorScheme.error,
+                        errorLabelColor = MaterialTheme.colorScheme.error,
+                        errorSupportingTextColor = MaterialTheme.colorScheme.error,
                     ),
                 )
 

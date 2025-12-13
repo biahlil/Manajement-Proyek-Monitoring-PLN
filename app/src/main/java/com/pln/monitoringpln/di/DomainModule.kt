@@ -23,4 +23,5 @@ val domainModule = module {
     factory { com.pln.monitoringpln.domain.usecase.report.ExportReportUseCase(get()) }
     factory { com.pln.monitoringpln.domain.usecase.report.ExportFullReportUseCase(get()) }
     factory { com.pln.monitoringpln.domain.usecase.tugas.CompleteTaskUseCase(get(), get()) }
+    factory { com.pln.monitoringpln.domain.usecase.validation.ValidateInputUseCase() }
 }

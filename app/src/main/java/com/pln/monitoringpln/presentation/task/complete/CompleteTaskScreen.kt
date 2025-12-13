@@ -121,6 +121,12 @@ fun CompleteTaskScreen(
                                 label = { Text("Kondisi Alat") },
                                 modifier = Modifier.fillMaxWidth(),
                                 minLines = 3,
+                                isError = state.conditionError != null,
+                                supportingText = {
+                                    if (state.conditionError != null) {
+                                        Text(text = state.conditionError, color = MaterialTheme.colorScheme.error)
+                                    }
+                                },
                             )
 
                             // Status Alat (Chips)

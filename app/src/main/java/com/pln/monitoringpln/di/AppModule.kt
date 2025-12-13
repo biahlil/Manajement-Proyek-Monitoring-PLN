@@ -51,12 +51,12 @@ val appModule = module {
     viewModel { ProfileViewModel(get(), get(), get(), get()) }
     viewModel { DashboardViewModel(get(), get(), get(), get(), get(), get()) }
     viewModel { TaskListViewModel(get(), get(), get(), get(), get()) }
-    viewModel { AddEditTaskViewModel(get(), get(), get(), get(), get()) }
+    viewModel { AddEditTaskViewModel(get(), get(), get(), get(), get(), get()) }
     viewModel { TaskDetailViewModel(get(), get(), get(), get()) }
-    viewModel { CompleteTaskViewModel(get(), get()) }
+    viewModel { CompleteTaskViewModel(get(), get(), get()) }
     viewModel { EquipmentListViewModel(get(), get(), get(), get()) }
     viewModel { EquipmentDetailViewModel(get(), get(), get()) }
-    viewModel { AddEditEquipmentViewModel(get(), get(), get()) }
+    viewModel { AddEditEquipmentViewModel(get(), get(), get(), get()) }
     viewModel { TechnicianListViewModel(get(), get(), get(), get(), get()) }
     viewModel { AddTechnicianViewModel(get(), get(), androidContext()) }
     viewModel { SearchViewModel(get(), get(), get()) }

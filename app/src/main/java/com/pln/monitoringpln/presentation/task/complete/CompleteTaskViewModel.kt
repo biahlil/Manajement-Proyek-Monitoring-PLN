@@ -10,9 +10,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+import com.pln.monitoringpln.domain.usecase.validation.ValidateInputUseCase
+
 class CompleteTaskViewModel(
     private val getTaskDetailUseCase: GetTaskDetailUseCase,
     private val completeTaskUseCase: CompleteTaskUseCase,
+    private val validateInputUseCase: ValidateInputUseCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(CompleteTaskState())
@@ -41,7 +44,7 @@ class CompleteTaskViewModel(
     }
 
     fun onConditionChange(condition: String) {
-        _state.update { it.copy(condition = condition) }
+        _state.update { it.copy(condition = condition, conditionError = null) }
     }
 
     fun onEquipmentStatusChange(status: String) {
@@ -54,9 +57,16 @@ class CompleteTaskViewModel(
 
     fun onCompleteTask(photoBytes: ByteArray?) {
         viewModelScope.launch {
+            val currentState = _state.value
             _state.update { it.copy(isSaving = true) }
 
-            val currentState = _state.value
+            // Validate Condition
+            val validationResult = validateInputUseCase(currentState.condition)
+            if (!validationResult.successful) {
+                _state.update { it.copy(isSaving = false, conditionError = validationResult.errorMessage) }
+                return@launch
+            }
+
             val task = currentState.task ?: return@launch
 
             if (photoBytes == null && currentState.proofUri.isNullOrBlank()) {
@@ -68,6 +78,7 @@ class CompleteTaskViewModel(
                 _state.update { it.copy(isSaving = false, error = "Kondisi alat wajib diisi") }
                 return@launch
             }
+
 
             val result = completeTaskUseCase(
                 taskId = task.id,

@@ -24,9 +24,6 @@ class CreateTaskUseCase(
         if (judul.isBlank()) return Result.failure(IllegalArgumentException("Judul tidak boleh kosong."))
         if (deskripsi.isBlank()) return Result.failure(IllegalArgumentException("Deskripsi tidak boleh kosong."))
 
-        val textRegex = "^[a-zA-Z0-9 ]+$".toRegex()
-        if (!textRegex.matches(judul)) return Result.failure(IllegalArgumentException("Judul tidak boleh mengandung simbol."))
-        if (!textRegex.matches(deskripsi)) return Result.failure(IllegalArgumentException("Deskripsi tidak boleh mengandung simbol."))
         if (idAlat.isBlank()) return Result.failure(IllegalArgumentException("ID Alat tidak boleh kosong."))
         if (idTeknisi.isBlank()) return Result.failure(IllegalArgumentException("ID Teknisi tidak boleh kosong."))
 

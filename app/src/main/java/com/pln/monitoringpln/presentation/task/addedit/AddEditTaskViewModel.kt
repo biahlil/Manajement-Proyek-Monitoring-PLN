@@ -9,6 +9,7 @@ import com.pln.monitoringpln.domain.repository.UserRepository
 import com.pln.monitoringpln.domain.usecase.tugas.CreateTaskUseCase
 import com.pln.monitoringpln.domain.usecase.tugas.GetTaskDetailUseCase
 import com.pln.monitoringpln.domain.usecase.tugas.UpdateTaskUseCase
+import com.pln.monitoringpln.domain.usecase.validation.ValidateInputUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -24,6 +25,7 @@ class AddEditTaskViewModel(
     private val getTaskDetailUseCase: GetTaskDetailUseCase,
     private val alatRepository: AlatRepository,
     private val userRepository: UserRepository,
+    private val validateInputUseCase: ValidateInputUseCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AddEditTaskState())
@@ -143,7 +145,26 @@ class AddEditTaskViewModel(
 
             val currentState = _state.value
 
-            // Validation handled in UseCase, but basic UI check here
+            // Validate Input Symbols
+            val titleValidation = validateInputUseCase(
+                currentState.title,
+                com.pln.monitoringpln.domain.usecase.validation.ValidationType.STRICT
+            )
+            val descriptionValidation = validateInputUseCase(
+                currentState.description,
+                com.pln.monitoringpln.domain.usecase.validation.ValidationType.TEXT
+            )
+
+            if (!titleValidation.successful) {
+                _state.update { it.copy(isSaving = false, titleError = titleValidation.errorMessage) }
+                return@launch
+            }
+            if (!descriptionValidation.successful) {
+                _state.update { it.copy(isSaving = false, descriptionError = descriptionValidation.errorMessage) }
+                return@launch
+            }
+
+            // Basic UI Validation
             if (currentState.title.isBlank() ||
                 currentState.selectedEquipment == null ||
                 currentState.deadline == null ||
