@@ -1,7 +1,6 @@
 package com.pln.monitoringpln.data.model
 
 import com.pln.monitoringpln.domain.model.Alat
-import com.pln.monitoringpln.data.model.DateSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import java.util.Date

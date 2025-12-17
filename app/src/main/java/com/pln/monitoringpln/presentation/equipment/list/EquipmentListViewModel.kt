@@ -80,7 +80,7 @@ class EquipmentListViewModel(
             } else {
                 categoryFiltered.filter {
                     it.namaAlat.contains(query, ignoreCase = true) ||
-                            it.kodeAlat.contains(query, ignoreCase = true)
+                        it.kodeAlat.contains(query, ignoreCase = true)
                 }
             }
 

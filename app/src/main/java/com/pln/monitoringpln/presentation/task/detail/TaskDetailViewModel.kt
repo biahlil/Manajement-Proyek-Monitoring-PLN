@@ -53,7 +53,7 @@ class TaskDetailViewModel(
                 _state.update {
                     it.copy(
                         isLoading = false,
-                        error = result.exceptionOrNull()?.message ?: "Tugas tidak ditemukan"
+                        error = result.exceptionOrNull()?.message ?: "Tugas tidak ditemukan",
                     )
                 }
             }
@@ -81,18 +81,18 @@ class TaskDetailViewModel(
         viewModelScope.launch {
             val task = _state.value.task ?: return@launch
             _state.update { it.copy(isLoading = true) }
-            
+
             val result = updateTaskStatusUseCase(task.id, "IN_PROGRESS")
-            
+
             if (result.isSuccess) {
-                 // Reload task to reflect changes
+                // Reload task to reflect changes
                 loadTask(task.id)
             } else {
-                _state.update { 
+                _state.update {
                     it.copy(
                         isLoading = false,
-                        error = result.exceptionOrNull()?.message ?: "Gagal memulai tugas"
-                    ) 
+                        error = result.exceptionOrNull()?.message ?: "Gagal memulai tugas",
+                    )
                 }
             }
         }
@@ -102,18 +102,18 @@ class TaskDetailViewModel(
         viewModelScope.launch {
             val task = _state.value.task ?: return@launch
             _state.update { it.copy(isLoading = true) }
-            
+
             val result = updateTaskStatusUseCase(task.id, "TODO")
-            
+
             if (result.isSuccess) {
-                 // Reload task to reflect changes
+                // Reload task to reflect changes
                 loadTask(task.id)
             } else {
-                _state.update { 
+                _state.update {
                     it.copy(
                         isLoading = false,
-                        error = result.exceptionOrNull()?.message ?: "Gagal menghentikan tugas"
-                    ) 
+                        error = result.exceptionOrNull()?.message ?: "Gagal menghentikan tugas",
+                    )
                 }
             }
         }

@@ -26,9 +26,11 @@ class CompleteTaskUseCase(
         // 2. Upload Bukti (Jika ada photoBytes baru)
         val proofUrl = if (photoBytes != null) {
             val uploadResult = tugasRepository.uploadTaskProof(taskId, photoBytes)
-            if (uploadResult.isFailure) return Result.failure(
-                uploadResult.exceptionOrNull() ?: Exception("Gagal upload bukti")
-            )
+            if (uploadResult.isFailure) {
+                return Result.failure(
+                    uploadResult.exceptionOrNull() ?: Exception("Gagal upload bukti"),
+                )
+            }
             uploadResult.getOrNull()!!
         } else {
             currentProofUrl!!
@@ -36,22 +38,28 @@ class CompleteTaskUseCase(
 
         // 3. Update Status Tugas -> "Done" & Simpan Bukti & Deskripsi Kondisi (newCondition)
         val updateTaskResult = tugasRepository.completeTugas(taskId, proofUrl, newCondition)
-        if (updateTaskResult.isFailure) return Result.failure(
-            updateTaskResult.exceptionOrNull() ?: Exception("Gagal update status tugas")
-        )
+        if (updateTaskResult.isFailure) {
+            return Result.failure(
+                updateTaskResult.exceptionOrNull() ?: Exception("Gagal update status tugas"),
+            )
+        }
 
         // 4. Update Kondisi & Status Alat
         // Ambil detail tugas untuk dapat idAlat
         val taskResult = tugasRepository.getTaskDetail(taskId)
-        if (taskResult.isFailure) return Result.failure(
-            taskResult.exceptionOrNull() ?: Exception("Tugas tidak ditemukan")
-        )
+        if (taskResult.isFailure) {
+            return Result.failure(
+                taskResult.exceptionOrNull() ?: Exception("Tugas tidak ditemukan"),
+            )
+        }
         val task = taskResult.getOrNull()!!
 
         val alatResult = alatRepository.updateAlatStatusAndCondition(task.idAlat, equipmentStatus, newCondition)
-        if (alatResult.isFailure) return Result.failure(
-            alatResult.exceptionOrNull() ?: Exception("Gagal update status alat")
-        )
+        if (alatResult.isFailure) {
+            return Result.failure(
+                alatResult.exceptionOrNull() ?: Exception("Gagal update status alat"),
+            )
+        }
 
         return Result.success(Unit)
     }

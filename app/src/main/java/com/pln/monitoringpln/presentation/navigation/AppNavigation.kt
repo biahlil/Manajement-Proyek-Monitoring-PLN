@@ -80,8 +80,8 @@ fun AppNavigation() {
     Scaffold(
         topBar = {
             val showHeader = currentRoute == Screen.Dashboard.route ||
-                    currentRoute == Screen.Search.route ||
-                    currentRoute == Screen.Profile.route
+                currentRoute == Screen.Search.route ||
+                currentRoute == Screen.Profile.route
 
             androidx.compose.animation.AnimatedVisibility(
                 visible = showHeader,
@@ -209,7 +209,7 @@ fun AppNavigation() {
                         if (savedTaskId != null) {
                             navigateWithDebounce(
                                 Screen.DetailTask.createRoute(savedTaskId),
-                                popUpTo = Screen.TaskList.route
+                                popUpTo = Screen.TaskList.route,
                             )
                         } else {
                             navigateWithDebounce(Screen.TaskList.route, popUpTo = Screen.TaskList.route)
@@ -328,7 +328,7 @@ fun AppNavigation() {
                     if (state.isDeleted) {
                         navigateWithDebounce(
                             Screen.EquipmentList.createRoute("all_equipment"),
-                            popUpTo = Screen.EquipmentList.route
+                            popUpTo = Screen.EquipmentList.route,
                         )
                     }
                 }
@@ -382,7 +382,7 @@ fun AppNavigation() {
                         }
                         navigateWithDebounce(
                             Screen.EquipmentList.createRoute(filterType),
-                            popUpTo = Screen.Dashboard.route // Clear stack to dashboard
+                            popUpTo = Screen.Dashboard.route, // Clear stack to dashboard
                         )
                     }
                 }
@@ -446,7 +446,7 @@ fun AppNavigation() {
                     onBack = {
                         navigateWithDebounce(
                             Screen.TechnicianList.route,
-                            popUpTo = Screen.TechnicianList.route
+                            popUpTo = Screen.TechnicianList.route,
                         )
                     },
                 )

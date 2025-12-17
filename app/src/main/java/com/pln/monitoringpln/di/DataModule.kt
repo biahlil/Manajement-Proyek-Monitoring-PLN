@@ -64,7 +64,7 @@ val dataModule = module {
     single<com.pln.monitoringpln.domain.repository.UserRepository> {
         com.pln.monitoringpln.data.repository.UserRepositoryImpl(
             get(),
-            get()
+            get(),
         )
     }
 }

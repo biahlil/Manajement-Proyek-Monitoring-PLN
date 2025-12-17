@@ -45,9 +45,9 @@ class TugasRepositoryImpl(
             val filteredList = if (!searchQuery.isNullOrBlank()) {
                 domainList.filter { tugas ->
                     tugas.judul.contains(searchQuery, ignoreCase = true) ||
-                            tugas.deskripsi.contains(searchQuery, ignoreCase = true) ||
-                            tugas.status.contains(searchQuery, ignoreCase = true) ||
-                            tugas.idAlat.contains(searchQuery, ignoreCase = true)
+                        tugas.deskripsi.contains(searchQuery, ignoreCase = true) ||
+                        tugas.status.contains(searchQuery, ignoreCase = true) ||
+                        tugas.idAlat.contains(searchQuery, ignoreCase = true)
                 }
             } else {
                 domainList
@@ -96,8 +96,8 @@ class TugasRepositoryImpl(
             if (remoteResult.isSuccess) {
                 localDataSource.updateTugas(updated.copy(isSynced = true))
             } else {
-                 // Propagate error to UI for debugging/feedback
-                 return Result.failure(remoteResult.exceptionOrNull() ?: Exception("Failed to sync task completion to remote"))
+                // Propagate error to UI for debugging/feedback
+                return Result.failure(remoteResult.exceptionOrNull() ?: Exception("Failed to sync task completion to remote"))
             }
 
             Result.success(Unit)
@@ -135,7 +135,7 @@ class TugasRepositoryImpl(
                 android.util.Log.e(
                     "TugasRepositoryImpl",
                     "Failed to fetch tasks from remote",
-                    remoteData.exceptionOrNull()
+                    remoteData.exceptionOrNull(),
                 )
             }
 

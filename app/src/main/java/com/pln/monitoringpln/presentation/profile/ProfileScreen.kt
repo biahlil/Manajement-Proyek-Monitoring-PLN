@@ -60,7 +60,7 @@ fun ProfileScreen(
                     .height(50.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.error,
-                    contentColor = MaterialTheme.colorScheme.onError
+                    contentColor = MaterialTheme.colorScheme.onError,
                 ),
                 shape = RoundedCornerShape(8.dp),
             ) {
@@ -78,7 +78,7 @@ fun ProfileAvatar(state: ProfileState) {
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         border = androidx.compose.foundation.BorderStroke(
             2.dp,
-            MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
+            MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
         ),
     ) {
         Column(
@@ -136,7 +136,7 @@ fun ProfileDetailsCard(state: ProfileState) {
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         border = androidx.compose.foundation.BorderStroke(
             2.dp,
-            MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
+            MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
         ),
     ) {
         Column(

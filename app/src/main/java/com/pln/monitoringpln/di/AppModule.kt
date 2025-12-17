@@ -31,7 +31,7 @@ val appModule = module {
     factory { com.pln.monitoringpln.domain.usecase.user.GetUserProfileUseCase(get(), get()) }
     single<com.pln.monitoringpln.domain.repository.StorageRepository> {
         com.pln.monitoringpln.data.repository.StorageRepositoryImpl(
-            get()
+            get(),
         )
     }
     factory { com.pln.monitoringpln.domain.usecase.storage.UploadPhotoUseCase(get()) }

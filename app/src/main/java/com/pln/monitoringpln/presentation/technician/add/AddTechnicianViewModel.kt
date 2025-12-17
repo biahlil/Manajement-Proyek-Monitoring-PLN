@@ -63,7 +63,7 @@ class AddTechnicianViewModel(
                                 _state.update {
                                     it.copy(
                                         isSaving = false,
-                                        error = "Gagal upload foto: ${error.message}"
+                                        error = "Gagal upload foto: ${error.message}",
                                     )
                                 }
                                 return@launch
@@ -96,9 +96,13 @@ class AddTechnicianViewModel(
                                 namaError = if (exception.message?.contains("Nama") == true) exception.message else null,
                                 emailError = if (exception.message?.contains("Email") == true) exception.message else null,
                                 error = if (exception.message?.contains("Nama") == false && exception.message?.contains(
-                                        "Email"
+                                        "Email",
                                     ) == false
-                                ) exception.message else null
+                                ) {
+                                    exception.message
+                                } else {
+                                    null
+                                },
                             )
                         }
                     } else {

@@ -141,7 +141,7 @@ fun EquipmentDetailScreen(
                                     android.widget.Toast.makeText(
                                         context,
                                         "Tidak ada aplikasi untuk membuka peta",
-                                        android.widget.Toast.LENGTH_SHORT
+                                        android.widget.Toast.LENGTH_SHORT,
                                     ).show()
                                 }
                             }

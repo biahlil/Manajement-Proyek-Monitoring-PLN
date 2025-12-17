@@ -65,7 +65,6 @@ class TugasRemoteDataSource(
     }
 
     suspend fun completeTaskRemote(id: String, status: String, proofUrl: String, condition: String): Result<Unit> {
-
         return try {
             // Use XXX for timezone with colon (e.g. +07:00) which Postgres prefers
             val outputFormat = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX", java.util.Locale.US)
@@ -76,7 +75,7 @@ class TugasRemoteDataSource(
                     "status" to status,
                     "url_bukti" to proofUrl,
                     "kondisi_akhir" to condition,
-                    "updated_at" to dateString
+                    "updated_at" to dateString,
                 ),
             ) {
                 filter {
@@ -99,7 +98,6 @@ class TugasRemoteDataSource(
             Result.failure(Exception("Error: ${e.message}"))
         }
     }
-
 
     suspend fun uploadTaskProof(taskId: String, photoBytes: ByteArray): Result<String> {
         return try {

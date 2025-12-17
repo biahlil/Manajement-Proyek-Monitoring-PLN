@@ -149,8 +149,8 @@ class AlatRepositoryImpl(
                 mapOf(
                     "status" to status,
                     "kondisi" to kondisi,
-                    "updated_at" to java.util.Date()
-                )
+                    "updated_at" to java.util.Date(),
+                ),
             )
             if (remoteResult.isSuccess) {
                 localDataSource.updateAlat(updated.copy(isSynced = true))

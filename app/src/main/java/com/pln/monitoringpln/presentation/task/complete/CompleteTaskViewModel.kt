@@ -4,13 +4,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pln.monitoringpln.domain.usecase.tugas.CompleteTaskUseCase
 import com.pln.monitoringpln.domain.usecase.tugas.GetTaskDetailUseCase
+import com.pln.monitoringpln.domain.usecase.validation.ValidateInputUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-
-import com.pln.monitoringpln.domain.usecase.validation.ValidateInputUseCase
 
 class CompleteTaskViewModel(
     private val getTaskDetailUseCase: GetTaskDetailUseCase,
@@ -79,7 +78,6 @@ class CompleteTaskViewModel(
                 return@launch
             }
 
-
             val result = completeTaskUseCase(
                 taskId = task.id,
                 photoBytes = photoBytes,
@@ -94,7 +92,7 @@ class CompleteTaskViewModel(
                 _state.update {
                     it.copy(
                         isSaving = false,
-                        error = result.exceptionOrNull()?.message ?: "Gagal menyimpan laporan"
+                        error = result.exceptionOrNull()?.message ?: "Gagal menyimpan laporan",
                     )
                 }
             }

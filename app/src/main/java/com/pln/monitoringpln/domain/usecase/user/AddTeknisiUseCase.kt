@@ -1,6 +1,5 @@
 package com.pln.monitoringpln.domain.usecase.user
 
-import com.pln.monitoringpln.domain.model.User
 import com.pln.monitoringpln.domain.repository.AuthRepository
 
 class AddTeknisiUseCase(private val repository: AuthRepository) {
@@ -12,7 +11,7 @@ class AddTeknisiUseCase(private val repository: AuthRepository) {
         namaLengkap: String,
         email: String,
         password: String,
-        photoUrl: String? = null
+        photoUrl: String? = null,
     ): Result<Unit> {
         if (namaLengkap.isBlank()) {
             return Result.failure(IllegalArgumentException("Nama tidak boleh kosong."))

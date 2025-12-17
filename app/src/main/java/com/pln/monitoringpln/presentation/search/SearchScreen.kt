@@ -81,11 +81,12 @@ fun SearchScreen(
                             SearchResultType.TASK -> navController.navigate(Screen.DetailTask.createRoute(result.id))
                             SearchResultType.EQUIPMENT -> navController.navigate(
                                 Screen.DetailEquipment.createRoute(
-                                    result.id
-                                )
+                                    result.id,
+                                ),
                             )
 
-                            SearchResultType.TECHNICIAN -> { /* Navigate to Technician Detail if exists, or List */
+                            SearchResultType.TECHNICIAN -> {
+                                /* Navigate to Technician Detail if exists, or List */
                             }
                         }
                     }
@@ -104,7 +105,7 @@ fun SearchResultItem(result: SearchResult, onClick: () -> Unit) {
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         border = androidx.compose.foundation.BorderStroke(
             2.dp,
-            MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
+            MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
         ),
     ) {
         Row(

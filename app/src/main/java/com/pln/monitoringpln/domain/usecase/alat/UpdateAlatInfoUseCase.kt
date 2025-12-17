@@ -45,18 +45,18 @@ class UpdateAlatInfoUseCase(private val repository: AlatRepository) {
             latitude = latitude,
             longitude = longitude,
             locationName = locationName ?: existingAlat.locationName,
-            // If tipe is not empty, update it. Else keep existing? 
+            // If tipe is not empty, update it. Else keep existing?
             // Or just update strict? The validaton logic above checked 'tipe'.
             tipe = if (tipe.isNotBlank()) tipe else existingAlat.tipe,
 
             // Preserve Status & Condition unless this UseCase is specifically used for them (which is likely not, given UpdateAlatStatusUseCase exists)
-            // But if params are passed, maybe update? 
+            // But if params are passed, maybe update?
             // The Test "update info should NOT change existing condition" passes default "" condition.
             // So we must fallback to existingAlat.kondisi if argument is empty.
             kondisi = if (kondisi.isNotBlank()) kondisi else existingAlat.kondisi,
             status = if (status != "Normal") status else existingAlat.status, // "Normal" is default param
 
-            updatedAt = java.util.Date()
+            updatedAt = java.util.Date(),
         )
 
         return repository.insertAlat(updatedAlat)

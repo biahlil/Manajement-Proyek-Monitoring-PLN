@@ -98,7 +98,7 @@ fun CompleteTaskScreen(
                         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                         border = androidx.compose.foundation.BorderStroke(
                             2.dp,
-                            MaterialTheme.colorScheme.outlineVariant
+                            MaterialTheme.colorScheme.outlineVariant,
                         ),
                     ) {
                         Column(
@@ -110,7 +110,7 @@ fun CompleteTaskScreen(
                             Text(
                                 "Laporan Pengerjaan",
                                 style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold
+                                fontWeight = FontWeight.Bold,
                             )
                             HorizontalDivider()
 
@@ -133,7 +133,7 @@ fun CompleteTaskScreen(
                             Text(
                                 "Status Alat",
                                 style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.Bold
+                                fontWeight = FontWeight.Bold,
                             )
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                 listOf("Normal", "Rusak", "Perlu Perhatian").forEach { status ->
@@ -146,7 +146,7 @@ fun CompleteTaskScreen(
                                                 Icon(
                                                     imageVector = Icons.Default.Check,
                                                     contentDescription = null,
-                                                    modifier = Modifier.size(16.dp)
+                                                    modifier = Modifier.size(16.dp),
                                                 )
                                             }
                                         } else {
@@ -160,7 +160,7 @@ fun CompleteTaskScreen(
                             Text(
                                 "Bukti Foto",
                                 style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.Bold
+                                fontWeight = FontWeight.Bold,
                             )
 
                             val photoPickerLauncher = rememberLauncherForActivityResult(
@@ -189,13 +189,13 @@ fun CompleteTaskScreen(
                                             .padding(8.dp)
                                             .background(
                                                 Color.Black.copy(alpha = 0.5f),
-                                                androidx.compose.foundation.shape.CircleShape
+                                                androidx.compose.foundation.shape.CircleShape,
                                             ),
                                     ) {
                                         Icon(
                                             imageVector = Icons.Default.Delete,
                                             contentDescription = "Hapus Foto",
-                                            tint = Color.White
+                                            tint = Color.White,
                                         )
                                     }
                                 }

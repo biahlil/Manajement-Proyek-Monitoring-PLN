@@ -101,9 +101,9 @@ fun TaskDetailScreen(
                 // TODO -> "Mulai Kerjakan" (Start -> IN_PROGRESS)
                 // IN_PROGRESS -> "Selesaikan" (Complete -> DONE)
                 // DONE -> "Edit Laporan" (Edit Report)
-                
+
                 val status = state.task?.status ?: "TODO"
-                
+
                 val (actionText, actionIcon, actionClick) = when (status) {
                     "DONE" -> Triple("Edit Laporan", Icons.Default.Edit, onCompleteTask)
                     else -> Triple("Selesaikan", Icons.Default.Check, onCompleteTask)
@@ -229,7 +229,7 @@ fun AdminTaskDetailContent(
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         border = androidx.compose.foundation.BorderStroke(
             2.dp,
-            MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
+            MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
         ),
     ) {
         Column(
@@ -248,7 +248,7 @@ fun AdminTaskDetailContent(
             Text(
                 "Bukti Foto",
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             if (state.proofUri != null) { // Note: state.proofUri comes from task.buktiFoto in ViewModel
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -265,7 +265,7 @@ fun AdminTaskDetailContent(
                                 android.widget.Toast.makeText(
                                     context,
                                     "Link foto disalin",
-                                    android.widget.Toast.LENGTH_SHORT
+                                    android.widget.Toast.LENGTH_SHORT,
                                 ).show()
                             },
                         contentAlignment = Alignment.Center,
@@ -318,7 +318,7 @@ fun TechnicianTaskDetailContent(
             elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
             border = androidx.compose.foundation.BorderStroke(
                 2.dp,
-                MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
+                MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
             ),
         ) {
             Column(
@@ -336,7 +336,7 @@ fun TechnicianTaskDetailContent(
                 Text(
                     "Bukti Foto",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 if (task.buktiFoto != null) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -353,7 +353,7 @@ fun TechnicianTaskDetailContent(
                                     android.widget.Toast.makeText(
                                         context,
                                         "Link foto disalin",
-                                        android.widget.Toast.LENGTH_SHORT
+                                        android.widget.Toast.LENGTH_SHORT,
                                     ).show()
                                 },
                             contentAlignment = Alignment.Center,
@@ -404,7 +404,7 @@ fun TaskHeaderCard(
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.weight(1f),
                 )
-                
+
                 Surface(
                     shape = RoundedCornerShape(16.dp),
                     color = when (task.status) {
@@ -425,7 +425,7 @@ fun TaskHeaderCard(
                     )
                 }
             }
-            
+
             Text(
                 text = "Teknisi: ${technician.namaLengkap}",
                 style = MaterialTheme.typography.bodyMedium,
@@ -436,14 +436,14 @@ fun TaskHeaderCard(
             if (isTechnician && task.status != "DONE") {
                 Spacer(modifier = Modifier.height(8.dp))
                 Row(
-                    verticalAlignment = Alignment.CenterVertically, 
+                    verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End
+                    horizontalArrangement = Arrangement.End,
                 ) {
                     Text(
                         text = "Kerjakan",
                         style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.padding(end = 8.dp)
+                        modifier = Modifier.padding(end = 8.dp),
                     )
                     val isChecked = task.status == "IN_PROGRESS"
                     Switch(
@@ -459,7 +459,7 @@ fun TaskHeaderCard(
                                     modifier = Modifier.size(12.dp),
                                 )
                             }
-                        }
+                        },
                     )
                 }
             }
@@ -476,7 +476,7 @@ fun LocationCard(equipment: Alat, context: Context) {
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         border = androidx.compose.foundation.BorderStroke(
             2.dp,
-            MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
+            MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
         ),
     ) {
         Row(
@@ -503,7 +503,7 @@ fun LocationCard(equipment: Alat, context: Context) {
                 Text(
                     "Lokasi",
                     style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Text(
                     equipment.namaAlat,
@@ -537,7 +537,7 @@ fun SpecificationCard(task: Tugas, equipment: Alat, technician: User) {
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         border = androidx.compose.foundation.BorderStroke(
             2.dp,
-            MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
+            MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
         ),
     ) {
         Column(

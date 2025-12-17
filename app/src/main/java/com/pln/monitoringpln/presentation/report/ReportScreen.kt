@@ -1,7 +1,6 @@
 package com.pln.monitoringpln.presentation.report
 
 import android.app.DatePickerDialog
-import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -18,7 +17,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.pln.monitoringpln.domain.model.ExportFormat
 import java.text.SimpleDateFormat
-import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
@@ -92,7 +90,7 @@ fun ReportScreen(
                 modifier = Modifier.fillMaxWidth(),
                 border = androidx.compose.foundation.BorderStroke(
                     2.dp,
-                    MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
+                    MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
                 ),
             ) {
                 Column(
@@ -157,7 +155,7 @@ fun ReportScreen(
                 modifier = Modifier.fillMaxWidth(),
                 border = androidx.compose.foundation.BorderStroke(
                     2.dp,
-                    MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
+                    MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
                 ),
             ) {
                 Column(
@@ -229,7 +227,7 @@ fun DatePickerField(
 
     if (showDatePicker) {
         val datePickerState = rememberDatePickerState(
-            initialSelectedDateMillis = date.time
+            initialSelectedDateMillis = date.time,
         )
         DatePickerDialog(
             onDismissRequest = { showDatePicker = false },
@@ -247,7 +245,7 @@ fun DatePickerField(
                 TextButton(onClick = { showDatePicker = false }) {
                     Text("Cancel")
                 }
-            }
+            },
         ) {
             DatePicker(state = datePickerState)
         }
@@ -266,18 +264,34 @@ fun DatePickerField(
         modifier = modifier.clickable(enabled = enabled) { showDatePicker = true },
         enabled = false, // Disable typing, handle click on parent
         colors = OutlinedTextFieldDefaults.colors(
-            disabledTextColor = if (enabled) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(
-                alpha = 0.38f
-            ),
-            disabledBorderColor = if (enabled) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.outline.copy(
-                alpha = 0.12f
-            ),
-            disabledLabelColor = if (enabled) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurfaceVariant.copy(
-                alpha = 0.38f
-            ),
-            disabledTrailingIconColor = if (enabled) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurfaceVariant.copy(
-                alpha = 0.38f
-            ),
+            disabledTextColor = if (enabled) {
+                MaterialTheme.colorScheme.onSurface
+            } else {
+                MaterialTheme.colorScheme.onSurface.copy(
+                    alpha = 0.38f,
+                )
+            },
+            disabledBorderColor = if (enabled) {
+                MaterialTheme.colorScheme.outline
+            } else {
+                MaterialTheme.colorScheme.outline.copy(
+                    alpha = 0.12f,
+                )
+            },
+            disabledLabelColor = if (enabled) {
+                MaterialTheme.colorScheme.onSurfaceVariant
+            } else {
+                MaterialTheme.colorScheme.onSurfaceVariant.copy(
+                    alpha = 0.38f,
+                )
+            },
+            disabledTrailingIconColor = if (enabled) {
+                MaterialTheme.colorScheme.onSurfaceVariant
+            } else {
+                MaterialTheme.colorScheme.onSurfaceVariant.copy(
+                    alpha = 0.38f,
+                )
+            },
         ),
     )
 }
@@ -296,10 +310,14 @@ fun FormatOption(
         colors = CardDefaults.cardColors(
             containerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant,
         ),
-        border = if (isSelected) androidx.compose.foundation.BorderStroke(
-            2.dp,
-            MaterialTheme.colorScheme.primary
-        ) else null,
+        border = if (isSelected) {
+            androidx.compose.foundation.BorderStroke(
+                2.dp,
+                MaterialTheme.colorScheme.primary,
+            )
+        } else {
+            null
+        },
     ) {
         Box(
             modifier = Modifier.fillMaxSize(),

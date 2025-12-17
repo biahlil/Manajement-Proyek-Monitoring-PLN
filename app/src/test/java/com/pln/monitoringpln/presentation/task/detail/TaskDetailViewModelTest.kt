@@ -17,7 +17,6 @@ import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
@@ -49,7 +48,7 @@ class TaskDetailViewModelTest {
             id = TestObjects.TUGAS_TODO.idTeknisi,
             email = "teknisi@pln.co.id",
             namaLengkap = "Teknisi 1",
-            role = "Teknisi"
+            role = "Teknisi",
         )
         userRepo.addDummy(teknisi)
 
@@ -61,7 +60,7 @@ class TaskDetailViewModelTest {
             authRepository = authRepo,
             getTaskDetailUseCase = getTaskDetailUseCase,
             deleteTaskUseCase = deleteTaskUseCase,
-            updateTaskStatusUseCase = updateTaskStatusUseCase
+            updateTaskStatusUseCase = updateTaskStatusUseCase,
         )
     }
 
@@ -73,9 +72,9 @@ class TaskDetailViewModelTest {
     @Test
     fun `loadTask success, matches initial state`() = runTest {
         val taskId = TestObjects.TUGAS_TODO.id // "task-1"
-        
+
         viewModel.loadTask(taskId)
-        
+
         val state = viewModel.state.value
         assertFalse("Loading harus false setelah selesai", state.isLoading)
         assertEquals("Initial status should be TODO", "TODO", state.taskStatus)
@@ -86,15 +85,15 @@ class TaskDetailViewModelTest {
     fun `startTask defaults status to IN_PROGRESS`() = runTest {
         // Setup state awal
         viewModel.loadTask(TestObjects.TUGAS_TODO.id)
-        
+
         // Act
         viewModel.startTask()
-        
+
         // Assert
         val state = viewModel.state.value
         assertEquals("Status should be IN_PROGRESS", "IN_PROGRESS", state.taskStatus)
         assertEquals("IN_PROGRESS", state.task?.status)
-        
+
         // Verify Repo
         val taskInRepo = tugasRepo.getTaskDetail(TestObjects.TUGAS_TODO.id).getOrNull()
         assertEquals("IN_PROGRESS", taskInRepo?.status)
@@ -104,17 +103,17 @@ class TaskDetailViewModelTest {
     fun `stopTask defaults status back to TODO`() = runTest {
         // Setup: Start dulu biar jadi IN_PROGRESS
         viewModel.loadTask(TestObjects.TUGAS_TODO.id)
-        viewModel.startTask() 
+        viewModel.startTask()
         assertEquals("IN_PROGRESS", viewModel.state.value.taskStatus)
-        
+
         // Act: Stop
         viewModel.stopTask()
-        
+
         // Assert
         val state = viewModel.state.value
         assertEquals("Status should be TODO", "TODO", state.taskStatus)
         assertEquals("TODO", state.task?.status)
-        
+
         // Verify Repo
         val taskInRepo = tugasRepo.getTaskDetail(TestObjects.TUGAS_TODO.id).getOrNull()
         assertEquals("TODO", taskInRepo?.status)

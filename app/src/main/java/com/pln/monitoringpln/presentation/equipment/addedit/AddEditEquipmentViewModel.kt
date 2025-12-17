@@ -2,16 +2,14 @@ package com.pln.monitoringpln.presentation.equipment.addedit
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.pln.monitoringpln.domain.model.Alat
 import com.pln.monitoringpln.domain.repository.AlatRepository
+import com.pln.monitoringpln.domain.usecase.validation.ValidateInputUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.UUID
-
-import com.pln.monitoringpln.domain.usecase.validation.ValidateInputUseCase
 
 class AddEditEquipmentViewModel(
     private val alatRepository: AlatRepository, // Keep for getting detail
@@ -128,15 +126,15 @@ class AddEditEquipmentViewModel(
             // Validate Input Symbols
             val nameValidation = validateInputUseCase(
                 currentState.namaAlat,
-                com.pln.monitoringpln.domain.usecase.validation.ValidationType.STRICT
+                com.pln.monitoringpln.domain.usecase.validation.ValidationType.STRICT,
             )
             val typeValidation = validateInputUseCase(
                 currentState.tipePeralatan,
-                com.pln.monitoringpln.domain.usecase.validation.ValidationType.STRICT
+                com.pln.monitoringpln.domain.usecase.validation.ValidationType.STRICT,
             )
             val descValidation = validateInputUseCase(
                 currentState.description,
-                com.pln.monitoringpln.domain.usecase.validation.ValidationType.TEXT
+                com.pln.monitoringpln.domain.usecase.validation.ValidationType.TEXT,
             )
 
             var hasError = false

@@ -69,7 +69,7 @@ fun AddEditTaskScreen(
                 title = {
                     Text(
                         if (state.taskId != null) "Edit Tugas" else "Tambah Tugas",
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
                     )
                 },
                 navigationIcon = {
@@ -151,7 +151,7 @@ fun AddEditTaskScreen(
                     errorBorderColor = MaterialTheme.colorScheme.error,
                     errorLabelColor = MaterialTheme.colorScheme.error,
                     errorSupportingTextColor = MaterialTheme.colorScheme.error,
-                )
+                ),
             )
 
             // Equipment (Searchable Dropdown)
@@ -182,7 +182,7 @@ fun AddEditTaskScreen(
                                     Text(
                                         equipment.kodeAlat,
                                         style = MaterialTheme.typography.bodySmall,
-                                        color = Color.Gray
+                                        color = Color.Gray,
                                     )
                                 }
                             },
@@ -215,7 +215,7 @@ fun AddEditTaskScreen(
                     errorBorderColor = MaterialTheme.colorScheme.error,
                     errorLabelColor = MaterialTheme.colorScheme.error,
                     errorSupportingTextColor = MaterialTheme.colorScheme.error,
-                )
+                ),
             )
 
             // Deadline

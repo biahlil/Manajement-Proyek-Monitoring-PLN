@@ -42,8 +42,10 @@ fun MapPicker(
                 // Banjarmasin Bounds
                 // North: -3.20, South: -3.45, East: 114.70, West: 114.50
                 val banjarBounds = org.osmdroid.util.BoundingBox(
-                    -3.20, 114.70, // North, East
-                    -3.45, 114.50  // South, West
+                    -3.20,
+                    114.70, // North, East
+                    -3.45,
+                    114.50, // South, West
                 )
                 setScrollableAreaLimitDouble(banjarBounds)
                 setMinZoomLevel(13.0) // Restrict zoom out

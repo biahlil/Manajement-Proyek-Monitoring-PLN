@@ -83,7 +83,7 @@ fun AddEditEquipmentScreen(
                             Text(
                                 text = state.namaAlatError,
                                 color = MaterialTheme.colorScheme.error,
-                                style = MaterialTheme.typography.bodySmall
+                                style = MaterialTheme.typography.bodySmall,
                             )
                         }
                     },
@@ -91,7 +91,7 @@ fun AddEditEquipmentScreen(
                         errorBorderColor = MaterialTheme.colorScheme.error,
                         errorLabelColor = MaterialTheme.colorScheme.error,
                         errorSupportingTextColor = MaterialTheme.colorScheme.error,
-                    )
+                    ),
                 )
 
                 // Kode Alat removed (Auto-generated)
@@ -109,7 +109,7 @@ fun AddEditEquipmentScreen(
                             Text(
                                 text = state.tipeError,
                                 color = MaterialTheme.colorScheme.error,
-                                style = MaterialTheme.typography.bodySmall
+                                style = MaterialTheme.typography.bodySmall,
                             )
                         }
                     },
@@ -117,7 +117,7 @@ fun AddEditEquipmentScreen(
                         errorBorderColor = MaterialTheme.colorScheme.error,
                         errorLabelColor = MaterialTheme.colorScheme.error,
                         errorSupportingTextColor = MaterialTheme.colorScheme.error,
-                    )
+                    ),
                 )
 
                 // Status Dropdown
@@ -164,7 +164,7 @@ fun AddEditEquipmentScreen(
                             Text(
                                 text = state.descriptionError,
                                 color = MaterialTheme.colorScheme.error,
-                                style = MaterialTheme.typography.bodySmall
+                                style = MaterialTheme.typography.bodySmall,
                             )
                         }
                     },
@@ -186,7 +186,7 @@ fun AddEditEquipmentScreen(
                     },
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Medium,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))

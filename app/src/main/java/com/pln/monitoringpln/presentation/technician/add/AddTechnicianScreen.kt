@@ -143,7 +143,7 @@ fun AddTechnicianScreen(
                     errorBorderColor = MaterialTheme.colorScheme.error,
                     errorLabelColor = MaterialTheme.colorScheme.error,
                     errorSupportingTextColor = MaterialTheme.colorScheme.error,
-                )
+                ),
             )
 
             // Email
@@ -163,7 +163,7 @@ fun AddTechnicianScreen(
                     errorBorderColor = MaterialTheme.colorScheme.error,
                     errorLabelColor = MaterialTheme.colorScheme.error,
                     errorSupportingTextColor = MaterialTheme.colorScheme.error,
-                )
+                ),
             )
 
             // Password

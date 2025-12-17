@@ -2,7 +2,7 @@ package com.pln.monitoringpln.domain.usecase.validation
 
 enum class ValidationType {
     STRICT, // Only Alphanumeric + Space
-    TEXT    // Alphanumeric + Space + Dot + Comma
+    TEXT, // Alphanumeric + Space + Dot + Comma
 }
 
 class ValidateInputUseCase {
@@ -20,7 +20,7 @@ class ValidateInputUseCase {
             }
             return ValidationResult(
                 successful = false,
-                errorMessage = message
+                errorMessage = message,
             )
         }
 
@@ -30,5 +30,5 @@ class ValidateInputUseCase {
 
 data class ValidationResult(
     val successful: Boolean,
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
 )

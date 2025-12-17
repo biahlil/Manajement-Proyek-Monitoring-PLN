@@ -66,7 +66,7 @@ class FakeAuthRepository : AuthRepository {
             return Result.failure(Exception("Failed to create user"))
         }
         if (users.contains(email)) {
-             return Result.failure(Exception("Email sudah terdaftar."))
+            return Result.failure(Exception("Email sudah terdaftar."))
         }
         users.add(email)
         return Result.success(Unit)

@@ -115,7 +115,7 @@ class AddEditTaskViewModel(
                 } else {
                     allEquipmentsCache.filter { eq ->
                         eq.namaAlat.contains(query, ignoreCase = true) ||
-                                eq.kodeAlat.contains(query, ignoreCase = true)
+                            eq.kodeAlat.contains(query, ignoreCase = true)
                     }
                 },
             )
@@ -148,11 +148,11 @@ class AddEditTaskViewModel(
             // Validate Input Symbols
             val titleValidation = validateInputUseCase(
                 currentState.title,
-                com.pln.monitoringpln.domain.usecase.validation.ValidationType.STRICT
+                com.pln.monitoringpln.domain.usecase.validation.ValidationType.STRICT,
             )
             val descriptionValidation = validateInputUseCase(
                 currentState.description,
-                com.pln.monitoringpln.domain.usecase.validation.ValidationType.TEXT
+                com.pln.monitoringpln.domain.usecase.validation.ValidationType.TEXT,
             )
 
             if (!titleValidation.successful) {
@@ -199,16 +199,20 @@ class AddEditTaskViewModel(
                                 titleError = if (exception.message?.contains("Judul") == true) exception.message else null,
                                 descriptionError = if (exception.message?.contains("Deskripsi") == true) exception.message else null,
                                 error = if (exception.message?.contains("Judul") == false && exception.message?.contains(
-                                        "Deskripsi"
+                                        "Deskripsi",
                                     ) == false
-                                ) exception.message else null
+                                ) {
+                                    exception.message
+                                } else {
+                                    null
+                                },
                             )
                         }
                     } else {
                         _state.update {
                             it.copy(
                                 isSaving = false,
-                                error = exception?.message ?: "Gagal menyimpan tugas"
+                                error = exception?.message ?: "Gagal menyimpan tugas",
                             )
                         }
                     }
@@ -235,16 +239,20 @@ class AddEditTaskViewModel(
                                 titleError = if (exception.message?.contains("Judul") == true) exception.message else null,
                                 descriptionError = if (exception.message?.contains("Deskripsi") == true) exception.message else null,
                                 error = if (exception.message?.contains("Judul") == false && exception.message?.contains(
-                                        "Deskripsi"
+                                        "Deskripsi",
                                     ) == false
-                                ) exception.message else null
+                                ) {
+                                    exception.message
+                                } else {
+                                    null
+                                },
                             )
                         }
                     } else {
                         _state.update {
                             it.copy(
                                 isSaving = false,
-                                error = exception?.message ?: "Gagal menyimpan tugas"
+                                error = exception?.message ?: "Gagal menyimpan tugas",
                             )
                         }
                     }
