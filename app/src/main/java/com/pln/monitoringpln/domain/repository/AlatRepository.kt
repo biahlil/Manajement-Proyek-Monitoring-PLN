@@ -27,8 +27,8 @@ interface AlatRepository {
     // UC1b: Soft Delete (Archive)
     suspend fun archiveAlat(id: String): Result<Unit>
 
-    // UC6: Update Alat Condition (Teknisi Only)
-    suspend fun updateAlatCondition(id: String, kondisi: String): Result<Unit>
+    // UC6: Update Alat Status (Health) and Condition (Description) (Teknisi Only)
+    suspend fun updateAlatStatusAndCondition(id: String, status: String, kondisi: String): Result<Unit>
 
     // Offline-First: Observe All Active Alat
     fun getAllAlat(): kotlinx.coroutines.flow.Flow<List<Alat>>

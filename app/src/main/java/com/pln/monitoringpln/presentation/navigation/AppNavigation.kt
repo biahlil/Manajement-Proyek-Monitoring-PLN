@@ -207,7 +207,10 @@ fun AppNavigation() {
                     if (state.isTaskSaved) {
                         val savedTaskId = state.savedTaskId
                         if (savedTaskId != null) {
-                            navigateWithDebounce(Screen.DetailTask.createRoute(savedTaskId), popUpTo = Screen.TaskList.route)
+                            navigateWithDebounce(
+                                Screen.DetailTask.createRoute(savedTaskId),
+                                popUpTo = Screen.TaskList.route,
+                            )
                         } else {
                             navigateWithDebounce(Screen.TaskList.route, popUpTo = Screen.TaskList.route)
                         }
@@ -253,6 +256,9 @@ fun AppNavigation() {
                     onConfirmDelete = viewModel::onConfirmDelete,
                     onDismissDelete = viewModel::onDismissDeleteDialog,
                     onCompleteTask = { navigateWithDebounce(Screen.CompleteTask.createRoute(taskId)) },
+                    onStatusToggle = { isChecked ->
+                        if (isChecked) viewModel.startTask() else viewModel.stopTask()
+                    },
                 )
             }
 
@@ -320,7 +326,10 @@ fun AppNavigation() {
 
                 LaunchedEffect(state.isDeleted) {
                     if (state.isDeleted) {
-                        navigateWithDebounce(Screen.EquipmentList.createRoute("all_equipment"), popUpTo = Screen.EquipmentList.route)
+                        navigateWithDebounce(
+                            Screen.EquipmentList.createRoute("all_equipment"),
+                            popUpTo = Screen.EquipmentList.route,
+                        )
                     }
                 }
 
@@ -350,11 +359,8 @@ fun AppNavigation() {
                 val state by viewModel.state.collectAsState()
 
                 val navigateBack = {
-                    if (equipmentId != null) {
-                        navigateWithDebounce(Screen.DetailEquipment.createRoute(equipmentId), popUpTo = Screen.DetailEquipment.route)
-                    } else {
-                        navigateWithDebounce(Screen.EquipmentList.createRoute("all_equipment"), popUpTo = Screen.EquipmentList.route)
-                    }
+                    navController.popBackStack()
+                    Unit
                 }
 
                 androidx.activity.compose.BackHandler {
@@ -367,16 +373,26 @@ fun AppNavigation() {
 
                 LaunchedEffect(state.isSaved) {
                     if (state.isSaved) {
-                        navigateBack()
+                        val condition = state.savedCondition
+                        val filterType = when (condition) {
+                            "Rusak" -> "broken_equipment"
+                            "Perlu Perhatian" -> "warning_equipment"
+                            "Normal" -> "normal_equipment"
+                            else -> "all_equipment"
+                        }
+                        navigateWithDebounce(
+                            Screen.EquipmentList.createRoute(filterType),
+                            popUpTo = Screen.Dashboard.route, // Clear stack to dashboard
+                        )
                     }
                 }
 
                 AddEditEquipmentScreen(
                     state = state,
                     onNamaChange = viewModel::onNamaChange,
-                    onKodeChange = viewModel::onKodeChange,
                     onTipeChange = viewModel::onTipeChange,
                     onStatusChange = viewModel::onStatusChange,
+                    onDescriptionChange = viewModel::onDescriptionChange,
                     onLokasiChange = viewModel::onLokasiChange,
                     onLatChange = viewModel::onLatitudeChange,
                     onLngChange = viewModel::onLongitudeChange,
@@ -427,7 +443,12 @@ fun AppNavigation() {
                     onPasswordChange = viewModel::onPasswordChange,
                     onPhotoSelected = viewModel::onPhotoSelected,
                     onSave = viewModel::onSaveTechnician,
-                    onBack = { navigateWithDebounce(Screen.TechnicianList.route, popUpTo = Screen.TechnicianList.route) },
+                    onBack = {
+                        navigateWithDebounce(
+                            Screen.TechnicianList.route,
+                            popUpTo = Screen.TechnicianList.route,
+                        )
+                    },
                 )
             }
 

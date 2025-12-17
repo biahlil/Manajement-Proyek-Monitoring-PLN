@@ -3,6 +3,9 @@ package com.pln.monitoringpln.data.model
 import com.pln.monitoringpln.domain.model.Alat
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import java.util.Date
+
+// Duplicate import removed
 
 @Serializable
 data class AlatDto(
@@ -17,6 +20,7 @@ data class AlatDto(
     @SerialName("last_modified_by_id") val lastModifiedById: String? = null,
     @SerialName("is_archived") val isArchived: Boolean = false,
     @SerialName("location_name") val locationName: String? = null,
+    @SerialName("updated_at") @Serializable(with = DateSerializer::class) val updatedAt: Date? = null,
 )
 
 @Serializable

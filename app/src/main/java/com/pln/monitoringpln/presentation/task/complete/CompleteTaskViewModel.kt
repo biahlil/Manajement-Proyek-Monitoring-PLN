@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pln.monitoringpln.domain.usecase.tugas.CompleteTaskUseCase
 import com.pln.monitoringpln.domain.usecase.tugas.GetTaskDetailUseCase
+import com.pln.monitoringpln.domain.usecase.validation.ValidateInputUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -13,6 +14,7 @@ import kotlinx.coroutines.launch
 class CompleteTaskViewModel(
     private val getTaskDetailUseCase: GetTaskDetailUseCase,
     private val completeTaskUseCase: CompleteTaskUseCase,
+    private val validateInputUseCase: ValidateInputUseCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(CompleteTaskState())
@@ -41,7 +43,7 @@ class CompleteTaskViewModel(
     }
 
     fun onConditionChange(condition: String) {
-        _state.update { it.copy(condition = condition) }
+        _state.update { it.copy(condition = condition, conditionError = null) }
     }
 
     fun onEquipmentStatusChange(status: String) {
@@ -49,14 +51,21 @@ class CompleteTaskViewModel(
     }
 
     fun onProofSelected(uri: String) {
-        _state.update { it.copy(proofUri = uri) }
+        _state.update { it.copy(proofUri = if (uri.isBlank()) null else uri) }
     }
 
     fun onCompleteTask(photoBytes: ByteArray?) {
         viewModelScope.launch {
+            val currentState = _state.value
             _state.update { it.copy(isSaving = true) }
 
-            val currentState = _state.value
+            // Validate Condition
+            val validationResult = validateInputUseCase(currentState.condition)
+            if (!validationResult.successful) {
+                _state.update { it.copy(isSaving = false, conditionError = validationResult.errorMessage) }
+                return@launch
+            }
+
             val task = currentState.task ?: return@launch
 
             if (photoBytes == null && currentState.proofUri.isNullOrBlank()) {
@@ -72,14 +81,20 @@ class CompleteTaskViewModel(
             val result = completeTaskUseCase(
                 taskId = task.id,
                 photoBytes = photoBytes,
-                newCondition = currentState.condition,
+                newCondition = currentState.condition, // Text Description
+                equipmentStatus = currentState.equipmentStatus, // "Normal" / "Rusak"
                 currentProofUrl = if (photoBytes == null) currentState.proofUri else null,
             )
 
             if (result.isSuccess) {
                 _state.update { it.copy(isSaving = false, isCompleted = true) }
             } else {
-                _state.update { it.copy(isSaving = false, error = result.exceptionOrNull()?.message ?: "Gagal menyimpan laporan") }
+                _state.update {
+                    it.copy(
+                        isSaving = false,
+                        error = result.exceptionOrNull()?.message ?: "Gagal menyimpan laporan",
+                    )
+                }
             }
         }
     }

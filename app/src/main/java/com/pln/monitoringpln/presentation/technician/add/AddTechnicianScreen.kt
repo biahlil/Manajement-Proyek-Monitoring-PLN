@@ -133,6 +133,17 @@ fun AddTechnicianScreen(
                 label = { Text("Nama Lengkap *") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
+                isError = state.namaError != null,
+                supportingText = {
+                    if (state.namaError != null) {
+                        Text(text = state.namaError, color = MaterialTheme.colorScheme.error)
+                    }
+                },
+                colors = OutlinedTextFieldDefaults.colors(
+                    errorBorderColor = MaterialTheme.colorScheme.error,
+                    errorLabelColor = MaterialTheme.colorScheme.error,
+                    errorSupportingTextColor = MaterialTheme.colorScheme.error,
+                ),
             )
 
             // Email
@@ -142,6 +153,17 @@ fun AddTechnicianScreen(
                 label = { Text("Email *") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
+                isError = state.emailError != null,
+                supportingText = {
+                    if (state.emailError != null) {
+                        Text(text = state.emailError, color = MaterialTheme.colorScheme.error)
+                    }
+                },
+                colors = OutlinedTextFieldDefaults.colors(
+                    errorBorderColor = MaterialTheme.colorScheme.error,
+                    errorLabelColor = MaterialTheme.colorScheme.error,
+                    errorSupportingTextColor = MaterialTheme.colorScheme.error,
+                ),
             )
 
             // Password

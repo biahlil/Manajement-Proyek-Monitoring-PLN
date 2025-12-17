@@ -43,6 +43,7 @@ fun TaskDetailScreen(
     onConfirmDelete: () -> Unit,
     onDismissDelete: () -> Unit,
     onCompleteTask: () -> Unit,
+    onStatusToggle: (Boolean) -> Unit,
 ) {
     val context = LocalContext.current
 
@@ -96,13 +97,22 @@ fun TaskDetailScreen(
                     canDelete = true,
                 )
             } else {
-                // For Technicians, "Edit" becomes "Selesaikan" (Complete)
-                // Only show if task is not done? Or allow editing report?
-                // User request: "edit tugas untuk teknisi menjadi ke complete tugas"
+                // For Technicians:
+                // TODO -> "Mulai Kerjakan" (Start -> IN_PROGRESS)
+                // IN_PROGRESS -> "Selesaikan" (Complete -> DONE)
+                // DONE -> "Edit Laporan" (Edit Report)
+
+                val status = state.task?.status ?: "TODO"
+
+                val (actionText, actionIcon, actionClick) = when (status) {
+                    "DONE" -> Triple("Edit Laporan", Icons.Default.Edit, onCompleteTask)
+                    else -> Triple("Selesaikan", Icons.Default.Check, onCompleteTask)
+                }
+
                 TaskActionBottomBar(
-                    onMainAction = onCompleteTask,
-                    mainActionText = if (state.task?.status == "Done") "Edit Laporan" else "Selesaikan",
-                    mainActionIcon = Icons.Default.Check,
+                    onMainAction = actionClick,
+                    mainActionText = actionText,
+                    mainActionIcon = actionIcon,
                     onDelete = onDelete,
                     canDelete = false,
                 )
@@ -147,6 +157,7 @@ fun TaskDetailScreen(
                             state = state,
                             context = context,
                             onCompleteTask = onCompleteTask,
+                            onStatusToggle = onStatusToggle,
                         )
                     }
                 }
@@ -214,8 +225,12 @@ fun AdminTaskDetailContent(
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        border = androidx.compose.foundation.BorderStroke(
+            2.dp,
+            MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
+        ),
     ) {
         Column(
             modifier = Modifier
@@ -230,7 +245,11 @@ fun AdminTaskDetailContent(
             DetailRow("Status Alat", state.equipmentStatus)
             DetailRow("Status Tugas", state.taskStatus)
 
-            Text("Bukti Foto", style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
+            Text(
+                "Bukti Foto",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
             if (state.proofUri != null) { // Note: state.proofUri comes from task.buktiFoto in ViewModel
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Box(
@@ -239,10 +258,15 @@ fun AdminTaskDetailContent(
                             .clip(RoundedCornerShape(8.dp))
                             .background(Color.LightGray)
                             .clickable {
-                                val clipboardManager = context.getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+                                val clipboardManager =
+                                    context.getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
                                 val clip = android.content.ClipData.newPlainText("Bukti Foto", state.proofUri)
                                 clipboardManager.setPrimaryClip(clip)
-                                android.widget.Toast.makeText(context, "Link foto disalin", android.widget.Toast.LENGTH_SHORT).show()
+                                android.widget.Toast.makeText(
+                                    context,
+                                    "Link foto disalin",
+                                    android.widget.Toast.LENGTH_SHORT,
+                                ).show()
                             },
                         contentAlignment = Alignment.Center,
                     ) {
@@ -257,7 +281,7 @@ fun AdminTaskDetailContent(
                     Text(
                         text = "Klik foto untuk salin link",
                         style = MaterialTheme.typography.bodySmall,
-                        color = Color.Gray,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
             } else {
@@ -275,8 +299,9 @@ fun TechnicianTaskDetailContent(
     state: TaskDetailState,
     context: Context,
     onCompleteTask: () -> Unit,
+    onStatusToggle: (Boolean) -> Unit,
 ) {
-    TaskHeaderCard(task, technician)
+    TaskHeaderCard(task, technician, onStatusToggle = onStatusToggle, isTechnician = true)
     LocationCard(equipment, context)
     SpecificationCard(task, equipment, technician)
 
@@ -284,13 +309,17 @@ fun TechnicianTaskDetailContent(
     // If task is not done, the action is now in the bottom bar.
     // So we just show the report status or nothing if not done yet.
 
-    if (task.status == "Done") {
+    if (task.status == "DONE") {
         // Show Completed Report (Read-Only)
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
             elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+            border = androidx.compose.foundation.BorderStroke(
+                2.dp,
+                MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
+            ),
         ) {
             Column(
                 modifier = Modifier
@@ -304,7 +333,11 @@ fun TechnicianTaskDetailContent(
                 DetailRow("Kondisi Alat", task.kondisiAkhir ?: "-")
                 DetailRow("Status Tugas", task.status)
 
-                Text("Bukti Foto", style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
+                Text(
+                    "Bukti Foto",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
                 if (task.buktiFoto != null) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Box(
@@ -313,10 +346,15 @@ fun TechnicianTaskDetailContent(
                                 .clip(RoundedCornerShape(8.dp))
                                 .background(Color.LightGray)
                                 .clickable {
-                                    val clipboardManager = context.getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+                                    val clipboardManager =
+                                        context.getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
                                     val clip = android.content.ClipData.newPlainText("Bukti Foto", task.buktiFoto)
                                     clipboardManager.setPrimaryClip(clip)
-                                    android.widget.Toast.makeText(context, "Link foto disalin", android.widget.Toast.LENGTH_SHORT).show()
+                                    android.widget.Toast.makeText(
+                                        context,
+                                        "Link foto disalin",
+                                        android.widget.Toast.LENGTH_SHORT,
+                                    ).show()
                                 },
                             contentAlignment = Alignment.Center,
                         ) {
@@ -331,7 +369,7 @@ fun TechnicianTaskDetailContent(
                         Text(
                             text = "Klik foto untuk salin link",
                             style = MaterialTheme.typography.bodySmall,
-                            color = Color.Gray,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
                 } else {
@@ -343,7 +381,12 @@ fun TechnicianTaskDetailContent(
 }
 
 @Composable
-fun TaskHeaderCard(task: Tugas, technician: User) {
+fun TaskHeaderCard(
+    task: Tugas,
+    technician: User,
+    onStatusToggle: ((Boolean) -> Unit)? = null,
+    isTechnician: Boolean = false,
+) {
     Card(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
         shape = RoundedCornerShape(12.dp),
@@ -361,32 +404,65 @@ fun TaskHeaderCard(task: Tugas, technician: User) {
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.weight(1f),
                 )
+
                 Surface(
                     shape = RoundedCornerShape(16.dp),
                     color = when (task.status) {
-                        "In Progress" -> Color(0xFFFFF3E0)
-                        "Done" -> Color(0xFFE8F5E9)
+                        "IN_PROGRESS" -> Color(0xFFFFF3E0)
+                        "DONE" -> Color(0xFFE8F5E9)
                         else -> Color(0xFFECEFF1)
                     },
                     contentColor = when (task.status) {
-                        "In Progress" -> Color(0xFFE65100)
-                        "Done" -> Color(0xFF1B5E20)
+                        "IN_PROGRESS" -> Color(0xFFE65100)
+                        "DONE" -> Color(0xFF1B5E20)
                         else -> Color(0xFF455A64)
                     },
                 ) {
                     Text(
-                        text = task.status,
+                        text = task.status.replace("_", " "),
                         style = MaterialTheme.typography.labelMedium,
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                     )
                 }
             }
-            Spacer(modifier = Modifier.height(8.dp))
+
             Text(
                 text = "Teknisi: ${technician.namaLengkap}",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+
+            // Toggle Switch for Technician (Below Technician Name)
+            if (isTechnician && task.status != "DONE") {
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End,
+                ) {
+                    Text(
+                        text = "Kerjakan",
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(end = 8.dp),
+                    )
+                    val isChecked = task.status == "IN_PROGRESS"
+                    Switch(
+                        checked = isChecked,
+                        onCheckedChange = { checked ->
+                            onStatusToggle?.invoke(checked)
+                        },
+                        thumbContent = {
+                            if (isChecked) {
+                                Icon(
+                                    imageVector = Icons.Default.Check,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(12.dp),
+                                )
+                            }
+                        },
+                    )
+                }
+            }
         }
     }
 }
@@ -396,8 +472,12 @@ fun LocationCard(equipment: Alat, context: Context) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        border = androidx.compose.foundation.BorderStroke(
+            2.dp,
+            MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
+        ),
     ) {
         Row(
             modifier = Modifier
@@ -420,7 +500,11 @@ fun LocationCard(equipment: Alat, context: Context) {
             }
             Spacer(modifier = Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {
-                Text("Lokasi", style = MaterialTheme.typography.labelMedium, color = Color.Gray)
+                Text(
+                    "Lokasi",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
                 Text(
                     equipment.namaAlat,
                     style = MaterialTheme.typography.titleMedium,
@@ -429,7 +513,8 @@ fun LocationCard(equipment: Alat, context: Context) {
             }
             Button(
                 onClick = {
-                    val gmmIntentUri = Uri.parse("geo:${equipment.latitude},${equipment.longitude}?q=${equipment.latitude},${equipment.longitude}(${equipment.namaAlat})")
+                    val gmmIntentUri =
+                        Uri.parse("geo:${equipment.latitude},${equipment.longitude}?q=${equipment.latitude},${equipment.longitude}(${equipment.namaAlat})")
                     val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
                     mapIntent.setPackage("com.google.android.apps.maps")
                     context.startActivity(mapIntent)
@@ -448,8 +533,12 @@ fun SpecificationCard(task: Tugas, equipment: Alat, technician: User) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        border = androidx.compose.foundation.BorderStroke(
+            2.dp,
+            MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
+        ),
     ) {
         Column(
             modifier = Modifier
@@ -482,7 +571,7 @@ fun DetailRow(label: String, value: String) {
         Text(
             text = label,
             style = MaterialTheme.typography.bodyMedium,
-            color = Color.Gray,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.weight(1f),
         )
         Text(

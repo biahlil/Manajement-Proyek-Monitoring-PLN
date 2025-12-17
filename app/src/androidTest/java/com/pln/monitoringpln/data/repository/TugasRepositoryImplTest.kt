@@ -221,6 +221,34 @@ class TugasRepositoryImplTest {
     }
 
     @Test
+    fun update_task_status_to_todo_should_succeed() = runBlocking {
+        println(logHeader.format("Integration: Revert Task Status to TODO"))
+
+        // Given: Create Alat and Task (IN_PROGRESS)
+        val alatId = createTestAlat()
+        val uniqueDesc = "REVERT-STATUS-${System.currentTimeMillis()}"
+        val uniqueId = java.util.UUID.randomUUID().toString()
+        val tugas = TestObjects.TUGAS_IN_PROGRESS.copy(
+            id = uniqueId,
+            deskripsi = uniqueDesc,
+            idTeknisi = teknisiId,
+            idAlat = alatId,
+        )
+        tugasRepository.createTask(tugas)
+
+        // When
+        val result = tugasRepository.updateTaskStatus(uniqueId, "TODO")
+
+        // Then
+        assertTrue(result.isSuccess)
+        val updatedTask = tugasRepository.getTaskDetail(uniqueId).getOrNull()
+        assertTrue(updatedTask?.status == "TODO")
+        println(logAssert.format("Task status reverted to TODO successfully"))
+
+        println(logResult)
+    }
+
+    @Test
     fun get_tasks_by_alat_should_return_list() = runBlocking {
         println(logHeader.format("Integration: Get Tasks by Alat"))
 

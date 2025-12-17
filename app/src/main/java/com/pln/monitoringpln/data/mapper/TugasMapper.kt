@@ -16,6 +16,7 @@ fun TugasEntity.toDomain(): Tugas {
         status = status,
         buktiFoto = buktiFoto,
         kondisiAkhir = kondisiAkhir,
+        updatedAt = updatedAt,
     )
 }
 
@@ -32,6 +33,7 @@ fun Tugas.toEntity(isSynced: Boolean = false): TugasEntity {
         buktiFoto = buktiFoto,
         kondisiAkhir = kondisiAkhir,
         isSynced = isSynced,
+        updatedAt = updatedAt,
     )
 }
 
@@ -46,6 +48,9 @@ fun TugasDto.toEntity(isSynced: Boolean = true): TugasEntity {
         tglJatuhTempo = dueDate,
         status = status,
         isSynced = isSynced,
+        updatedAt = updatedAt,
+        buktiFoto = buktiFoto,
+        kondisiAkhir = kondisiAkhir,
     )
 }
 
@@ -58,5 +63,7 @@ fun Tugas.toInsertDto(): com.pln.monitoringpln.data.model.TugasInsertDto {
         dueDate = tglJatuhTempo,
         alatId = idAlat,
         teknisiId = idTeknisi,
+        buktiFoto = buktiFoto,
+        kondisiAkhir = kondisiAkhir,
     )
 }

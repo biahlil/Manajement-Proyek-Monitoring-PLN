@@ -10,8 +10,14 @@ import com.itextpdf.kernel.pdf.PdfWriter
 import com.itextpdf.layout.Document
 import com.itextpdf.layout.element.Paragraph
 import com.itextpdf.layout.element.Table
+import com.pln.monitoringpln.data.local.dao.AlatDao
+import com.pln.monitoringpln.data.local.dao.TugasDao
+import com.pln.monitoringpln.data.local.dao.UserDao
 import com.pln.monitoringpln.data.mapper.toDomain
+import com.pln.monitoringpln.domain.model.Alat
 import com.pln.monitoringpln.domain.model.ExportFormat
+import com.pln.monitoringpln.domain.model.Tugas
+import com.pln.monitoringpln.domain.model.User
 import com.pln.monitoringpln.domain.repository.ReportRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -23,9 +29,9 @@ import java.util.Date
 import java.util.Locale
 
 class ReportRepositoryImpl(
-    private val tugasDao: com.pln.monitoringpln.data.local.dao.TugasDao,
-    private val userDao: com.pln.monitoringpln.data.local.dao.UserDao,
-    private val alatDao: com.pln.monitoringpln.data.local.dao.AlatDao,
+    private val tugasDao: TugasDao,
+    private val userDao: UserDao,
+    private val alatDao: AlatDao,
     private val context: Context,
 ) : ReportRepository {
 
@@ -120,9 +126,9 @@ class ReportRepositoryImpl(
 
     private suspend fun generateFullPdf(
         fileName: String,
-        tasks: List<com.pln.monitoringpln.domain.model.Tugas>,
-        technicians: List<com.pln.monitoringpln.domain.model.User>,
-        equipment: List<com.pln.monitoringpln.domain.model.Alat>,
+        tasks: List<Tugas>,
+        technicians: List<User>,
+        equipment: List<Alat>,
     ): String {
         return saveToDownloads("$fileName.pdf", "application/pdf") { outputStream ->
             val writer = PdfWriter(outputStream)

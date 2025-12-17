@@ -11,12 +11,16 @@ class UpdateUserProfileUseCase(
         if (user.namaLengkap.isBlank()) {
             return Result.failure(ValidationException("Nama tidak boleh kosong"))
         }
+        val nameRegex = "^[a-zA-Z0-9 ]+$".toRegex()
+        if (!nameRegex.matches(user.namaLengkap)) {
+            return Result.failure(ValidationException("Nama tidak boleh mengandung simbol"))
+        }
         if (user.email.isBlank()) {
             return Result.failure(ValidationException("Email tidak boleh kosong"))
         }
-        val emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$".toRegex()
+        val emailRegex = "^[A-Za-z0-9._%+-]+@(pln\\.co\\.id|gmail\\.com)$".toRegex()
         if (!emailRegex.matches(user.email)) {
-            return Result.failure(ValidationException("Format email tidak valid"))
+            return Result.failure(ValidationException("Email harus pln.co.id atau gmail.com"))
         }
         return userRepository.updateUser(user)
     }

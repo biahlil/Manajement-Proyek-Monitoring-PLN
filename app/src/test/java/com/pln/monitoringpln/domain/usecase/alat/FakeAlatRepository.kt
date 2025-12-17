@@ -77,11 +77,19 @@ class FakeAlatRepository : AlatRepository {
         return Result.success(Unit)
     }
 
-    override suspend fun updateAlatCondition(id: String, kondisi: String): Result<Unit> {
+    suspend fun updateAlatCondition(id: String, kondisi: String): Result<Unit> {
         println("  ➡️ [FakeRepo] Update kondisi Alat $id menjadi '$kondisi'")
         val existing = database[id] ?: return Result.failure(Exception("Alat tidak ditemukan"))
 
         database[id] = existing.copy(kondisi = kondisi)
+        return Result.success(Unit)
+    }
+
+    override suspend fun updateAlatStatusAndCondition(id: String, status: String, kondisi: String): Result<Unit> {
+        println("  ➡️ [FakeRepo] Update stat & cond Alat $id: Status=$status, Kondisi='$kondisi'")
+        val existing = database[id] ?: return Result.failure(Exception("Alat tidak ditemukan"))
+
+        database[id] = existing.copy(status = status, kondisi = kondisi)
         return Result.success(Unit)
     }
 

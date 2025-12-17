@@ -20,11 +20,12 @@ class AddAlatUseCaseTest {
         println("\n--- 🔴 TEST: `add valid alat` ---")
 
         println("  [Act] Memanggil UseCase dengan input valid...")
-        val result = useCase("Trafo A", "TRF-1", -6.2, 106.8)
+        val result = useCase(namaAlat = "Trafo A", kodeAlat = "TRF-1", latitude = -6.2, longitude = 106.8)
 
         println("  [Assert] Cek sukses dan kondisi default...")
         assertTrue(result.isSuccess)
-        assertEquals("Normal", fakeRepo.lastSavedAlat?.kondisi)
+        assertEquals("Normal", fakeRepo.lastSavedAlat?.status)
+        assertEquals("", fakeRepo.lastSavedAlat?.kondisi)
 
         println("--- ✅ LULUS ---")
         println("--- ✅ LULUS ---")
@@ -35,7 +36,7 @@ class AddAlatUseCaseTest {
         println("\n--- 🔴 TEST: `add valid alat with location name` ---")
 
         println("  [Act] Memanggil UseCase dengan location name...")
-        val result = useCase("Trafo B", "TRF-2", -3.3, 114.5, "Banjarmasin")
+        val result = useCase(namaAlat = "Trafo B", kodeAlat = "TRF-2", latitude = -3.3, longitude = 114.5, locationName = "Banjarmasin")
 
         println("  [Assert] Cek sukses dan location name...")
         assertTrue(result.isSuccess)
@@ -50,7 +51,7 @@ class AddAlatUseCaseTest {
         println("\n--- 🔴 TEST: `add alat with whitespace name` ---")
 
         println("  [Act] Input nama spasi kosong...")
-        val result = useCase("   ", "TRF-1", 0.0, 0.0)
+        val result = useCase(namaAlat = "   ", kodeAlat = "TRF-1", latitude = 0.0, longitude = 0.0)
 
         println("  [Assert] Cek failure message...")
         assertTrue(result.isFailure)
@@ -62,7 +63,7 @@ class AddAlatUseCaseTest {
     @Test
     fun `add alat with whitespace code, should fail`() = runTest {
         println("\n--- 🔴 TEST: `add alat with whitespace code` ---")
-        val result = useCase("Trafo A", "   ", 0.0, 0.0)
+        val result = useCase(namaAlat = "Trafo A", kodeAlat = "   ", latitude = 0.0, longitude = 0.0)
 
         assertTrue(result.isFailure)
         assertEquals("Kode alat tidak boleh kosong.", result.exceptionOrNull()?.message)
@@ -75,7 +76,7 @@ class AddAlatUseCaseTest {
         println("\n--- 🔴 TEST: `add alat boundary latitude (90.0)` ---")
 
         println("  [Act] Input Lat 90.0 (Valid)...")
-        val result = useCase("Kutub Utara", "N-01", 90.0, 0.0)
+        val result = useCase(namaAlat = "Kutub Utara", kodeAlat = "N-01", latitude = 90.0, longitude = 0.0)
 
         assertTrue("Latitude 90.0 harusnya valid", result.isSuccess)
         println("--- ✅ LULUS ---")
@@ -86,7 +87,7 @@ class AddAlatUseCaseTest {
         println("\n--- 🔴 TEST: `add alat invalid latitude (90.000001)` ---")
 
         println("  [Act] Input Lat 90.000001 (Invalid)...")
-        val result = useCase("Invalid Lat", "X-01", 90.000001, 0.0)
+        val result = useCase(namaAlat = "Invalid Lat", kodeAlat = "X-01", latitude = 90.000001, longitude = 0.0)
 
         assertTrue(result.isFailure)
         assertEquals("Koordinat tidak valid.", result.exceptionOrNull()?.message)

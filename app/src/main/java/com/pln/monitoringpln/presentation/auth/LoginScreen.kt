@@ -83,7 +83,7 @@ fun LoginScreen(
         ) {
             // Logo Section
             Image(
-                painter = painterResource(id = R.drawable.ic_launcher_foreground),
+                painter = painterResource(id = R.drawable.logo),
                 contentDescription = "Logo PLN",
                 modifier = Modifier.size(115.dp),
             )
@@ -192,7 +192,7 @@ fun LoginScreen(
                     verticalArrangement = Arrangement.Center,
                 ) {
                     Image(
-                        painter = painterResource(id = R.drawable.ic_launcher_foreground),
+                        painter = painterResource(id = R.drawable.logo),
                         contentDescription = "Loading Logo",
                         modifier = Modifier
                             .size(100.dp)

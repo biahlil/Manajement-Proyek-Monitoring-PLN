@@ -61,5 +61,10 @@ val dataModule = module {
     single<TugasRepository> { TugasRepositoryImpl(get(), get()) }
     single<DashboardRepository> { DashboardRepositoryImpl(get(), get()) }
     single<ReportRepository> { ReportRepositoryImpl(get(), get(), get(), androidContext()) }
-    single<com.pln.monitoringpln.domain.repository.UserRepository> { com.pln.monitoringpln.data.repository.UserRepositoryImpl(get(), get()) }
+    single<com.pln.monitoringpln.domain.repository.UserRepository> {
+        com.pln.monitoringpln.data.repository.UserRepositoryImpl(
+            get(),
+            get(),
+        )
+    }
 }

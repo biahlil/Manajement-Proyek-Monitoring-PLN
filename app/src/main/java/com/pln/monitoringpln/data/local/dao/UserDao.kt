@@ -21,10 +21,10 @@ interface UserDao {
     @Query("SELECT * FROM users WHERE id = :id")
     suspend fun getUserById(id: String): UserEntity?
 
-    @Query("SELECT * FROM users WHERE UPPER(role) = 'TEKNISI' AND isActive = 1")
+    @Query("SELECT * FROM users WHERE UPPER(role) = 'TEKNISI' AND isActive = 1 ORDER BY updatedAt DESC")
     suspend fun getAllTeknisi(): List<UserEntity>
 
-    @Query("SELECT * FROM users WHERE UPPER(role) = 'TEKNISI' AND isActive = 1")
+    @Query("SELECT * FROM users WHERE UPPER(role) = 'TEKNISI' AND isActive = 1 ORDER BY updatedAt DESC")
     fun observeAllTeknisi(): Flow<List<UserEntity>>
 
     @Query("SELECT * FROM users WHERE id = :id")

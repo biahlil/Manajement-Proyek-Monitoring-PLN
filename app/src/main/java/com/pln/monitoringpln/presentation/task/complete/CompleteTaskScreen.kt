@@ -94,8 +94,12 @@ fun CompleteTaskScreen(
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color.White),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                        border = androidx.compose.foundation.BorderStroke(
+                            2.dp,
+                            MaterialTheme.colorScheme.outlineVariant,
+                        ),
                     ) {
                         Column(
                             modifier = Modifier
@@ -103,7 +107,11 @@ fun CompleteTaskScreen(
                                 .padding(16.dp),
                             verticalArrangement = Arrangement.spacedBy(16.dp),
                         ) {
-                            Text("Laporan Pengerjaan", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                            Text(
+                                "Laporan Pengerjaan",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                            )
                             HorizontalDivider()
 
                             // Kondisi Alat
@@ -113,10 +121,20 @@ fun CompleteTaskScreen(
                                 label = { Text("Kondisi Alat") },
                                 modifier = Modifier.fillMaxWidth(),
                                 minLines = 3,
+                                isError = state.conditionError != null,
+                                supportingText = {
+                                    if (state.conditionError != null) {
+                                        Text(text = state.conditionError, color = MaterialTheme.colorScheme.error)
+                                    }
+                                },
                             )
 
                             // Status Alat (Chips)
-                            Text("Status Alat", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
+                            Text(
+                                "Status Alat",
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Bold,
+                            )
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                 listOf("Normal", "Rusak", "Perlu Perhatian").forEach { status ->
                                     FilterChip(
@@ -124,7 +142,13 @@ fun CompleteTaskScreen(
                                         onClick = { onEquipmentStatusChange(status) },
                                         label = { Text(status) },
                                         leadingIcon = if (state.equipmentStatus == status) {
-                                            { Icon(imageVector = Icons.Default.Check, contentDescription = null, modifier = Modifier.size(16.dp)) }
+                                            {
+                                                Icon(
+                                                    imageVector = Icons.Default.Check,
+                                                    contentDescription = null,
+                                                    modifier = Modifier.size(16.dp),
+                                                )
+                                            }
                                         } else {
                                             null
                                         },
@@ -133,7 +157,11 @@ fun CompleteTaskScreen(
                             }
 
                             // Upload Bukti
-                            Text("Bukti Foto", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
+                            Text(
+                                "Bukti Foto",
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Bold,
+                            )
 
                             val photoPickerLauncher = rememberLauncherForActivityResult(
                                 contract = ActivityResultContracts.PickVisualMedia(),
@@ -143,7 +171,7 @@ fun CompleteTaskScreen(
                                 }
                             }
 
-                            if (state.proofUri != null) {
+                            if (!state.proofUri.isNullOrBlank()) {
                                 Box(modifier = Modifier.fillMaxWidth()) {
                                     AsyncImage(
                                         model = state.proofUri,
@@ -159,9 +187,16 @@ fun CompleteTaskScreen(
                                         modifier = Modifier
                                             .align(Alignment.TopEnd)
                                             .padding(8.dp)
-                                            .background(Color.Black.copy(alpha = 0.5f), androidx.compose.foundation.shape.CircleShape),
+                                            .background(
+                                                Color.Black.copy(alpha = 0.5f),
+                                                androidx.compose.foundation.shape.CircleShape,
+                                            ),
                                     ) {
-                                        Icon(imageVector = Icons.Default.Delete, contentDescription = "Hapus Foto", tint = Color.White)
+                                        Icon(
+                                            imageVector = Icons.Default.Delete,
+                                            contentDescription = "Hapus Foto",
+                                            tint = Color.White,
+                                        )
                                     }
                                 }
                             } else {

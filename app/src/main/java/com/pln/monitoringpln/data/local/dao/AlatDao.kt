@@ -25,10 +25,10 @@ interface AlatDao {
     suspend fun archiveAlat(id: String)
 
     // Helper for testing/admin: Get All Active
-    @Query("SELECT * FROM alat WHERE isArchived = 0")
+    @Query("SELECT * FROM alat WHERE isArchived = 0 ORDER BY updatedAt DESC")
     suspend fun getAllActiveAlat(): List<AlatEntity>
 
-    @Query("SELECT * FROM alat WHERE isArchived = 0")
+    @Query("SELECT * FROM alat WHERE isArchived = 0 ORDER BY updatedAt DESC")
     fun getAllAlat(): kotlinx.coroutines.flow.Flow<List<AlatEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -52,6 +52,6 @@ interface AlatDao {
     @Query("SELECT COUNT(*) FROM alat WHERE isArchived = 0")
     fun observeCountAll(): kotlinx.coroutines.flow.Flow<Int>
 
-    @Query("SELECT COUNT(*) FROM alat WHERE kondisi = :kondisi AND isArchived = 0")
-    fun observeCountByCondition(kondisi: String): kotlinx.coroutines.flow.Flow<Int>
+    @Query("SELECT COUNT(*) FROM alat WHERE status = :status AND isArchived = 0")
+    fun observeCountByStatus(status: String): kotlinx.coroutines.flow.Flow<Int>
 }

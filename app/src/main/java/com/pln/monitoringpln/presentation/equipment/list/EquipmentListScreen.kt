@@ -60,7 +60,7 @@ fun EquipmentListScreen(
                 FloatingActionButton(
                     onClick = onAddEquipment,
                     containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = Color.White,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
                     shape = RoundedCornerShape(16.dp),
                 ) {
                     Icon(Icons.Default.Add, contentDescription = "Add Equipment")
@@ -84,8 +84,8 @@ fun EquipmentListScreen(
                 shape = RoundedCornerShape(12.dp),
                 singleLine = true,
                 colors = OutlinedTextFieldDefaults.colors(
-                    unfocusedContainerColor = Color.White,
-                    focusedContainerColor = Color.White,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                    focusedContainerColor = MaterialTheme.colorScheme.surface,
                 ),
             )
 
@@ -143,9 +143,12 @@ fun EquipmentCard(
             .fillMaxWidth()
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)),
+        border = androidx.compose.foundation.BorderStroke(
+            2.dp,
+            MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
+        ),
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             // Header: Name and Badge
@@ -163,25 +166,25 @@ fun EquipmentCard(
                     Text(
                         text = equipment.kodeAlat,
                         style = MaterialTheme.typography.bodySmall,
-                        color = Color.Gray,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
 
                 Surface(
                     shape = RoundedCornerShape(8.dp),
-                    color = when (equipment.kondisi) {
+                    color = when (equipment.status) {
                         "Normal" -> Color(0xFFE8F5E9)
                         "Rusak" -> Color(0xFFFFEBEE)
                         else -> Color(0xFFFFF3E0)
                     },
-                    contentColor = when (equipment.kondisi) {
+                    contentColor = when (equipment.status) {
                         "Normal" -> Color(0xFF1B5E20)
                         "Rusak" -> Color(0xFFB71C1C)
                         else -> Color(0xFFE65100)
                     },
                 ) {
                     Text(
-                        text = equipment.kondisi,
+                        text = equipment.status,
                         style = MaterialTheme.typography.labelSmall,
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                         fontWeight = FontWeight.Bold,
@@ -196,14 +199,14 @@ fun EquipmentCard(
                 Icon(
                     Icons.Default.LocationOn,
                     contentDescription = null,
-                    tint = Color.Gray,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(16.dp),
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
                     text = equipment.locationName ?: "Lokasi belum tersedia",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = Color.Gray,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
         }

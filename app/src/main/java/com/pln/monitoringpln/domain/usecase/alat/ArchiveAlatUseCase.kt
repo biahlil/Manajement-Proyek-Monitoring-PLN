@@ -18,7 +18,7 @@ class ArchiveAlatUseCase(
         val tasksResult = tugasRepository.getTasksByAlat(id)
         if (tasksResult.isSuccess) {
             val activeTasks = tasksResult.getOrNull()?.filter {
-                it.status.equals("In Progress", ignoreCase = true)
+                it.status.equals("IN_PROGRESS", ignoreCase = true)
             }
 
             if (!activeTasks.isNullOrEmpty()) {

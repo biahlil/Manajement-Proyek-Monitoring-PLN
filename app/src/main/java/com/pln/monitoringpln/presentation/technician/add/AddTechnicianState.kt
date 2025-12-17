@@ -8,7 +8,9 @@ data class AddTechnicianState(
 
     // Form Fields
     val namaLengkap: String = "",
+    val namaError: String? = null,
     val email: String = "",
+    val emailError: String? = null,
     val password: String = "",
     val photoUri: android.net.Uri? = null,
 )

@@ -11,6 +11,7 @@ data class CompleteTaskState(
     val equipment: Alat? = null,
     val technician: User? = null,
     val condition: String = "",
+    val conditionError: String? = null,
     val equipmentStatus: String = "Normal",
     val proofUri: String? = null,
     val isSaving: Boolean = false,

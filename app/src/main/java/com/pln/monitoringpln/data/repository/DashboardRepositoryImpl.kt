@@ -1,11 +1,15 @@
 package com.pln.monitoringpln.data.repository
 
+import com.pln.monitoringpln.data.local.dao.AlatDao
+import com.pln.monitoringpln.data.local.dao.TugasDao
 import com.pln.monitoringpln.domain.model.DashboardSummary
 import com.pln.monitoringpln.domain.repository.DashboardRepository
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 
 class DashboardRepositoryImpl(
-    private val alatDao: com.pln.monitoringpln.data.local.dao.AlatDao,
-    private val tugasDao: com.pln.monitoringpln.data.local.dao.TugasDao,
+    private val alatDao: AlatDao,
+    private val tugasDao: TugasDao,
 ) : DashboardRepository {
 
     override fun getDashboardSummary(technicianId: String?): kotlinx.coroutines.flow.Flow<DashboardSummary> {
@@ -13,9 +17,9 @@ class DashboardRepositoryImpl(
             // Admin Logic (Existing)
             val alatFlow = kotlinx.coroutines.flow.combine(
                 alatDao.observeCountAll(),
-                alatDao.observeCountByCondition("Normal"),
-                alatDao.observeCountByCondition("Perlu Perhatian"),
-                alatDao.observeCountByCondition("Rusak"),
+                alatDao.observeCountByStatus("Normal"),
+                alatDao.observeCountByStatus("Perlu Perhatian"),
+                alatDao.observeCountByStatus("Rusak"),
             ) { total, normal, warning, broken ->
                 Quad(total, normal, warning, broken)
             }
@@ -29,7 +33,7 @@ class DashboardRepositoryImpl(
                 Quad(total, todo, progress, done)
             }
 
-            return kotlinx.coroutines.flow.combine(alatFlow, tugasFlow) { alat, tugas ->
+            return combine(alatFlow, tugasFlow) { alat, tugas ->
                 DashboardSummary(
                     totalAlat = alat.first,
                     totalAlatNormal = alat.second,
@@ -48,7 +52,7 @@ class DashboardRepositoryImpl(
             val totalAlatFlow = tugasDao.observeDistinctEquipmentCountByTechnician(technicianId)
 
             // Tugas Stats specific to technician
-            val tugasFlow = kotlinx.coroutines.flow.combine(
+            val tugasFlow = combine(
                 tugasDao.observeCountByTechnician(technicianId),
                 tugasDao.observeCountByStatusAndTechnician("To Do", technicianId),
                 tugasDao.observeCountByStatusAndTechnician("In Progress", technicianId),
@@ -57,7 +61,7 @@ class DashboardRepositoryImpl(
                 Quad(total, todo, progress, done)
             }
 
-            return kotlinx.coroutines.flow.combine(totalAlatFlow, tugasFlow) { totalAlat, tugas ->
+            return combine(totalAlatFlow, tugasFlow) { totalAlat, tugas ->
                 DashboardSummary(
                     totalAlat = totalAlat,
                     totalAlatNormal = 0, // Not shown for technician

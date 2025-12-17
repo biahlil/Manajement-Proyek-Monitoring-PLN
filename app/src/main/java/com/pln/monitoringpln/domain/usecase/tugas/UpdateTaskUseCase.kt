@@ -23,6 +23,7 @@ class UpdateTaskUseCase(
         if (taskId.isBlank()) return Result.failure(IllegalArgumentException("ID Tugas tidak valid."))
         if (judul.isBlank()) return Result.failure(IllegalArgumentException("Judul tidak boleh kosong."))
         if (deskripsi.isBlank()) return Result.failure(IllegalArgumentException("Deskripsi tidak boleh kosong."))
+
         if (idAlat.isBlank()) return Result.failure(IllegalArgumentException("ID Alat tidak boleh kosong."))
         if (idTeknisi.isBlank()) return Result.failure(IllegalArgumentException("ID Teknisi tidak boleh kosong."))
 
@@ -60,6 +61,7 @@ class UpdateTaskUseCase(
             idTeknisi = idTeknisi,
             tglJatuhTempo = tglJatuhTempo,
             status = status,
+            updatedAt = java.util.Date(),
             // tglDibuat tetap
             // buktiFoto tetap
             // kondisiAkhir tetap

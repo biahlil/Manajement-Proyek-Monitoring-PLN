@@ -55,6 +55,8 @@ class FakeAuthRepository : AuthRepository {
 
     var shouldFailCreateUser = false
 
+    val users = mutableListOf<String>() // Store emails
+
     override suspend fun getCurrentUserId(): String? {
         return if (_isLoggedIn.value) "user-123" else null
     }
@@ -63,6 +65,10 @@ class FakeAuthRepository : AuthRepository {
         if (shouldFailCreateUser) {
             return Result.failure(Exception("Failed to create user"))
         }
+        if (users.contains(email)) {
+            return Result.failure(Exception("Email sudah terdaftar."))
+        }
+        users.add(email)
         return Result.success(Unit)
     }
 

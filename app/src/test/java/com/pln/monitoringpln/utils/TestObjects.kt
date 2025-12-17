@@ -52,7 +52,7 @@ object TestObjects {
         idAlat = ALAT_VALID.id,
         idTeknisi = TEKNISI_VALID.id, // tech-1
         tglJatuhTempo = Date(System.currentTimeMillis() + 86400000), // Besok
-        status = "To Do",
+        status = "TODO",
     )
 
     val TUGAS_IN_PROGRESS = Tugas(
@@ -62,7 +62,7 @@ object TestObjects {
         idAlat = ALAT_VALID.id,
         idTeknisi = TEKNISI_VALID.id, // tech-1
         tglJatuhTempo = Date(System.currentTimeMillis() + 86400000),
-        status = "In Progress",
+        status = "IN_PROGRESS",
     )
 
     val TUGAS_OTHER_TECH = Tugas(
@@ -72,6 +72,6 @@ object TestObjects {
         idAlat = ALAT_VALID.id,
         idTeknisi = "tech-2", // Teknisi Beda
         tglJatuhTempo = Date(System.currentTimeMillis() + 86400000),
-        status = "To Do",
+        status = "TODO",
     )
 }

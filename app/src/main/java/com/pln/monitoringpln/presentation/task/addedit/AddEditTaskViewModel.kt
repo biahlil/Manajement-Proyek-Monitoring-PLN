@@ -9,6 +9,7 @@ import com.pln.monitoringpln.domain.repository.UserRepository
 import com.pln.monitoringpln.domain.usecase.tugas.CreateTaskUseCase
 import com.pln.monitoringpln.domain.usecase.tugas.GetTaskDetailUseCase
 import com.pln.monitoringpln.domain.usecase.tugas.UpdateTaskUseCase
+import com.pln.monitoringpln.domain.usecase.validation.ValidateInputUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -24,6 +25,7 @@ class AddEditTaskViewModel(
     private val getTaskDetailUseCase: GetTaskDetailUseCase,
     private val alatRepository: AlatRepository,
     private val userRepository: UserRepository,
+    private val validateInputUseCase: ValidateInputUseCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AddEditTaskState())
@@ -97,11 +99,11 @@ class AddEditTaskViewModel(
     }
 
     fun onTitleChange(title: String) {
-        _state.update { it.copy(title = title) }
+        _state.update { it.copy(title = title, titleError = null) }
     }
 
     fun onDescriptionChange(description: String) {
-        _state.update { it.copy(description = description) }
+        _state.update { it.copy(description = description, descriptionError = null) }
     }
 
     fun onEquipmentSearchQueryChange(query: String) {
@@ -143,7 +145,26 @@ class AddEditTaskViewModel(
 
             val currentState = _state.value
 
-            // Validation handled in UseCase, but basic UI check here
+            // Validate Input Symbols
+            val titleValidation = validateInputUseCase(
+                currentState.title,
+                com.pln.monitoringpln.domain.usecase.validation.ValidationType.STRICT,
+            )
+            val descriptionValidation = validateInputUseCase(
+                currentState.description,
+                com.pln.monitoringpln.domain.usecase.validation.ValidationType.TEXT,
+            )
+
+            if (!titleValidation.successful) {
+                _state.update { it.copy(isSaving = false, titleError = titleValidation.errorMessage) }
+                return@launch
+            }
+            if (!descriptionValidation.successful) {
+                _state.update { it.copy(isSaving = false, descriptionError = descriptionValidation.errorMessage) }
+                return@launch
+            }
+
+            // Basic UI Validation
             if (currentState.title.isBlank() ||
                 currentState.selectedEquipment == null ||
                 currentState.deadline == null ||
@@ -170,7 +191,31 @@ class AddEditTaskViewModel(
                 if (result.isSuccess) {
                     _state.update { it.copy(isSaving = false, isTaskSaved = true, savedTaskId = currentState.taskId) }
                 } else {
-                    _state.update { it.copy(isSaving = false, error = result.exceptionOrNull()?.message ?: "Gagal menyimpan tugas") }
+                    val exception = result.exceptionOrNull()
+                    if (exception is IllegalArgumentException) {
+                        _state.update {
+                            it.copy(
+                                isSaving = false,
+                                titleError = if (exception.message?.contains("Judul") == true) exception.message else null,
+                                descriptionError = if (exception.message?.contains("Deskripsi") == true) exception.message else null,
+                                error = if (exception.message?.contains("Judul") == false && exception.message?.contains(
+                                        "Deskripsi",
+                                    ) == false
+                                ) {
+                                    exception.message
+                                } else {
+                                    null
+                                },
+                            )
+                        }
+                    } else {
+                        _state.update {
+                            it.copy(
+                                isSaving = false,
+                                error = exception?.message ?: "Gagal menyimpan tugas",
+                            )
+                        }
+                    }
                 }
             } else {
                 // Create
@@ -186,7 +231,31 @@ class AddEditTaskViewModel(
                     val newTaskId = result.getOrNull()
                     _state.update { it.copy(isSaving = false, isTaskSaved = true, savedTaskId = newTaskId) }
                 } else {
-                    _state.update { it.copy(isSaving = false, error = result.exceptionOrNull()?.message ?: "Gagal menyimpan tugas") }
+                    val exception = result.exceptionOrNull()
+                    if (exception is IllegalArgumentException) {
+                        _state.update {
+                            it.copy(
+                                isSaving = false,
+                                titleError = if (exception.message?.contains("Judul") == true) exception.message else null,
+                                descriptionError = if (exception.message?.contains("Deskripsi") == true) exception.message else null,
+                                error = if (exception.message?.contains("Judul") == false && exception.message?.contains(
+                                        "Deskripsi",
+                                    ) == false
+                                ) {
+                                    exception.message
+                                } else {
+                                    null
+                                },
+                            )
+                        }
+                    } else {
+                        _state.update {
+                            it.copy(
+                                isSaving = false,
+                                error = exception?.message ?: "Gagal menyimpan tugas",
+                            )
+                        }
+                    }
                 }
             }
         }

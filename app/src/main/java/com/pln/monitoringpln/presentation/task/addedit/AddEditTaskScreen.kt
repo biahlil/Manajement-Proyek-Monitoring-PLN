@@ -66,7 +66,12 @@ fun AddEditTaskScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(if (state.taskId != null) "Edit Tugas" else "Tambah Tugas", fontWeight = FontWeight.Bold) },
+                title = {
+                    Text(
+                        if (state.taskId != null) "Edit Tugas" else "Tambah Tugas",
+                        fontWeight = FontWeight.Bold,
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back")
@@ -136,6 +141,17 @@ fun AddEditTaskScreen(
                 label = { Text("Judul Tugas *") },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(8.dp),
+                isError = state.titleError != null,
+                supportingText = {
+                    if (state.titleError != null) {
+                        Text(text = state.titleError, color = MaterialTheme.colorScheme.error)
+                    }
+                },
+                colors = OutlinedTextFieldDefaults.colors(
+                    errorBorderColor = MaterialTheme.colorScheme.error,
+                    errorLabelColor = MaterialTheme.colorScheme.error,
+                    errorSupportingTextColor = MaterialTheme.colorScheme.error,
+                ),
             )
 
             // Equipment (Searchable Dropdown)
@@ -163,7 +179,11 @@ fun AddEditTaskScreen(
                             text = {
                                 Column {
                                     Text(equipment.namaAlat, fontWeight = FontWeight.Bold)
-                                    Text(equipment.kodeAlat, style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                                    Text(
+                                        equipment.kodeAlat,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = Color.Gray,
+                                    )
                                 }
                             },
                             onClick = {
@@ -185,6 +205,17 @@ fun AddEditTaskScreen(
                     .height(120.dp),
                 shape = RoundedCornerShape(8.dp),
                 maxLines = 5,
+                isError = state.descriptionError != null,
+                supportingText = {
+                    if (state.descriptionError != null) {
+                        Text(text = state.descriptionError, color = MaterialTheme.colorScheme.error)
+                    }
+                },
+                colors = OutlinedTextFieldDefaults.colors(
+                    errorBorderColor = MaterialTheme.colorScheme.error,
+                    errorLabelColor = MaterialTheme.colorScheme.error,
+                    errorSupportingTextColor = MaterialTheme.colorScheme.error,
+                ),
             )
 
             // Deadline

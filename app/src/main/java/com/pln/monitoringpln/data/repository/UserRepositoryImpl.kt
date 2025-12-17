@@ -49,6 +49,9 @@ class UserRepositoryImpl(
                         namaLengkap = profile.fullName ?: "Pengguna",
                         role = profile.role,
                         isActive = profile.isActive ?: true,
+                        photoUrl = profile.avatarUrl,
+                        createdAt = profile.createdAt,
+                        updatedAt = profile.updatedAt,
                     )
                     userDao.insertUser(userEntity)
                     Result.success(userEntity.toDomain())
@@ -101,6 +104,9 @@ class UserRepositoryImpl(
                         namaLengkap = profile.fullName ?: "Pengguna",
                         role = profile.role,
                         isActive = profile.isActive ?: true,
+                        photoUrl = profile.avatarUrl,
+                        createdAt = profile.createdAt,
+                        updatedAt = profile.updatedAt,
                     )
                     userDao.insertUser(userEntity)
                 }
@@ -150,6 +156,8 @@ class UserRepositoryImpl(
                     role = profile.role,
                     isActive = profile.isActive ?: true,
                     photoUrl = profile.avatarUrl,
+                    createdAt = profile.createdAt,
+                    updatedAt = profile.updatedAt,
                 )
             }
 
@@ -216,8 +224,8 @@ class UserRepositoryImpl(
             // 1. Upload to Storage
             supabaseClient.storage.from(bucketName).upload(path, byteArray, upsert = true)
 
-            // 2. Get Public URL
-            val publicUrl = supabaseClient.storage.from(bucketName).publicUrl(path)
+            // 2. Get Public URL with Timestamp to bust cache
+            val publicUrl = supabaseClient.storage.from(bucketName).publicUrl(path) + "?t=${System.currentTimeMillis()}"
 
             // 3. Update Profile in DB
             val profileDto = com.pln.monitoringpln.data.model.ProfileDto(

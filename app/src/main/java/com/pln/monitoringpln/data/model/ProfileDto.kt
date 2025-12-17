@@ -11,4 +11,6 @@ data class ProfileDto(
     @SerialName("email") val email: String? = null,
     @SerialName("is_active") val isActive: Boolean? = true,
     @SerialName("avatar_url") val avatarUrl: String? = null,
+    @SerialName("created_at") @Serializable(with = DateSerializer::class) val createdAt: java.util.Date? = null,
+    @SerialName("updated_at") @Serializable(with = DateSerializer::class) val updatedAt: java.util.Date? = null,
 )

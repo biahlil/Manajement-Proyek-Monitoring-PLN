@@ -12,6 +12,7 @@ class ProfileViewModel(
     private val getUserProfileUseCase: com.pln.monitoringpln.domain.usecase.user.GetUserProfileUseCase,
     private val logoutUseCase: com.pln.monitoringpln.domain.usecase.auth.LogoutUseCase,
     private val observeUserProfileUseCase: com.pln.monitoringpln.domain.usecase.user.ObserveUserProfileUseCase,
+    private val syncUserProfileUseCase: com.pln.monitoringpln.domain.usecase.user.SyncUserProfileUseCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(ProfileState())
@@ -20,6 +21,13 @@ class ProfileViewModel(
     init {
         loadProfile()
         observeProfile()
+        syncProfile()
+    }
+
+    private fun syncProfile() {
+        viewModelScope.launch {
+            syncUserProfileUseCase()
+        }
     }
 
     private fun observeProfile() {
